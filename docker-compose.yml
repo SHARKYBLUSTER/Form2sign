@@ -2,8 +2,6 @@
 # Form2Sign - Docker Compose Configuration
 # =============================================================================
 
-version: '3.8'
-
 services:
   # Main application service
   app:
@@ -21,7 +19,6 @@ services:
       # Persistent storage for uploads (if any)
       - ./backend/uploads:/app/backend/uploads
     environment:
-      - NODE_ENV=production
       - PORT=3000
     env_file:
       - ./backend/config/.env
