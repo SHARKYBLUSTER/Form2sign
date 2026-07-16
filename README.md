@@ -32,8 +32,8 @@ L'application est entierement conteneurisee avec **Docker** pour un deploiement 
 
 ```bash
 # Cloner le depot
-git clone https://github.com/[ton-user]/form2sign.git
-cd form2sign
+git clone https://github.com/SHARKYBLUSTER/Form2sign.git
+cd Form2sign
 
 # Copier et configurer le fichier d'environnement
 cp backend/config/.env.example backend/config/.env
@@ -58,8 +58,8 @@ docker-compose logs -f
 
 ```bash
 # Cloner le depot
-git clone https://github.com/[ton-user]/form2sign.git
-cd form2sign
+git clone https://github.com/SHARKYBLUSTER/Form2sign.git
+cd Form2sign
 
 # Installer les dependances
 npm install
@@ -73,8 +73,37 @@ nano backend/config/.env
 # Demarrer l'application en mode developpement (avec auto-reload)
 npm run dev
 
+# Ou en mode production
+npm start
+
 # Acceder a l'application
 # Ouvrez votre navigateur : http://localhost:3000
+```
+
+### Mise a jour du projet
+
+#### Avec Docker
+```bash
+# Arreter les conteneurs
+docker-compose down
+
+# Tirer les dernieres modifications
+git pull origin main
+
+# Reconstruire et redemarrer (les modifications du code seront prises en compte)
+docker-compose up -d --build
+```
+
+#### Sans Docker
+```bash
+# Tirer les dernieres modifications
+git pull origin main
+
+# Mettre a jour les dependances (si package.json a change)
+npm install
+
+# Redemarrer l'application
+npm restart  # ou Ctrl+C puis npm start
 ```
 
 ---
@@ -168,48 +197,35 @@ cp backend/config/.env.example backend/config/.env
 ## 📁 Structure du Projet
 
 ```
-form2sign/
+Form2sign/
 ├── backend/                          # Backend Node.js + Express
-│   ├── app.js                        # Point d'entree de l'application
+│   ├── app.js                        # Point d'entree principal de l'application
+│   │                                # (routes API, configuration Express, middleware)
 │   ├── config/
 │   │   ├── .env                      # Variables d'environnement (SECRETE)
 │   │   └── .env.example              # Template pour .env
 │   ├── controllers/                  # Controleurs Express
-│   │   ├── authController.js
-│   │   ├── formController.js
-│   │   └── pdfController.js
-│   ├── models/                       # Modeles de donnees
-│   ├── services/                    # Services metiers
-│   │   ├── formParser.js            # Parse les fichiers YAML
-│   │   ├── pdfGenerator.js          # Genere les PDFs
-│   │   └── storageService.js        # Gestion du stockage
+│   │   └── authController.js        # Gestion de l'authentification
 │   ├── routes/                      # Routes Express
-│   │   ├── authRoutes.js
-│   │   ├── formRoutes.js
-│   │   └── apiRoutes.js
+│   │   └── authRoutes.js             # Routes d'authentification
 │   ├── middlewares/                 # Middlewares Express
 │   │   └── authMiddleware.js        # Verification d'authentification
-│   ├── forms/                       # Formulaires dynamiques
+│   ├── forms/                       # Formulaires dynamiques (fichiers YAML)
 │   │   ├── template.yaml            # Template de base
 │   │   └── [nom_du_formulaire].yaml
 │   └── uploads/                     # Stockage des fichiers
-│       └── pdfs/                    # PDFs generes
+│       └── pdfs/                    # PDFs generes (organises par date)
 │
 ├── frontend/                        # Frontend HTML/CSS/JS
-│   ├── index.html                   # Page principale
 │   ├── views/
 │   │   ├── login.html               # Page de connexion
 │   │   ├── form-list.html           # Liste des formulaires
 │   │   ├── form.html                # Formulaire a remplir
-│   │   └── success.html             # Page de succes
+│   │   ├── pdf-list.html            # Liste des PDFs generes
+│   │   └── logout.html              # Page de deconnexion
 │   └── public/
-│       ├── css/
-│       │   └── style.css            # Styles CSS
-│       ├── js/
-│       │   ├── app.js               # Application frontend
-│       │   ├── signature.js          # Gestion de la signature
-│       │   └── formRenderer.js       # Rendu des formulaires
-│       └── images/                  # Images statiques
+│       └── css/
+│           └── style.css            # Styles CSS
 │
 ├── Dockerfile                       # Definition de l'image Docker
 ├── docker-compose.yml               # Configuration Docker Compose
@@ -219,6 +235,8 @@ form2sign/
 ├── README.md                        # Documentation (ce fichier)
 └── DEV_LOG.md                       # Journal de developpement
 ```
+
+> ⚠️ **Note** : Certains repertoires mentionnes dans la structure (models, services, js/) sont prevus pour une evolution future mais ne sont pas encore implémentes. Le code actuel est concentre dans app.js pour simplifier.
 
 ---
 
