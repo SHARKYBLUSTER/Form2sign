@@ -148,6 +148,7 @@ cp backend/config/.env.example backend/config/.env
 | Methode | Endpoint | Description | Authentification requise |
 |---------|----------|-------------|--------------------------|
 | GET | `/api/forms` | Liste les formulaires disponibles | ✅ Oui |
+| GET | `/api/forms/:id` | Charge un formulaire specifique par son ID | ✅ Oui |
 
 ---
 

@@ -47,24 +47,22 @@
 
 ---
 
-### [Date a venir] - Formulaires Dynamiques (Phase 2)
+### 16/07/2026 - Formulaires Dynamiques (Phase 2)
 - **Phase 2** : Parsing YAML et rendu frontend
-- Creation du parser YAML :
-  - `backend/services/formParser.js`
+- Implementation directe dans app.js (sans service separat pour l'instant)
 - Implementation des endpoints API :
   - GET /api/forms (liste des formulaires)
-  - GET /api/forms/:id (details d'un formulaire)
-- Creation des controleurs :
-  - `formController.js`
-- Creation du rendu dynamique frontend :
-  - `frontend/public/js/formRenderer.js`
-- Creation des pages frontend :
+  - GET /api/forms/:id (details d'un formulaire) - **FIX**: Ajoute pour resoudre "Route non trouvee"
+- Utilisation de js-yaml pour parser les fichiers YAML
+- Pages frontend existantes :
   - `frontend/views/form-list.html`
   - `frontend/views/form.html`
-- Creation du template YAML :
+- Template YAML :
   - `backend/forms/template.yaml`
-- **Problemes rencontrés** : [A completer]
-- **Statut** : ⏳ En attente
+- **Problemes rencontrés** : 
+  - Route /api/forms/:id manquante -> erreur "Route non trouvée" lors du clic sur "Remplir"
+  - **Solution**: Ajout de la route dans app.js avec parsing YAML via js-yaml
+- **Statut** : ✅ Partiellement termine (chargement des formulaires fonctionnel)
 
 ---
 
@@ -164,7 +162,7 @@
 |-------|----------|--------|------------|----------|-------|
 | 0 | Initialisation projet | ✅ Termine | 16/07/2026 | 16/07/2026 | Structure complete creee |
 | 1 | Authentification | ✅ Termine | 16/07/2026 | 16/07/2026 | Systeme d'auth complet avec bcrypt et express-session |
-| 2 | Formulaires dynamiques | ⏳ En attente | - | - | |
+| 2 | Formulaires dynamiques | ✅ Partiellement termine | 16/07/2026 | 16/07/2026 | Chargement des formulaires fonctionnel, rendering a finaliser |
 | 3 | Interface Mobile + Signature | ⏳ En attente | - | - | |
 | 4 | Generation PDF | ⏳ En attente | - | - | |
 | 5 | Stockage PDFs | ⏳ En attente | - | - | |
@@ -310,7 +308,12 @@ docker volume prune
 - Documentation initiale
 - Preparation pour le developpement
 
+### v1.0.1 - Fix chargement formulaires (16/07/2026)
+- **FIX**: Ajout de la route API /api/forms/:id pour charger un formulaire specifique
+- Integration de js-yaml pour le parsing des fichiers YAML
+- Correction du bug "Route non trouvée" lors du clic sur le bouton "Remplir"
+
 ---
 
-*Derniere mise a jour : 16/07/2026 - Phase 1 (Authentification) terminee*
+*Derniere mise a jour : 16/07/2026 - Phase 2 (Formulaires) partiellement terminee*
 *Projet : Form2Sign*

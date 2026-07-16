@@ -11,6 +11,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const yaml = require('js-yaml');
 
 // Charger les variables d'environnement
 const envPath = path.join(__dirname, 'config', '.env');
@@ -174,6 +175,53 @@ app.get('/api/forms', requireAuthRedirect, (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la lecture des formulaires:', error);
     res.status(500).json({ success: false, error: 'Impossible de lister les formulaires' });
+  }
+});
+
+// Route pour charger un formulaire spécifique par son ID
+app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
+  try {
+    const formId = req.params.id;
+    const formsDir = path.join(__dirname, FORMS_DIRECTORY);
+    
+    // Trouver le fichier YAML correspondant
+    const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
+    const formFile = yamlFiles.find(file => path.parse(file).name === formId);
+    
+    if (!formFile) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Formulaire non trouvé' 
+      });
+    }
+    
+    // Lire et parser le fichier YAML
+    const filePath = path.join(formsDir, formFile);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const formData = yaml.load(fileContent);
+    
+    // Extraire les données du formulaire
+    const form = formData.form || formData;
+    
+    res.json({ 
+      success: true, 
+      form: {
+        id: form.id || formId,
+        title: form.title || formId,
+        description: form.description || '',
+        fields: form.fields || [],
+        signature: form.signature || { required: true, label: 'Signature', instructions: 'Signez ici' },
+        style: form.style || {},
+        pdf: form.pdf || {}
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors du chargement du formulaire:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Impossible de charger le formulaire',
+      message: NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 });
 
