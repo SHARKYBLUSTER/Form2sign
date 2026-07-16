@@ -361,13 +361,15 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
-    // Creer un nom de fichier au format: Date(YYYY_MM_DD HH:SS)_FormID.pdf
+    // Creer un nom de fichier au format: yyyy_mm_dd_hhmmss_FormID.pdf
     const now = new Date();
     const dateFolder = now.toISOString().split('T')[0];
-    const dateStr = dateFolder.replace(/-/g, '_'); // YYYY_MM_DD
+    const dateStr = dateFolder.replace(/-/g, '_'); // yyyy_mm_dd
     const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
-    const filename = `${dateStr} ${hours}:${seconds}_${formId}.pdf`;
+    const timeStr = hours + minutes + seconds; // hhmmss
+    const filename = `${dateStr}_${timeStr}_${formId}.pdf`;
     const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, dateFolder);
     const filePath = path.join(pdfPath, filename);
     
@@ -507,10 +509,11 @@ app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
           const stat = fs.statSync(pdfPath);
           
           // Extraire le formId et formTitle du nom de fichier
-          // Format: formId_formTitle_timestamp.pdf
+          // Format: yyyy_mm_dd_hhmmss_formId.pdf
           const parts = path.parse(pdfFile).name.split('_');
-          const formId = parts[0] || 'unknown';
-          const formTitle = parts.slice(1, -1).join('_') || formId;
+          // Le formId est tout ce qui vient après les 4 premiers éléments (yyyy, mm, dd, hhmmss)
+          const formId = parts.slice(4).join('_') || 'unknown';
+          const formTitle = formId;
           
           pdfs.push({
             id: path.parse(pdfFile).name,
