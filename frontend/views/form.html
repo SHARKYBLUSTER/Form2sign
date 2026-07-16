@@ -203,6 +203,7 @@
         let formData = null;
         let signaturePad = null;
         let currentSignature = '';
+        let successModal = null;
         
         // Initialisation au chargement de la page
         document.addEventListener('DOMContentLoaded', async () => {
@@ -619,7 +620,7 @@
                 
                 if (data.success) {
                     // Succes - afficher le modal
-                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal = new bootstrap.Modal(document.getElementById('successModal'));
                     document.getElementById('success-message').textContent = 
                         data.message || 'Le PDF a ete genere avec succes.';
                     
@@ -672,15 +673,14 @@
             }
         });
         
-        // Bouton Fermer du modal de succes - ferme la modal et redirige vers form-list.html
+        // Bouton Fermer du modal de succes - ferme et redirige vers form-list.html
         document.getElementById('close-success-modal').addEventListener('click', () => {
-            const successModalEl = document.getElementById('successModal');
-            const successModal = bootstrap.Modal.getInstance(successModalEl);
-            successModal.hide();
-            // Rediriger apRES que la modal soit fermee
-            successModalEl.addEventListener('hidden.bs.modal', () => {
+            if (successModal) {
+                successModal.hide();
+            }
+            setTimeout(() => {
                 window.location.href = '/form-list.html';
-            }, { once: true });
+            }, 150);
         });
     </script>
 </body>
