@@ -118,7 +118,7 @@ const authRoutes = require('./routes/authRoutes');
 // const pdfRoutes = require('./routes/pdfRoutes');
 
 // Middleware d'authentification
-const { requireAuthRedirect } = require('./middlewares/authMiddleware');
+const { requireAuth, requireAuthRedirect } = require('./middlewares/authMiddleware');
 
 // ============================================================================
 // ROUTES API
@@ -344,6 +344,142 @@ app.delete('/api/forms/:id', requireAuthRedirect, (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Impossible de supprimer le formulaire',
+      message: NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// POST /api/generate-pdf - Generer un PDF a partir des donnees du formulaire
+app.post('/api/generate-pdf', requireAuth, async (req, res) => {
+  try {
+    const { formId, formTitle, signature, ...formValues } = req.body;
+    
+    if (!formId) {
+      return res.status(400).json({
+        success: false,
+        error: 'L\'identifiant du formulaire est requis'
+      });
+    }
+    
+    // Creer un nom de fichier unique avec timestamp
+    const timestamp = new Date().getTime();
+    const dateFolder = new Date().toISOString().split('T')[0];
+    const filename = `${formId}_${formTitle || formId}_${timestamp}.pdf`;
+    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, dateFolder);
+    const filePath = path.join(pdfPath, filename);
+    
+    // Creer le repertoire de date s'il n'existe pas
+    if (!fs.existsSync(pdfPath)) {
+      fs.mkdirSync(pdfPath, { recursive: true });
+    }
+    
+    // Creer le document PDF
+    const PDFDocument = require('pdfkit');
+    const doc = new PDFDocument({
+      size: 'A4',
+      margins: { top: 50, left: 50, right: 50, bottom: 50 }
+    });
+    
+    // Creer un stream vers le fichier
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+    
+    // Titre du document
+    doc.fontSize(20).font('Helvetica-Bold').text(formTitle || formId, { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(12).font('Helvetica').text(`ID: ${formId}`, { align: 'center' });
+    doc.moveDown(2);
+    
+    // Date de generation
+    doc.fontSize(10).text(`Genere le: ${new Date().toLocaleDateString('fr-FR')} a ${new Date().toLocaleTimeString('fr-FR')}`, { align: 'right' });
+    doc.moveDown();
+    
+    // Separateur
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+    
+    // Ajouter les champs du formulaire
+    doc.fontSize(14).font('Helvetica-Bold').text('Donnees du formulaire:', { underline: true });
+    doc.moveDown();
+    
+    doc.fontSize(12).font('Helvetica');
+    
+    // Trier les champs par ordre alphabetique pour une meilleure presentation
+    const sortedKeys = Object.keys(formValues).sort();
+    sortedKeys.forEach(key => {
+      if (key !== 'formId' && key !== 'formTitle' && key !== 'signature') {
+        const value = formValues[key];
+        doc.text(`${key}: ${value || 'N/A'}`);
+        doc.moveDown(0.5);
+      }
+    });
+    
+    doc.moveDown();
+    
+    // Separateur avant la signature
+    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveDown();
+    
+    // Section Signature
+    doc.fontSize(14).font('Helvetica-Bold').text('Signature:', { underline: true });
+    doc.moveDown();
+    
+    if (signature) {
+      // La signature est en base64 (data URL)
+      // Extraire la partie base64 de la data URL
+      let base64Data = signature.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+      
+      try {
+        // Decoder l'image de la signature
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Ajouter l'image de signature au PDF
+        // Redimensionner pour s'adapter a la page
+        doc.image(imageBuffer, {
+          fit: [500, 150],
+          align: 'center',
+          valign: 'center'
+        });
+      } catch (err) {
+        console.warn('Impossible de decoder la signature:', err);
+        doc.fontSize(12).text('Signature: Impossible d\'afficher la signature');
+      }
+    } else {
+      doc.fontSize(12).text('Aucune signature fournie');
+    }
+    
+    doc.moveDown();
+    doc.fontSize(10).text('Form2Sign - Document genere automatiquement', { align: 'center' });
+    
+    // Finaliser le PDF
+    doc.end();
+    
+    // Attendre que le stream soit termine
+    await new Promise((resolve, reject) => {
+      stream.on('finish', () => {
+        console.log(`✅ PDF genere: ${filename}`);
+        resolve();
+      });
+      stream.on('error', (err) => {
+        console.error('Erreur lors de l\'ecriture du PDF:', err);
+        reject(err);
+      });
+    });
+    
+    // Retourner le chemin du PDF pour telechargement
+    res.json({
+      success: true,
+      message: 'PDF genere avec succes',
+      pdfUrl: `/api/pdfs/download/${dateFolder}/${filename}`,
+      filename: filename,
+      formId: formId
+    });
+    
+  } catch (error) {
+    console.error('Erreur lors de la generation du PDF:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Impossible de generer le PDF',
       message: NODE_ENV === 'development' ? error.message : undefined
     });
   }

@@ -115,18 +115,24 @@
 
 ---
 
-### [Date a venir] - Generation de PDF (Phase 4)
+### 16/07/2026 - Generation de PDF (Phase 4)
 - **Phase 4** : Generation de PDF avec formulaire + signature + date
-- Creation du template de PDF :
-  - `backend/services/pdfGenerator.js`
-- Integration des donnees du formulaire dans le PDF
-- Ajout de la signature (image) au PDF
-- Ajout de la date et heure de generation
+- Implementation directe dans app.js (sans service separat pour l'instant)
 - Creation de l'API endpoint :
   - POST /api/generate-pdf
-- Gestion des erreurs de generation
-- **Problemes rencontrés** : [A completer]
-- **Statut** : ⏳ En attente
+- Generation de PDF avec PDFKit contenant :
+  - Titre du formulaire et son ID
+  - Date et heure de generation
+  - Toutes les donnees des champs du formulaire (tries alphabetiquement)
+  - La signature capturee (image PNG base64)
+  - Pied de page avec mention "Form2Sign - Document genere automatiquement"
+- Stockage automatique des PDFs generes dans uploads/pdfs/[date]/
+- Nom de fichier unique: [formId]_[formTitle]_[timestamp].pdf
+- Retourne l'URL de telechargement /api/pdfs/download/[date]/[filename]
+- Integration avec le frontend form.html
+- **Problemes rencontrés** : Route POST /api/generate-pdf manquante causait erreur "Route non trouvee"
+- **Solution**: Ajout de la route dans app.js avec le middleware requireAuth
+- **Statut** : ✅ Termine
 
 ---
 
@@ -195,11 +201,11 @@
 | 2 | Formulaires dynamiques | ✅ Termine | 16/07/2026 | 16/07/2026 | Chargement, upload et suppression des formulaires fonctionnels |
 | 2.5 | Upload de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour uploader de nouveaux formulaires YAML |
 | 2.6 | Suppression de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour supprimer des formulaires avec confirmation |
-| 3 | Interface Mobile + Signature | ⏳ En attente | - | - | |
-| 4 | Generation PDF | ⏳ En attente | - | - | |
-| 5 | Stockage PDFs | ⏳ En attente | - | - | |
+| 3 | Interface Mobile + Signature | ✅ Termine | 16/07/2026 | 16/07/2026 | Signature Pad integree, canvas responsive |
+| 4 | Generation PDF | ✅ Termine | 16/07/2026 | 16/07/2026 | Route POST /api/generate-pdf avec PDFKit |
+| 5 | Stockage PDFs | ✅ Termine | 16/07/2026 | 16/07/2026 | Organisation par date, telechargement et visualisation |
 | 6 | Tests | ⏳ En attente | - | - | |
-| 7 | Conteneurisation Docker | ⏳ En attente | - | - | |
+| 7 | Conteneurisation Docker | ✅ Termine | 16/07/2026 | 16/07/2026 | Configuration Docker et docker-compose |
 | 8 | Deployment | ⏳ En attente | - | - | |
 
 ---
@@ -362,7 +368,7 @@ docker volume prune
 
 ---
 
-*Derniere mise a jour : 16/07/2026 - v1.0.3 (Gestion complete des PDFs)
+*Derniere mise a jour : 16/07/2026 - v1.4.0 (Generation de PDF)
 *Projet : Form2Sign*
 *Projet : Form2Sign*
 

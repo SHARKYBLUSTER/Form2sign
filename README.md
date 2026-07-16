@@ -153,6 +153,7 @@ cp backend/config/.env.example backend/config/.env
 | GET | `/api/forms/:id` | Charge un formulaire specifique par son ID | ✅ Oui |
 | POST | `/api/forms/upload` | Telecharge un nouveau formulaire YAML | ✅ Oui |
 | DELETE | `/api/forms/:id` | Supprime un formulaire | ✅ Oui |
+| POST | `/api/generate-pdf` | Genere un PDF a partir des donnees du formulaire | ✅ Oui |
 
 ### PDFs
 | Methode | Endpoint | Description | Authentification requise |
@@ -407,6 +408,13 @@ docker ps -a
 ---
 
 ## 📝 Changelog
+
+### v1.4.0 - Generation de PDF (16/07/2026)
+- Implementation de l'API POST /api/generate-pdf
+- Generation de PDF avec PDFKit contenant les donnees du formulaire, la signature et la date
+- Stockage automatique des PDFs generes dans uploads/pdfs/[date]/
+- Nom de fichier unique: [formId]_[formTitle]_[timestamp].pdf
+- Retourne l'URL de telechargement du PDF au frontend
 
 ### v1.3.0 - Suppression de formulaires (16/07/2026)
 - Ajout d'une icône poubelle sur chaque carte de formulaire
