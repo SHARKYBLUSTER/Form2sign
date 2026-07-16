@@ -207,7 +207,9 @@
             const emptyState = document.getElementById('empty-state');
             
             try {
-                const response = await fetch('/api/pdfs');
+                const response = await fetch('/api/pdfs', {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 
                 if (data.success && data.pdfs) {
@@ -352,7 +354,8 @@
             
             try {
                 const response = await fetch(`/api/pdfs/${currentPdfToDelete}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
                 
                 const data = await response.json();
@@ -394,7 +397,8 @@
         document.getElementById('confirm-logout').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/logout', {
-                    method: 'GET'
+                    method: 'GET',
+                    credentials: 'include'
                 });
                 const data = await response.json();
                 

@@ -230,7 +230,9 @@
             const formTitle = document.getElementById('form-title');
             
             try {
-                const response = await fetch(`/api/forms/${formId}`);
+                const response = await fetch(`/api/forms/${formId}`, {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 
                 if (data.success && data.form) {
@@ -609,7 +611,8 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(formValues)
+                    body: JSON.stringify(formValues),
+                    credentials: 'include'
                 });
                 
                 const data = await response.json();
@@ -655,7 +658,8 @@
         document.getElementById('confirm-logout').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/logout', {
-                    method: 'GET'
+                    method: 'GET',
+                    credentials: 'include'
                 });
                 const data = await response.json();
                 

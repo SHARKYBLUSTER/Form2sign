@@ -34,7 +34,8 @@
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch('/api/logout', {
-                    method: 'GET'
+                    method: 'GET',
+                    credentials: 'include'
                 });
                 
                 const data = await response.json();

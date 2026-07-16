@@ -130,7 +130,9 @@
             const formsContainer = document.getElementById('forms-container');
             
             try {
-                const response = await fetch('/api/forms');
+                const response = await fetch('/api/forms', {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 
                 if (data.success && data.forms) {
@@ -196,7 +198,8 @@
         document.getElementById('confirm-logout').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/logout', {
-                    method: 'GET'
+                    method: 'GET',
+                    credentials: 'include'
                 });
                 const data = await response.json();
                 
