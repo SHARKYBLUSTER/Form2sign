@@ -361,8 +361,8 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
-    // Charger la configuration du formulaire pour obtenir le footer PDF
-    let pdfFooter = null;
+    // Charger la configuration du formulaire pour obtenir les options PDF
+    let pdfConfig = {};
     try {
       const formsDir = path.join(__dirname, FORMS_DIRECTORY);
       const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
@@ -374,8 +374,8 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         const formData = yaml.load(fileContent);
         const form = formData.form || formData;
         
-        if (form.pdf && form.pdf.footer) {
-          pdfFooter = form.pdf.footer;
+        if (form.pdf) {
+          pdfConfig = form.pdf;
         }
       }
     } catch (err) {
@@ -391,6 +391,13 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     const seconds = now.getSeconds().toString().padStart(2, '0');
     const timeStr = hours + minutes + seconds; // hhmmss
     const filename = `${dateStr}_${timeStr}_${formId}.pdf`;
+    
+    // Préparer les variables pour substitution dans le footer et title
+    const footerVariables = {
+      full_name: formValues.full_name || formValues.name || formValues.nom || '',
+      date: now.toLocaleDateString('fr-FR'),
+      time: now.toLocaleTimeString('fr-FR')
+    };
     const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, dateFolder);
     const filePath = path.join(pdfPath, filename);
     
@@ -399,12 +406,28 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       fs.mkdirSync(pdfPath, { recursive: true });
     }
     
-    // Creer le document PDF
+    // Creer le document PDF avec les options personnalisées
     const PDFDocument = require('pdfkit');
+    
+    // Déterminer la taille et l'orientation
+    const pdfSize = pdfConfig.page_size || 'A4';
+    const pdfOrientation = pdfConfig.orientation || 'portrait';
+    
     const doc = new PDFDocument({
-      size: 'A4',
+      size: pdfSize,
+      layout: pdfOrientation,
       margins: { top: 50, left: 50, right: 50, bottom: 50 }
     });
+    
+    // Définir les métadonnées du PDF
+    if (pdfConfig.title) {
+      // Remplacer les variables dans le titre
+      let resolvedTitle = pdfConfig.title;
+      Object.keys(footerVariables).forEach(key => {
+        resolvedTitle = resolvedTitle.replace(new RegExp(`\{${key}\}`, 'g'), footerVariables[key]);
+      });
+      doc.info['Title'] = resolvedTitle;
+    }
     
     // Creer un stream vers le fichier
     const stream = fs.createWriteStream(filePath);
@@ -473,8 +496,13 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     doc.moveDown();
     
     // Footer personnalisé si défini dans le formulaire
-    if (pdfFooter) {
-      doc.fontSize(8).font('Helvetica').text(pdfFooter, { align: 'center', width: 500 });
+    if (pdfConfig.footer) {
+      // Remplacer les variables dans le footer
+      let resolvedFooter = pdfConfig.footer;
+      Object.keys(footerVariables).forEach(key => {
+        resolvedFooter = resolvedFooter.replace(new RegExp(`\{${key}\}`, 'g'), footerVariables[key]);
+      });
+      doc.fontSize(8).font('Helvetica').text(resolvedFooter, { align: 'center', width: 500 });
       doc.moveDown();
     }
     
