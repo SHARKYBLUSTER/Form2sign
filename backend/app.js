@@ -390,21 +390,17 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     doc.pipe(stream);
     
     // Titre du document
-    doc.fontSize(20).font('Helvetica-Bold').text(formTitle || formId, { align: 'center' });
+    doc.fontSize(20).font('Helvetica-Bold').text('Form2sign', { align: 'center' });
     doc.moveDown();
     doc.fontSize(12).font('Helvetica').text(`ID: ${formId}`, { align: 'center' });
     doc.moveDown(2);
     
-    // Date de generation
-    doc.fontSize(10).text(`Genere le: ${new Date().toLocaleDateString('fr-FR')} a ${new Date().toLocaleTimeString('fr-FR')}`, { align: 'right' });
+    // Date de signature
+    doc.fontSize(10).text(`Signé le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, { align: 'right' });
     doc.moveDown();
     
     // Separateur
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-    doc.moveDown();
-    
-    // Ajouter les champs du formulaire
-    doc.fontSize(14).font('Helvetica-Bold').text('Donnees du formulaire:', { underline: true });
     doc.moveDown();
     
     doc.fontSize(12).font('Helvetica');
@@ -454,7 +450,6 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     }
     
     doc.moveDown();
-    doc.fontSize(10).text('Form2Sign - Document genere automatiquement', { align: 'center' });
     
     // Finaliser le PDF
     doc.end();
