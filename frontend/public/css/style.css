@@ -390,7 +390,7 @@ body {
    ========================================================================= */
 
 #signature-pad {
-    width: 350px;
+    width: 300px;
     height: 250px;
     border: 2px dashed var(--gray-300);
     border-radius: var(--border-radius);

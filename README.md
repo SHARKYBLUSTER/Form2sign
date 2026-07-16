@@ -397,6 +397,11 @@ docker-compose up -d
 - Verifiez que `APP_USER` et `APP_PASSWORD` sont correctement definis dans `.env`
 - Verifiez que le mot de passe n'est pas deja hashe (le systeme le hashe automatiquement)
 - Verifiez les majuscules/minuscules (la connexion est sensible a la casse)
+- Si vous avez perdu le mot de passe, réinitialisez-le avec :
+  ```bash
+  sudo sed -i 's/^APP_PASSWORD=.*/APP_PASSWORD=password123/' backend/config/.env
+  ```
+  Puis redémarrez Docker pour que le backend re-hashe automatiquement le mot de passe.
 
 ### Le formulaire ne s'affiche pas
 
