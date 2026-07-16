@@ -375,20 +375,29 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         const formData = yaml.load(fileContent);
         const form = formData.form || formData;
         
-        console.log(`Formulaire chargé pour ${formId}: pdf config =`, form.pdf);
-        
         if (form.pdf) {
           pdfConfig = form.pdf;
         }
         if (form.fields && Array.isArray(form.fields)) {
           fieldsOrder = form.fields.map(field => field.id);
-          console.log(`Order des champs pour ${formId}:`, fieldsOrder);
         }
-      } else {
-        console.warn(`Fichier de formulaire non trouvé pour formId: ${formId}`);
       }
     } catch (err) {
       console.warn('Impossible de charger la configuration du formulaire:', err.message);
+    }
+    
+    // Utiliser les valeurs du .env comme fallback si non définies dans le formulaire YAML
+    pdfConfig = {
+      title: pdfConfig.title || process.env.PDF_TITLE,
+      footer: pdfConfig.footer || process.env.PDF_FOOTER,
+      include_timestamp: pdfConfig.include_timestamp !== false && process.env.PDF_INCLUDE_TIMESTAMP !== 'false',
+      page_size: pdfConfig.page_size || process.env.PDF_PAGE_SIZE || 'A4',
+      orientation: pdfConfig.orientation || process.env.PDF_ORIENTATION || 'portrait'
+    };
+    
+    // Convertir include_timestamp en boolean si c'est une string
+    if (typeof pdfConfig.include_timestamp === 'string') {
+      pdfConfig.include_timestamp = pdfConfig.include_timestamp.toLowerCase() === 'true';
     }
     
     // Creer un nom de fichier au format: yyyy_mm_dd_hhmmss_FormID.pdf
@@ -407,7 +416,6 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       date: now.toLocaleDateString('fr-FR'),
       time: now.toLocaleTimeString('fr-FR')
     };
-    console.log(`Variables disponibles pour substitution:`, footerVariables);
     const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, dateFolder);
     const filePath = path.join(pdfPath, filename);
     
@@ -437,9 +445,6 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         resolvedTitle = resolvedTitle.replace(new RegExp(`\{${key}\}`, 'g'), footerVariables[key]);
       });
       doc.info['Title'] = resolvedTitle;
-      console.log(`Titre PDF: ${resolvedTitle}`);
-    } else {
-      console.warn('Aucun titre PDF configuré dans le formulaire YAML');
     }
     
     // Creer un stream vers le fichier
@@ -526,9 +531,6 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
       doc.fontSize(8).font('Helvetica').text(resolvedFooter, { align: 'center', width: 500 });
       doc.moveDown();
-      console.log(`Footer PDF: ${resolvedFooter}`);
-    } else {
-      console.warn('Aucun footer PDF configuré dans le formulaire YAML');
     }
     
     // Finaliser le PDF
