@@ -12,6 +12,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
+const multer = require('multer');
 
 // Charger les variables d'environnement
 const envPath = path.join(__dirname, 'config', '.env');
@@ -87,6 +88,21 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
+// Configuration de multer pour l'upload de fichiers
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 1024 * 1024 }, // 1MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/yaml' || 
+        file.mimetype === 'application/x-yaml' ||
+        path.extname(file.originalname).match(/\.(yaml|yml)$/i)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seuls les fichiers YAML sont autorises'), false);
+    }
+  }
+});
 
 // ============================================================================
 // IMPORTATION DES ROUTES
@@ -225,6 +241,72 @@ app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
       success: false, 
       error: 'Impossible de charger le formulaire',
       message: NODE_ENV === 'development' ? error.message : undefined 
+    });
+  }
+});
+
+// POST /api/forms/upload - Upload d'un nouveau formulaire
+app.post('/api/forms/upload', requireAuthRedirect, upload.single('formFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Aucun fichier telecharge'
+      });
+    }
+
+    const fileContent = req.file.buffer.toString('utf8');
+    const formData = yaml.load(fileContent);
+    
+    if (!formData || !formData.form) {
+      return res.status(400).json({
+        success: false,
+        error: 'Fichier YAML invalide - doit contenir une cle "form"'
+      });
+    }
+
+    const formId = formData.form.id;
+    if (!formId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Le formulaire doit avoir un identifiant (id)'
+      });
+    }
+
+    // Verifier que l'id est unique
+    const formsDir = path.join(__dirname, FORMS_DIRECTORY);
+    const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
+    const existingForm = yamlFiles.find(file => path.parse(file).name === formId);
+    
+    if (existingForm) {
+      return res.status(409).json({
+        success: false,
+        error: `Un formulaire avec l\'id "${formId}" existe deja`
+      });
+    }
+
+    // Sauvegarder le fichier
+    const filename = `${formId}.yaml`;
+    const filePath = path.join(formsDir, filename);
+    fs.writeFileSync(filePath, req.file.buffer);
+
+    console.log(`✅ Formulaire uploadé: ${filename}`);
+    
+    res.json({
+      success: true,
+      message: 'Formulaire téléchargé avec succès',
+      form: {
+        id: formId,
+        title: formData.form.title || formId,
+        filename: filename
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'upload du formulaire:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Impossible de télécharger le formulaire',
+      message: NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });

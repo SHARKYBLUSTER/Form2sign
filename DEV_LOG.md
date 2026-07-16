@@ -72,6 +72,30 @@
 
 ---
 
+### 16/07/2026 - Upload de formulaires (Phase 2.5)
+- **Nouvelle fonctionnalite** : Permettre aux utilisateurs d'uploader de nouveaux formulaires via l'interface web
+- Implementation backend :
+  - Configuration de multer pour l'upload de fichiers (limite: 1MB)
+  - Creation de la route POST /api/forms/upload avec protection requireAuthRedirect
+  - Validation du type de fichier (acceptation uniquement des .yaml et .yml)
+  - Validation du contenu YAML (doit contenir une cle "form" avec un id)
+  - Verification de l'unicite de l'id du formulaire
+  - Sauvegarde du fichier dans backend/forms/
+- Implementation frontend :
+  - Ajout d'un bouton "Ajouter Formulaire" dans la navbar de form-list.html
+  - Creation d'une modal avec selection de fichier et feedback visuel
+  - Integration du JavaScript pour gerer l'upload via fetch()
+  - Rechargement automatique de la liste des formulaires apres upload
+- **Fichiers modifies** :
+  - `backend/app.js` : Ajout de la configuration multer et de la route POST /api/forms/upload
+  - `frontend/views/form-list.html` : Ajout du bouton, de la modal et du JavaScript
+  - `README.md` : Documentation de la nouvelle route API et methode d'upload
+  - `DEV_LOG.md` : Journal de cette implementation
+- **Problemes rencontrés** : Aucun - implementation fluide
+- **Statut** : ✅ Termine
+
+---
+
 ### [Date a venir] - Interface Mobile et Signature (Phase 3)
 - **Phase 3** : Interface optimisee mobile avec capture de signature
 - Creation du layout responsive avec Bootstrap 5 :
@@ -168,7 +192,8 @@
 |-------|----------|--------|------------|----------|-------|
 | 0 | Initialisation projet | ✅ Termine | 16/07/2026 | 16/07/2026 | Structure complete creee |
 | 1 | Authentification | ✅ Termine | 16/07/2026 | 16/07/2026 | Systeme d'auth complet avec bcrypt et express-session |
-| 2 | Formulaires dynamiques | ✅ Partiellement termine | 16/07/2026 | 16/07/2026 | Chargement des formulaires fonctionnel, rendering a finaliser |
+| 2 | Formulaires dynamiques | ✅ Termine | 16/07/2026 | 16/07/2026 | Chargement et upload des formulaires fonctionnels |
+| 2.5 | Upload de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour uploader de nouveaux formulaires YAML |
 | 3 | Interface Mobile + Signature | ⏳ En attente | - | - | |
 | 4 | Generation PDF | ⏳ En attente | - | - | |
 | 5 | Stockage PDFs | ⏳ En attente | - | - | |
@@ -337,4 +362,5 @@ docker volume prune
 ---
 
 *Derniere mise a jour : 16/07/2026 - v1.0.3 (Gestion complete des PDFs)
+*Projet : Form2Sign*
 *Projet : Form2Sign*

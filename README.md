@@ -151,6 +151,7 @@ cp backend/config/.env.example backend/config/.env
 |---------|----------|-------------|--------------------------|
 | GET | `/api/forms` | Liste les formulaires disponibles | ✅ Oui |
 | GET | `/api/forms/:id` | Charge un formulaire specifique par son ID | ✅ Oui |
+| POST | `/api/forms/upload` | Telecharge un nouveau formulaire YAML | ✅ Oui |
 
 ### PDFs
 | Methode | Endpoint | Description | Authentification requise |
@@ -264,6 +265,16 @@ npm test
 
 ### Ajouter un nouveau formulaire
 
+**Methodes possibles :**
+
+**Via l'interface web (recommande) :**
+1. Connectez-vous a l'application
+2. Cliquez sur le bouton "Ajouter Formulaire" dans la navbar
+3. Selectionnez votre fichier YAML (.yaml ou .yml)
+4. Cliquez sur "Televerser"
+5. Le formulaire sera automatiquement disponible dans la liste
+
+**Via le systeme de fichiers (manuel) :**
 1. Creez un fichier `.yaml` dans le repertoire `backend/forms/`
 2. Suivez le format definis dans `backend/forms/template.yaml`
 3. Exemple minimal :
@@ -387,6 +398,17 @@ docker ps -a
 ---
 
 ## 📝 Changelog
+
+### v1.2.0 - Upload de formulaires (16/07/2026)
+- Ajout d'un bouton "Ajouter Formulaire" dans la navbar
+- Creation d'une modal d'upload avec selection de fichier YAML
+- Implementation de l'API POST /api/forms/upload avec multer
+- Validation du type de fichier (YAML seulement)
+- Validation du contenu YAML (structure avec cle "form")
+- Verification de l'unicite de l'id du formulaire
+- Feedback visuel pendant le telechargement
+- Rechargement automatique de la liste des formulaires apres upload
+- Limite de taille de fichier: 1MB
 
 ### v1.1.0 - Authentification (16/07/2026)
 - Implementation complete du systeme d'authentification

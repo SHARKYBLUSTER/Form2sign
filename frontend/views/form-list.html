@@ -27,6 +27,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <button class="nav-link btn btn-link" id="upload-form-btn">
+                            <i class="fas fa-upload me-1"></i> Ajouter Formulaire
+                        </button>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/pdfs.html">
                             <i class="fas fa-file-pdf me-1"></i> Mes PDFs
                         </a>
@@ -105,6 +110,43 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-primary" id="confirm-logout">
                         <i class="fas fa-sign-out-alt me-2"></i> Se deconnecter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Upload Form Modal -->
+    <div class="modal fade" id="uploadFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-upload me-2"></i>
+                        Ajouter un Nouveau Formulaire
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="upload-form">
+                        <div class="mb-3">
+                            <label for="form-file" class="form-label">
+                                <i class="fas fa-file-code me-2"></i>
+                                Fichier YAML du formulaire
+                            </label>
+                            <input class="form-control" type="file" id="form-file" 
+                                   accept=".yaml,.yml" required>
+                            <div class="form-text">
+                                Selectionnez un fichier YAML valide (ex: template.yaml)
+                            </div>
+                        </div>
+                        <div id="upload-feedback" class="alert d-none"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirm-upload">
+                        <i class="fas fa-upload me-2"></i> Televerser
                     </button>
                 </div>
             </div>
@@ -209,6 +251,61 @@
             } catch (error) {
                 console.error('Erreur:', error);
                 window.location.href = '/login.html';
+            }
+        });
+
+        // Upload Form Modal
+        const uploadFormModal = new bootstrap.Modal(document.getElementById('uploadFormModal'));
+
+        document.getElementById('upload-form-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('form-file').value = '';
+            document.getElementById('upload-feedback').className = 'alert d-none';
+            uploadFormModal.show();
+        });
+
+        document.getElementById('confirm-upload').addEventListener('click', async () => {
+            const fileInput = document.getElementById('form-file');
+            const feedback = document.getElementById('upload-feedback');
+            
+            if (!fileInput.files.length) {
+                feedback.textContent = 'Veuillez selectionner un fichier';
+                feedback.className = 'alert alert-danger d-block';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('formFile', file);
+
+            try {
+                feedback.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div> Telechargement...';
+                feedback.className = 'alert alert-info d-block';
+                
+                const response = await fetch('/api/forms/upload', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    feedback.textContent = data.message;
+                    feedback.className = 'alert alert-success d-block';
+                    
+                    // Recharger la liste apres 1 seconde
+                    setTimeout(async () => {
+                        await loadForms();
+                        uploadFormModal.hide();
+                    }, 1000);
+                } else {
+                    throw new Error(data.error || 'Erreur lors de l\'upload');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                feedback.textContent = error.message;
+                feedback.className = 'alert alert-danger d-block';
             }
         });
     </script>
