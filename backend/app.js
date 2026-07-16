@@ -508,12 +508,22 @@ app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
           const pdfPath = path.join(dateDir, pdfFile);
           const stat = fs.statSync(pdfPath);
           
-          // Extraire le formId et formTitle du nom de fichier
+          // Extraire le formId et la date complète du nom de fichier
           // Format: yyyy_mm_dd_hhmmss_formId.pdf
           const parts = path.parse(pdfFile).name.split('_');
           // Le formId est tout ce qui vient après les 4 premiers éléments (yyyy, mm, dd, hhmmss)
           const formId = parts.slice(4).join('_') || 'unknown';
           const formTitle = formId;
+          
+          // Extraire la date complète pour le tri (yyyy-mm-ddThh:mm:ss)
+          const yyyy = parts[0];
+          const mm = parts[1];
+          const dd = parts[2];
+          const hhmmss = parts[3];
+          const hh = hhmmss.substring(0, 2);
+          const minutes = hhmmss.substring(2, 4);
+          const ss = hhmmss.substring(4, 6);
+          const fullDateStr = `${yyyy}-${mm}-${dd}T${hh}:${minutes}:${ss}`;
           
           pdfs.push({
             id: path.parse(pdfFile).name,
@@ -521,6 +531,7 @@ app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
             formId: formId,
             formTitle: formTitle,
             date: date,
+            fullDate: fullDateStr,
             size: stat.size,
             downloadUrl: `/api/pdfs/download/${date}/${pdfFile}`,
             viewUrl: `/api/pdfs/view/${date}/${pdfFile}`
@@ -529,8 +540,8 @@ app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
       }
     });
     
-    // Trier par date (la plus recente en premier)
-    pdfs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Trier par date complete (la plus recente en premier)
+    pdfs.sort((a, b) => new Date(b.fullDate) - new Date(a.fullDate));
     
     res.json({ success: true, pdfs });
   } catch (error) {
