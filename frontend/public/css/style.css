@@ -390,13 +390,14 @@ body {
    ========================================================================= */
 
 #signature-pad {
-    width: 100%;
+    width: 487px;
     height: 200px;
     border: 2px dashed var(--gray-300);
     border-radius: var(--border-radius);
     background-color: var(--white);
     cursor: crosshair;
     touch-action: none;
+    display: block;
 }
 
 .signature-container {
@@ -548,10 +549,7 @@ textarea {
         font-size: 1.1rem;
     }
     
-    /* Signature pad plus grand sur mobile */
-    #signature-pad {
-        height: 250px;
-    }
+
     
     .signature-controls button {
         min-width: 140px;
@@ -605,10 +603,7 @@ textarea {
         font-size: 1rem;
     }
     
-    /* Signature pad encore plus grand sur petit ecran */
-    #signature-pad {
-        height: 200px;
-    }
+
     
     .signature-controls {
         flex-direction: column;

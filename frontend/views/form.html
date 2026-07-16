@@ -15,6 +15,9 @@
             border-radius: 8px;
             background-color: #f8f9fa;
             margin-bottom: 15px;
+            width: 487px !important;
+            height: 200px !important;
+            display: block;
         }
         .signature-container {
             position: relative;
@@ -103,7 +106,7 @@
                                         Signez avec votre doigt ou un stylet.
                                     </p>
                                     <div class="signature-container">
-                                        <canvas id="signature-pad" width="600" height="200"></canvas>
+                                        <canvas id="signature-pad" width="487" height="200" style="touch-action: none; user-select: none; display: block;"></canvas>
                                         <div class="signature-controls">
                                             <button type="button" 
                                                     id="clear-signature" 
@@ -490,9 +493,7 @@
                 penColor: '#007bff'
             });
             
-            // Taille du canvas pour mobile
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+
             
             // Bouton Effacer
             document.getElementById('clear-signature').addEventListener('click', () => {
@@ -520,26 +521,7 @@
             });
         }
         
-        // Redimensionner le canvas
-        function resizeCanvas() {
-            const canvas = document.getElementById('signature-pad');
-            if (!canvas) return;
-            
-            const container = canvas.parentElement;
-            const rect = container.getBoundingClientRect();
-            
-            // Taille optimisee pour mobile
-            const width = Math.min(rect.width, 600);
-            const height = Math.min(200, window.innerHeight * 0.3);
-            
-            canvas.width = width;
-            canvas.height = height;
-            
-            // Redessiner si il y avait deja une signature
-            if (currentSignature) {
-                signaturePad.fromDataURL(currentSignature);
-            }
-        }
+
         
         // Initialiser la validation Bootstrap
         function initBootstrapValidation() {
