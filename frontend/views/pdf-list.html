@@ -218,10 +218,10 @@
                     
                     if (allPdfs.length === 0) {
                         emptyState.classList.remove('d-none');
+                        pdfList.classList.add('d-none');
                     } else {
                         // Réappliquer les filtres actuels après le rechargement
                         filterPdfs();
-                        pdfList.classList.remove('d-none');
                     }
                 } else {
                     throw new Error(data.error || 'Impossible de charger les PDFs');
