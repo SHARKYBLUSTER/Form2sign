@@ -361,10 +361,13 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
-    // Creer un nom de fichier unique avec timestamp
-    const timestamp = new Date().getTime();
-    const dateFolder = new Date().toISOString().split('T')[0];
-    const filename = `${formId}_${formTitle || formId}_${timestamp}.pdf`;
+    // Creer un nom de fichier au format: Date(YYYY_MM_DD HH:SS)_FormID.pdf
+    const now = new Date();
+    const dateFolder = now.toISOString().split('T')[0];
+    const dateStr = dateFolder.replace(/-/g, '_'); // YYYY_MM_DD
+    const hours = now.getHours().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const filename = `${dateStr} ${hours}:${seconds}_${formId}.pdf`;
     const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, dateFolder);
     const filePath = path.join(pdfPath, filename);
     

@@ -100,10 +100,8 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Nom du PDF</th>
-                                            <th>Formulaire</th>
-                                            <th>Date de generation</th>
-                                            <th>Taille</th>
                                             <th>Actions</th>
+                                            <th>Taille</th>
                                         </tr>
                                     </thead>
                                     <tbody id="pdfs-table-body">
@@ -256,11 +254,7 @@
             const selectedDate = document.getElementById('date-filter').value;
             
             const filteredPdfs = allPdfs.filter(pdf => {
-                const matchesSearch = 
-                    pdf.filename.toLowerCase().includes(searchTerm) ||
-                    pdf.formId.toLowerCase().includes(searchTerm) ||
-                    pdf.formTitle.toLowerCase().includes(searchTerm);
-                
+                const matchesSearch = pdf.filename.toLowerCase().includes(searchTerm);
                 const matchesDate = !selectedDate || pdf.date === selectedDate;
                 
                 return matchesSearch && matchesDate;
@@ -290,29 +284,12 @@
             pdfs.forEach(pdf => {
                 const row = document.createElement('tr');
                 
-                const date = new Date(pdf.date);
-                const formattedDate = date.toLocaleDateString('fr-FR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                const formattedTime = date.toLocaleTimeString('fr-FR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
                 row.innerHTML = `
                     <td>
                         <i class="fas fa-file-pdf text-danger me-2"></i>
                         <strong>${pdf.filename}</strong>
                         <div class="text-muted small">${pdf.id}</div>
                     </td>
-                    <td>${pdf.formTitle || pdf.formId}</td>
-                    <td>
-                        <div>${formattedDate}</div>
-                        <div class="text-muted small">${formattedTime}</div>
-                    </td>
-                    <td>${formatFileSize(pdf.size)}</td>
                     <td>
                         <div class="d-flex gap-2">
                             <a href="${pdf.downloadUrl}" 
@@ -333,6 +310,7 @@
                             </button>
                         </div>
                     </td>
+                    <td>${formatFileSize(pdf.size)}</td>
                 `;
                 
                 tableBody.appendChild(row);
