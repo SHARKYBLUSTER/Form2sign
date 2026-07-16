@@ -41,6 +41,12 @@ cp backend/config/.env.example backend/config/.env
 # Editer .env avec vos identifiants (voir section Configuration)
 nano backend/config/.env  # ou utilisez votre editeur prefere
 
+# Creer les repertoires de stockage et configurer les permissions pour Docker
+# Le conteneur Docker s'execute sous l'utilisateur UID 1001
+# Cette commande detecte si un utilisateur avec UID 1001 existe sur votre systeme,
+# sinon elle utilise directement UID 1001. Cela permet au conteneur d'ecrire dans les volumes montes.
+awk -F: '{ if ($3 == 1001) print $1 }' /etc/passwd | xargs -I {} sudo chown -R {}:{} ./backend/uploads ./backend/forms 2>/dev/null || sudo chown -R 1001:1001 ./backend/uploads ./backend/forms
+
 # Demarrer l'application avec Docker Compose
 docker-compose up -d
 
@@ -362,6 +368,22 @@ docker ps -a
 - Verifiez que le port 3000 est disponible
 - Verifiez les permissions sur les fichiers `.env`
 - Verifiez que le fichier `.env` existe et contient les variables requises
+
+### Erreur de permissions EACCES: permission denied
+
+**Probleme :** Le conteneur ne peut pas ecrire dans les volumes montes (uploads/pdfs, forms)
+
+**Solution :**
+```bash
+# Donner les permissions a l'utilisateur du conteneur (UID 1001)
+sudo chown -R 1001:1001 ./backend/uploads ./backend/forms
+
+# Puis redemarrer les conteneurs
+docker-compose down
+docker-compose up -d
+```
+
+**Explication :** Le Dockerfile cree un utilisateur `nodejs` avec UID 1001 pour des raisons de securite. Les volumes montes depuis l'hote doivent etre accessibles par cet utilisateur.
 
 ### Erreur de connexion
 
