@@ -152,6 +152,14 @@ cp backend/config/.env.example backend/config/.env
 | GET | `/api/forms` | Liste les formulaires disponibles | ✅ Oui |
 | GET | `/api/forms/:id` | Charge un formulaire specifique par son ID | ✅ Oui |
 
+### PDFs
+| Methode | Endpoint | Description | Authentification requise |
+|---------|----------|-------------|--------------------------|
+| GET | `/api/pdfs` | Liste tous les PDFs generes | ✅ Oui |
+| DELETE | `/api/pdfs/:id` | Supprime un PDF | ✅ Oui |
+| GET | `/api/pdfs/download/:date/:filename` | Telecharge un PDF | ✅ Oui |
+| GET | `/api/pdfs/view/:date/:filename` | Visualise un PDF dans le navigateur | ✅ Oui |
+
 ---
 
 ## 📁 Structure du Projet

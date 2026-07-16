@@ -146,6 +146,10 @@ app.get('/pdf-list.html', requireAuthRedirect, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/views/pdf-list.html'));
 });
 
+app.get('/pdfs.html', requireAuthRedirect, (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/views/pdf-list.html'));
+});
+
 app.get('/logout.html', requireAuthRedirect, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/views/logout.html'));
 });
@@ -221,6 +225,154 @@ app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
       success: false, 
       error: 'Impossible de charger le formulaire',
       message: NODE_ENV === 'development' ? error.message : undefined 
+    });
+  }
+});
+
+// Route pour lister les PDFs generes
+app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
+  try {
+    const pdfsDir = path.join(__dirname, PDF_STORAGE_PATH);
+    
+    // Lister tous les PDFs dans les sous-repertoires
+    const pdfs = [];
+    const dates = fs.readdirSync(pdfsDir);
+    
+    dates.forEach(date => {
+      const dateDir = path.join(pdfsDir, date);
+      if (fs.existsSync(dateDir) && fs.statSync(dateDir).isDirectory()) {
+        const pdfFiles = fs.readdirSync(dateDir).filter(file => file.endsWith('.pdf'));
+        
+        pdfFiles.forEach(pdfFile => {
+          const pdfPath = path.join(dateDir, pdfFile);
+          const stat = fs.statSync(pdfPath);
+          
+          // Extraire le formId et formTitle du nom de fichier
+          // Format: formId_formTitle_timestamp.pdf
+          const parts = path.parse(pdfFile).name.split('_');
+          const formId = parts[0] || 'unknown';
+          const formTitle = parts.slice(1, -1).join('_') || formId;
+          
+          pdfs.push({
+            id: path.parse(pdfFile).name,
+            filename: pdfFile,
+            formId: formId,
+            formTitle: formTitle,
+            date: date,
+            size: stat.size,
+            downloadUrl: `/api/pdfs/download/${date}/${pdfFile}`,
+            viewUrl: `/api/pdfs/view/${date}/${pdfFile}`
+          });
+        });
+      }
+    });
+    
+    // Trier par date (la plus recente en premier)
+    pdfs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    res.json({ success: true, pdfs });
+  } catch (error) {
+    console.error('Erreur lors de la lecture des PDFs:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Impossible de lister les PDFs' 
+    });
+  }
+});
+
+// Route pour supprimer un PDF
+app.delete('/api/pdfs/:id', requireAuthRedirect, (req, res) => {
+  try {
+    const pdfId = req.params.id;
+    const pdfsDir = path.join(__dirname, PDF_STORAGE_PATH);
+    
+    // Rechercher le PDF dans les sous-repertoires
+    let pdfFound = false;
+    const dates = fs.readdirSync(pdfsDir);
+    
+    for (const date of dates) {
+      const dateDir = path.join(pdfsDir, date);
+      if (fs.existsSync(dateDir) && fs.statSync(dateDir).isDirectory()) {
+        const pdfFiles = fs.readdirSync(dateDir);
+        
+        for (const pdfFile of pdfFiles) {
+          if (path.parse(pdfFile).name === pdfId) {
+            const pdfPath = path.join(dateDir, pdfFile);
+            fs.unlinkSync(pdfPath);
+            pdfFound = true;
+            
+            // Nettoyer le repertoire de date s'il est vide
+            if (fs.readdirSync(dateDir).length === 0) {
+              fs.rmdirSync(dateDir);
+            }
+            
+            res.json({ success: true, message: 'PDF supprime avec succes' });
+            return;
+          }
+        }
+      }
+    }
+    
+    if (!pdfFound) {
+      res.status(404).json({ 
+        success: false, 
+        error: 'PDF non trouve' 
+      });
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression du PDF:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Impossible de supprimer le PDF' 
+    });
+  }
+});
+
+// Route pour telecharger un PDF
+app.get('/api/pdfs/download/:date/:filename', requireAuthRedirect, (req, res) => {
+  try {
+    const { date, filename } = req.params;
+    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, date, filename);
+    
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'PDF non trouve' 
+      });
+    }
+    
+    res.download(pdfPath, filename);
+  } catch (error) {
+    console.error('Erreur lors du telechargement du PDF:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Impossible de telecharger le PDF' 
+    });
+  }
+});
+
+// Route pour visualiser un PDF
+app.get('/api/pdfs/view/:date/:filename', requireAuthRedirect, (req, res) => {
+  try {
+    const { date, filename } = req.params;
+    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, date, filename);
+    
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'PDF non trouve' 
+      });
+    }
+    
+    // Envoyer le PDF pour visualisation dans le navigateur
+    const file = fs.readFileSync(pdfPath);
+    res.contentType('application/pdf');
+    res.send(file);
+  } catch (error) {
+    console.error('Erreur lors de la visualisation du PDF:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Impossible de visualiser le PDF' 
     });
   }
 });

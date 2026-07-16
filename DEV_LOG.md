@@ -60,12 +60,15 @@
 - Template YAML :
   - `backend/forms/template.yaml`
 - **FIX 2** : Ajout de `credentials: 'include'` a tous les appels fetch() pour envoyer les cookies de session httpOnly
+- **FIX 3** : Ajout des routes pour la page Mes PDFs
 - **Problemes rencontrés** : 
   - Route /api/forms/:id manquante -> erreur "Route non trouvée" lors du clic sur "Remplir"
   - **Solution 1**: Ajout de la route dans app.js avec parsing YAML via js-yaml
   - Les requetes fetch n'envoyaient pas les cookies -> session non reconnue
   - **Solution 2**: Ajout de `credentials: 'include'` dans tous les fetch() des pages HTML
-- **Statut** : ✅ Partiellement termine (chargement des formulaires fonctionnel)
+  - Bouton "Mes PDFs" dans la navbar pointait vers /pdfs.html au lieu de /pdf-list.html
+  - **Solution 3**: Ajout de la route /pdfs.html dans app.js (redirection vers pdf-list.html) + implementation complete des API PDFs
+- **Statut** : ✅ Termine (affichage, telechargement, visualisation et suppression des PDFs fonctionnels)
 
 ---
 
@@ -321,7 +324,17 @@ docker volume prune
 - Correction du bug de session non reconnue (cookies httpOnly non envoyes)
 - Tous les appels API authentifies fonctionnent maintenant correctement
 
+### v1.0.3 - Fix bouton Mes PDFs (16/07/2026)
+- **FIX 3**: Ajout des routes pour la page Mes PDFs
+- Ajout de la route /pdfs.html dans app.js
+- Implementation complete des API PDFs:
+  - GET /api/pdfs - Liste tous les PDFs generes
+  - DELETE /api/pdfs/:id - Supprime un PDF
+  - GET /api/pdfs/download/:date/:filename - Telecharge un PDF
+  - GET /api/pdfs/view/:date/:filename - Visualise un PDF
+- Organisation des PDFs par date (YYYY-MM-DD)
+
 ---
 
-*Derniere mise a jour : 16/07/2026 - Phase 2 (Formulaires) fonctionnelle*
+*Derniere mise a jour : 16/07/2026 - v1.0.3 (Gestion complete des PDFs)
 *Projet : Form2Sign*
