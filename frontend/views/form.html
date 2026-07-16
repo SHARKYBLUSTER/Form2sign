@@ -156,7 +156,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="close-success-modal" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="setTimeout(() => {window.location.href='/form-list.html'}, 200)">
                         <i class="fas fa-times me-2"></i> Fermer
                     </button>
                     <a href="#" id="download-pdf-btn" class="btn btn-primary">
@@ -671,11 +671,6 @@
                 console.error('Erreur:', error);
                 window.location.href = '/login.html';
             }
-        });
-        
-        // Rediriger vers form-list.html quand le modal de succes est ferme
-        document.getElementById('successModal').addEventListener('hidden.bs.modal', () => {
-            window.location.href = '/form-list.html';
         });
     </script>
 </body>
