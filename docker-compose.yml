@@ -18,6 +18,8 @@ services:
       - ./backend/forms:/app/backend/forms
       # Persistent storage for uploads (if any)
       - ./backend/uploads:/app/backend/uploads
+      # Persistent storage for config
+      - ./backend/config:/app/backend/config
     environment:
       - PORT=3000
     env_file:

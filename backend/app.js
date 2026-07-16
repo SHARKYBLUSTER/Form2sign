@@ -16,11 +16,29 @@ const multer = require('multer');
 
 // Charger les variables d'environnement
 const envPath = path.join(__dirname, 'config', '.env');
+const envExamplePath = path.join(__dirname, 'config', '.env.example');
+
 if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
 } else {
-  console.warn('⚠️  Fichier .env non trouvé. Utilisation des variables par défaut.');
-  dotenv.config();
+  console.warn('⚠️  Fichier .env non trouvé.');
+  
+  // Essayer de copier .env.example vers .env
+  if (fs.existsSync(envExamplePath)) {
+    try {
+      const envExampleContent = fs.readFileSync(envExamplePath, 'utf8');
+      fs.writeFileSync(envPath, envExampleContent, 'utf8');
+      console.log(`✅ Fichier .env créé à partir de .env.example: ${envPath}`);
+      dotenv.config({ path: envPath });
+    } catch (err) {
+      console.warn('⚠️  Impossible de copier .env.example vers .env:', err);
+      console.warn('⚠️  Utilisation des variables par défaut.');
+      dotenv.config();
+    }
+  } else {
+    console.warn('⚠️  Fichiers .env et .env.example non trouvés. Utilisation des variables par défaut.');
+    dotenv.config();
+  }
 }
 
 // Initialisation de l'application Express
@@ -176,11 +194,30 @@ function readEnvConfig() {
 // Sauvegarder la configuration dans le fichier .env
 function saveEnvConfig(newConfig) {
   const envPath = path.join(__dirname, 'config', '.env');
+  const configDir = path.dirname(envPath);
+  
+  // S'assurer que le répertoire existe
+  if (!fs.existsSync(configDir)) {
+    try {
+      fs.mkdirSync(configDir, { recursive: true });
+      console.log(`✅ Répertoire créé: ${configDir}`);
+    } catch (err) {
+      console.error(`❌ Impossible de créer le répertoire ${configDir}:`, err);
+      throw err;
+    }
+  }
   
   // Lire le contenu existant
   let envContent = '';
   if (fs.existsSync(envPath)) {
-    envContent = fs.readFileSync(envPath, 'utf8');
+    try {
+      envContent = fs.readFileSync(envPath, 'utf8');
+    } catch (err) {
+      console.error(`❌ Impossible de lire ${envPath}:`, err);
+      throw err;
+    }
+  } else {
+    console.log(`ℹ️  Fichier .env non trouvé, création d'un nouveau: ${envPath}`);
   }
   
   const lines = envContent.split('\n');
@@ -247,12 +284,35 @@ function saveEnvConfig(newConfig) {
   
   // Écrire le fichier
   const newEnvContent = updatedLines.join('\n');
-  fs.writeFileSync(envPath, newEnvContent);
+  
+  try {
+    fs.writeFileSync(envPath, newEnvContent, 'utf8');
+    console.log(`✅ Configuration .env sauvegardée avec succès: ${envPath}`);
+    console.log('   Contenu sauvegardé:', newConfig);
+  } catch (err) {
+    console.error(`❌ Impossible d'écrire dans ${envPath}:`, err);
+    console.error('   Vérifiez les permissions sur le fichier et le répertoire');
+    console.error('   UID:', process.getuid ? process.getuid() : 'N/A');
+    console.error('   GID:', process.getgid ? process.getgid() : 'N/A');
+    throw err;
+  }
   
   // Recharger les variables d'environnement
-  dotenv.config({ path: envPath });
-  
-  console.log('✅ Configuration .env sauvegardée avec succès');
+  try {
+    dotenv.config({ path: envPath });
+    console.log('✅ Variables d\'environnement rechargées');
+    
+    // Mettre à jour process.env avec les nouvelles valeurs
+    Object.keys(newConfig).forEach(key => {
+      if (typeof newConfig[key] === 'boolean') {
+        process.env[key] = newConfig[key].toString();
+      } else {
+        process.env[key] = newConfig[key];
+      }
+    });
+  } catch (err) {
+    console.error('⚠️  Impossible de recharger dotenv:', err);
+  }
 }
 
 // ============================================================================
