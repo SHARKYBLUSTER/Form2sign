@@ -311,6 +311,44 @@ app.post('/api/forms/upload', requireAuthRedirect, upload.single('formFile'), as
   }
 });
 
+// DELETE /api/forms/:id - Supprimer un formulaire
+app.delete('/api/forms/:id', requireAuthRedirect, (req, res) => {
+  try {
+    const formId = req.params.id;
+    const formsDir = path.join(__dirname, FORMS_DIRECTORY);
+    
+    // Trouver le fichier correspondant
+    const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
+    const formFile = yamlFiles.find(file => path.parse(file).name === formId);
+    
+    if (!formFile) {
+      return res.status(404).json({
+        success: false,
+        error: 'Formulaire non trouvé'
+      });
+    }
+    
+    // Supprimer le fichier
+    const filePath = path.join(formsDir, formFile);
+    fs.unlinkSync(filePath);
+    
+    console.log(`🗑️  Formulaire supprimé: ${formFile}`);
+    
+    res.json({
+      success: true,
+      message: 'Formulaire supprimé avec succès',
+      formId: formId
+    });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du formulaire:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Impossible de supprimer le formulaire',
+      message: NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Route pour lister les PDFs generes
 app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
   try {

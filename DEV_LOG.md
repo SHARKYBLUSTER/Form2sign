@@ -192,8 +192,9 @@
 |-------|----------|--------|------------|----------|-------|
 | 0 | Initialisation projet | ✅ Termine | 16/07/2026 | 16/07/2026 | Structure complete creee |
 | 1 | Authentification | ✅ Termine | 16/07/2026 | 16/07/2026 | Systeme d'auth complet avec bcrypt et express-session |
-| 2 | Formulaires dynamiques | ✅ Termine | 16/07/2026 | 16/07/2026 | Chargement et upload des formulaires fonctionnels |
+| 2 | Formulaires dynamiques | ✅ Termine | 16/07/2026 | 16/07/2026 | Chargement, upload et suppression des formulaires fonctionnels |
 | 2.5 | Upload de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour uploader de nouveaux formulaires YAML |
+| 2.6 | Suppression de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour supprimer des formulaires avec confirmation |
 | 3 | Interface Mobile + Signature | ⏳ En attente | - | - | |
 | 4 | Generation PDF | ⏳ En attente | - | - | |
 | 5 | Stockage PDFs | ⏳ En attente | - | - | |
@@ -363,4 +364,7 @@ docker volume prune
 
 *Derniere mise a jour : 16/07/2026 - v1.0.3 (Gestion complete des PDFs)
 *Projet : Form2Sign*
+*Projet : Form2Sign*
+
+*Derniere mise a jour : 16/07/2026 - v1.3.0 (Suppression de formulaires via interface web)*
 *Projet : Form2Sign*

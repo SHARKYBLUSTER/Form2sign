@@ -152,6 +152,7 @@ cp backend/config/.env.example backend/config/.env
 | GET | `/api/forms` | Liste les formulaires disponibles | ✅ Oui |
 | GET | `/api/forms/:id` | Charge un formulaire specifique par son ID | ✅ Oui |
 | POST | `/api/forms/upload` | Telecharge un nouveau formulaire YAML | ✅ Oui |
+| DELETE | `/api/forms/:id` | Supprime un formulaire | ✅ Oui |
 
 ### PDFs
 | Methode | Endpoint | Description | Authentification requise |
@@ -279,6 +280,14 @@ npm test
 2. Suivez le format definis dans `backend/forms/template.yaml`
 3. Exemple minimal :
 
+### Supprimer un formulaire
+Via l'interface web :
+1. Dans la liste des formulaires, cliquez sur l'icône poubelle (🗑️) sur la carte du formulaire
+2. Confirmez la suppression dans la modal
+3. Le formulaire est supprimé et la liste est rechargée automatiquement
+
+**Attention** : Cette action est irreversible. Le fichier YAML est définitivement supprimé du serveur.
+
 ```yaml
 form:
   id: mon_formulaire
@@ -398,6 +407,13 @@ docker ps -a
 ---
 
 ## 📝 Changelog
+
+### v1.3.0 - Suppression de formulaires (16/07/2026)
+- Ajout d'une icône poubelle sur chaque carte de formulaire
+- Implementation d'une modal de confirmation de suppression
+- Implementation de l'API DELETE /api/forms/:id
+- Suppression physique du fichier YAML du serveur
+- Rechargement automatique de la liste apres suppression
 
 ### v1.2.0 - Upload de formulaires (16/07/2026)
 - Ajout d'un bouton "Ajouter Formulaire" dans la navbar

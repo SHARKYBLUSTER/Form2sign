@@ -153,10 +153,36 @@
         </div>
     </div>
     
+    <!-- Delete Form Modal -->
+    <div class="modal fade" id="deleteFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Supprimer le Formulaire
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Voulez-vous vraiment supprimer ce formulaire ?</p>
+                    <p class="text-muted small">Cette action est irreversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Non</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete">
+                        <i class="fas fa-trash-alt me-2"></i> Oui, supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Variables globales
         let forms = [];
+        let formToDelete = null;
         
         // Chargement des formulaires au demarrage
         document.addEventListener('DOMContentLoaded', async () => {
@@ -209,13 +235,22 @@
                 formCard.innerHTML = `
                     <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-file-alt text-primary me-2"></i>
-                                ${form.id}
-                            </h5>
-                            <p class="card-text text-muted">
-                                ${form.filename}
-                            </p>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title mb-1">
+                                        <i class="fas fa-file-alt text-primary me-2"></i>
+                                        ${form.id}
+                                    </h5>
+                                    <p class="card-text text-muted small mb-0">
+                                        ${form.filename}
+                                    </p>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger delete-form-btn" 
+                                        data-form-id="${form.id}" 
+                                        title="Supprimer">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-footer bg-transparent">
                             <a href="/form.html?id=${form.id}" 
@@ -307,6 +342,49 @@
                 feedback.textContent = error.message;
                 feedback.className = 'alert alert-danger d-block';
             }
+        });
+
+        // Delete Form Modal
+        const deleteFormModal = new bootstrap.Modal(document.getElementById('deleteFormModal'));
+
+        // Gestion des boutons de suppression (délégation d'événement)
+        document.getElementById('forms-container').addEventListener('click', (e) => {
+            if (e.target.closest('.delete-form-btn')) {
+                e.preventDefault();
+                const formId = e.target.closest('.delete-form-btn').dataset.formId;
+                formToDelete = formId;
+                deleteFormModal.show();
+            }
+        });
+
+        document.getElementById('confirm-delete').addEventListener('click', async () => {
+            if (!formToDelete) return;
+
+            try {
+                const response = await fetch(`/api/forms/${formToDelete}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Recharger la liste des formulaires
+                    await loadForms();
+                    deleteFormModal.hide();
+                    formToDelete = null;
+                } else {
+                    throw new Error(data.error || 'Erreur lors de la suppression');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la suppression: ' + error.message);
+            }
+        });
+
+        // Réinitialiser formToDelete quand on ferme la modal sans confirmer
+        document.getElementById('deleteFormModal').addEventListener('hidden.bs.modal', () => {
+            formToDelete = null;
         });
     </script>
 </body>
