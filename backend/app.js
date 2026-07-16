@@ -123,6 +123,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/views/login.html'));
 });
 
+// Route alternative pour /login.html
+app.get('/login.html', (req, res) => {
+  // Si déjà connecté, rediriger vers form-list
+  if (req.session.user?.authenticated) {
+    return res.redirect('/form-list.html');
+  }
+  res.sendFile(path.join(__dirname, '../frontend/views/login.html'));
+});
+
 // Routes protégées - Redirigent vers login si non authentifié
 app.get('/form-list.html', requireAuthRedirect, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/views/form-list.html'));
