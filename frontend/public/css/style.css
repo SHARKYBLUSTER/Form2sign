@@ -390,8 +390,8 @@ body {
    ========================================================================= */
 
 #signature-pad {
-    width: 487px;
-    height: 200px;
+    width: 350px;
+    height: 250px;
     border: 2px dashed var(--gray-300);
     border-radius: var(--border-radius);
     background-color: var(--white);
