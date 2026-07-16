@@ -1,6 +1,6 @@
 {
   "name": "form2sign",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "description": "Application web mobile-first pour la capture de formulaires dynamiques avec signature et génération PDF",
   "main": "backend/app.js",
   "scripts": {
