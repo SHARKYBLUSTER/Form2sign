@@ -45,7 +45,7 @@ nano backend/config/.env  # ou utilisez votre editeur prefere
 # Le conteneur Docker s'execute sous l'utilisateur UID 1001
 # Cette commande detecte si un utilisateur avec UID 1001 existe sur votre systeme,
 # sinon elle utilise directement UID 1001. Cela permet au conteneur d'ecrire dans les volumes montes.
-awk -F: '{ if ($3 == 1001) print $1 }' /etc/passwd | xargs -I {} sudo chown -R {}:{} ./backend/uploads ./backend/forms 2>/dev/null || sudo chown -R 1001:1001 ./backend/uploads ./backend/forms
+awk -F: '{ if ($3 == 1001) print $1 }' /etc/passwd | xargs -I {} sudo chown -R {}:{} ./backend/uploads ./backend/forms ./backend/config 2>/dev/null || sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
 
 # Demarrer l'application avec Docker Compose
 docker-compose up -d
@@ -371,19 +371,23 @@ docker ps -a
 
 ### Erreur de permissions EACCES: permission denied
 
-**Probleme :** Le conteneur ne peut pas ecrire dans les volumes montes (uploads/pdfs, forms)
+**Probleme :** Le conteneur ne peut pas ecrire dans les volumes montes (uploads/pdfs, forms, config)
 
 **Solution :**
 ```bash
 # Donner les permissions a l'utilisateur du conteneur (UID 1001)
-sudo chown -R 1001:1001 ./backend/uploads ./backend/forms
+sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
+
+# Pour le fichier .env specifiquement (si vous avez des problemes de sauvegarde via l'interface Configuration)
+sudo chown 1001:1001 ./backend/config/.env
+sudo chmod 666 ./backend/config/.env
 
 # Puis redemarrer les conteneurs
 docker-compose down
 docker-compose up -d
 ```
 
-**Explication :** Le Dockerfile cree un utilisateur `nodejs` avec UID 1001 pour des raisons de securite. Les volumes montes depuis l'hote doivent etre accessibles par cet utilisateur.
+**Explication :** Le Dockerfile cree un utilisateur `nodejs` avec UID 1001 pour des raisons de securite. Les volumes montes depuis l'hote doivent etre accessibles par cet utilisateur. Pour l'interface de configuration (page Configuration), le fichier `.env` doit etre accessible en ecriture par le conteneur.
 
 ### Erreur de connexion
 
