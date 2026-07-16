@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Form2Sign - Formulaire</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+    <!-- Signature Pad CSS -->
+    <style>
+        /* Signature Pad Styles */
+        #signature-pad {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin-bottom: 15px;
+        }
+        .signature-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .signature-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .signature-controls button {
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/form-list.html">
+                <i class="fas fa-file-signature me-2"></i>
+                Form2Sign
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/form-list.html">
+                            <i class="fas fa-arrow-left me-1"></i> Retour
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout.html">
+                            <i class="fas fa-sign-out-alt me-1"></i> Deconnexion
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0" id="form-title">
+                            <i class="fas fa-wpforms me-2"></i>
+                            Chargement...
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <!-- Loading -->
+                        <div id="loading-spinner" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                            <p class="mt-3">Chargement du formulaire...</p>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+                        
+                        <!-- Form Content -->
+                        <div id="form-container" class="d-none">
+                            <form id="dynamic-form" class="needs-validation" novalidate>
+                                <input type="hidden" id="form-id" name="formId">
+                                
+                                <!-- Form fields will be inserted here -->
+                                <div id="form-fields"></div>
+                                
+                                <!-- Signature Section -->
+                                <div id="signature-section" class="mb-4">
+                                    <hr>
+                                    <h4 class="mb-3">
+                                        <i class="fas fa-signature me-2"></i>
+                                        Signature
+                                    </h4>
+                                    <p class="text-muted mb-3" id="signature-instructions">
+                                        Signez avec votre doigt ou un stylet.
+                                    </p>
+                                    <div class="signature-container">
+                                        <canvas id="signature-pad" width="600" height="200"></canvas>
+                                        <div class="signature-controls">
+                                            <button type="button" 
+                                                    id="clear-signature" 
+                                                    class="btn btn-outline-danger">
+                                                <i class="fas fa-times me-1"></i> Effacer
+                                            </button>
+                                            <button type="button" 
+                                                    id="redo-signature" 
+                                                    class="btn btn-outline-warning">
+                                                <i class="fas fa-undo me-1"></i> Recommencer
+                                            </button>
+                                        </div>
+                                        <input type="hidden" id="signature-data" name="signature" required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Submit Button -->
+                                <div class="d-grid gap-2">
+                                    <button type="submit" 
+                                            id="submit-btn" 
+                                            class="btn btn-success btn-lg">
+                                        <i class="fas fa-check me-2"></i>
+                                        Valider et Generer PDF
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Succes !
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center py-3">
+                        <i class="fas fa-file-pdf text-success fa-3x mb-3"></i>
+                        <h4>PDF genere avec succes !</h4>
+                        <p id="success-message"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Fermer
+                    </button>
+                    <a href="#" id="download-pdf-btn" class="btn btn-primary">
+                        <i class="fas fa-download me-2"></i> Telecharger le PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Deconnexion
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Etes-vous sur de vouloir vous deconnecter ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirm-logout">
+                        <i class="fas fa-sign-out-alt me-2"></i> Se deconnecter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Signature Pad JS -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.4/dist/signature_pad.umd.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        // Variables globales
+        let formData = null;
+        let signaturePad = null;
+        let currentSignature = '';
+        
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Recuperer l'ID du formulaire de l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const formId = urlParams.get('id');
+            
+            if (!formId) {
+                showError('Aucun identifiant de formulaire specifie.');
+                return;
+            }
+            
+            // Charger le formulaire
+            await loadForm(formId);
+            
+            // Initialiser la signature
+            initSignaturePad();
+        });
+        
+        // Charger un formulaire
+        async function loadForm(formId) {
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const errorMessage = document.getElementById('error-message');
+            const formContainer = document.getElementById('form-container');
+            const formTitle = document.getElementById('form-title');
+            
+            try {
+                const response = await fetch(`/api/forms/${formId}`);
+                const data = await response.json();
+                
+                if (data.success && data.form) {
+                    formData = data.form;
+                    
+                    // Mettre a jour le titre
+                    formTitle.innerHTML = `
+                        <i class="fas fa-wpforms me-2"></i>
+                        ${formData.title || formId}
+                    `;
+                    
+                    // Stocker l'ID du formulaire
+                    document.getElementById('form-id').value = formId;
+                    
+                    // Mettre a jour les instructions de signature
+                    if (formData.signature && formData.signature.instructions) {
+                        document.getElementById('signature-instructions').textContent = 
+                            formData.signature.instructions;
+                    }
+                    
+                    // Afficher les champs du formulaire
+                    renderFormFields(formData.fields);
+                    
+                    // Afficher le conteneur du formulaire
+                    formContainer.classList.remove('d-none');
+                    loadingSpinner.classList.add('d-none');
+                    
+                    // Initialiser la validation Bootstrap
+                    initBootstrapValidation();
+                    
+                } else {
+                    throw new Error(data.error || 'Formulaire non trouve');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError(`Erreur lors du chargement du formulaire: ${error.message}`);
+            }
+        }
+        
+        // Afficher les champs du formulaire
+        function renderFormFields(fields) {
+            const formFields = document.getElementById('form-fields');
+            formFields.innerHTML = '';
+            
+            if (!fields || fields.length === 0) {
+                formFields.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Ce formulaire n'a pas de champs a remplir.
+                    </div>
+                `;
+                return;
+            }
+            
+            fields.forEach((field, index) => {
+                const fieldElement = createFormField(field, index);
+                formFields.appendChild(fieldElement);
+            });
+        }
+        
+        // Creer un champ de formulaire
+        function createFormField(field, index) {
+            const fieldId = `field-${field.id || index}`;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'mb-3';
+            
+            let inputHtml = '';
+            
+            switch (field.type) {
+                case 'text':
+                case 'email':
+                case 'password':
+                case 'tel':
+                case 'number':
+                    inputHtml = `
+                        <label for="${fieldId}" class="form-label">
+                            ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                        </label>
+                        <input type="${field.type}" 
+                               class="form-control form-control-lg" 
+                               id="${fieldId}" 
+                               name="${field.id}" 
+                               placeholder="${field.placeholder || ''}"
+                               ${field.required ? 'required' : ''}
+                               ${field.validation ? `data-validation="${field.validation}"` : ''}>
+                        <div class="invalid-feedback">
+                            Ce champ est requis.
+                        </div>
+                    `;
+                    break;
+                    
+                case 'textarea':
+                    inputHtml = `
+                        <label for="${fieldId}" class="form-label">
+                            ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                        </label>
+                        <textarea class="form-control form-control-lg" 
+                                  id="${fieldId}" 
+                                  name="${field.id}" 
+                                  placeholder="${field.placeholder || ''}"
+                                  rows="${field.rows || 3}"
+                                  ${field.required ? 'required' : ''}></textarea>
+                        <div class="invalid-feedback">
+                            Ce champ est requis.
+                        </div>
+                    `;
+                    break;
+                    
+                case 'select':
+                    const optionsHtml = field.options ? 
+                        field.options.map(opt => 
+                            `<option value="${opt.value}">${opt.label}</option>`
+                        ).join('') : '';
+                    
+                    inputHtml = `
+                        <label for="${fieldId}" class="form-label">
+                            ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                        </label>
+                        <select class="form-select form-select-lg" 
+                                id="${fieldId}" 
+                                name="${field.id}"
+                                ${field.required ? 'required' : ''}>
+                            <option value="" disabled selected>${field.placeholder || 'Sélectionnez une option'}</option>
+                            ${optionsHtml}
+                        </select>
+                        <div class="invalid-feedback">
+                            Veuillez sélectionner une option.
+                        </div>
+                    `;
+                    break;
+                    
+                case 'radio':
+                    const radioOptions = field.options ? 
+                        field.options.map(opt => `
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="radio" 
+                                       name="${field.id}" 
+                                       id="${fieldId}-${opt.value}" 
+                                       value="${opt.value}"
+                                       ${field.required ? 'required' : ''}>
+                                <label class="form-check-label" for="${fieldId}-${opt.value}">
+                                    ${opt.label}
+                                </label>
+                            </div>
+                        `).join('') : '';
+                    
+                    inputHtml = `
+                        <label class="form-label">
+                            ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                        </label>
+                        <div class="form-check-group">
+                            ${radioOptions}
+                        </div>
+                        <div class="invalid-feedback">
+                            Veuillez sélectionner une option.
+                        </div>
+                    `;
+                    break;
+                    
+                case 'checkbox':
+                    inputHtml = `
+                        <div class="form-check">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="${fieldId}" 
+                                   name="${field.id}"
+                                   ${field.required ? 'required' : ''}>
+                            <label class="form-check-label" for="${fieldId}">
+                                ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                            </label>
+                            <div class="invalid-feedback">
+                                Ce champ est requis.
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'date':
+                    inputHtml = `
+                        <label for="${fieldId}" class="form-label">
+                            ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                        </label>
+                        <input type="date" 
+                               class="form-control form-control-lg" 
+                               id="${fieldId}" 
+                               name="${field.id}"
+                               ${field.required ? 'required' : ''}>
+                        <div class="invalid-feedback">
+                            Ce champ est requis.
+                        </div>
+                    `;
+                    break;
+                    
+                case 'file':
+                    inputHtml = `
+                        <label for="${fieldId}" class="form-label">
+                            ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                        </label>
+                        <input type="file" 
+                               class="form-control form-control-lg" 
+                               id="${fieldId}" 
+                               name="${field.id}"
+                               accept="${field.accept || '*'}"
+                               ${field.required ? 'required' : ''}>
+                        <div class="form-text text-muted">
+                            ${field.max_size ? `Taille max: ${formatFileSize(field.max_size)}` : ''}
+                        </div>
+                        <div class="invalid-feedback">
+                            Ce champ est requis.
+                        </div>
+                    `;
+                    break;
+                    
+                default:
+                    inputHtml = `
+                        <label for="${fieldId}" class="form-label">
+                            ${field.label}${field.required ? '<span class="text-danger"> *</span>' : ''}
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               id="${fieldId}" 
+                               name="${field.id}"
+                               placeholder="${field.placeholder || ''}"
+                               ${field.required ? 'required' : ''}>
+                        <div class="invalid-feedback">
+                            Ce champ est requis.
+                        </div>
+                    `;
+            }
+            
+            wrapper.innerHTML = inputHtml;
+            return wrapper;
+        }
+        
+        // Initialiser Signature Pad
+        function initSignaturePad() {
+            const canvas = document.getElementById('signature-pad');
+            
+            // Verifier si le canvas existe
+            if (!canvas) {
+                console.warn('Canvas pour la signature non trouve');
+                return;
+            }
+            
+            // Creer SignaturePad
+            signaturePad = new SignaturePad(canvas, {
+                backgroundColor: 'rgba(255, 255, 255, 0)',
+                penColor: '#000000',
+                velocityFilterWeight: 0.7,
+                minWidth: 2,
+                maxWidth: 4,
+                throttle: 16,
+                penColor: '#007bff'
+            });
+            
+            // Taille du canvas pour mobile
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Bouton Effacer
+            document.getElementById('clear-signature').addEventListener('click', () => {
+                signaturePad.clear();
+                currentSignature = '';
+                document.getElementById('signature-data').value = '';
+            });
+            
+            // Bouton Recommencer
+            document.getElementById('redo-signature').addEventListener('click', () => {
+                signaturePad.clear();
+                currentSignature = '';
+                document.getElementById('signature-data').value = '';
+            });
+            
+            // Capturer la signature quand on change
+            signaturePad.addEventListener('endStroke', () => {
+                if (!signaturePad.isEmpty()) {
+                    currentSignature = signaturePad.toDataURL();
+                    document.getElementById('signature-data').value = currentSignature;
+                } else {
+                    currentSignature = '';
+                    document.getElementById('signature-data').value = '';
+                }
+            });
+        }
+        
+        // Redimensionner le canvas
+        function resizeCanvas() {
+            const canvas = document.getElementById('signature-pad');
+            if (!canvas) return;
+            
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            
+            // Taille optimisee pour mobile
+            const width = Math.min(rect.width, 600);
+            const height = Math.min(200, window.innerHeight * 0.3);
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Redessiner si il y avait deja une signature
+            if (currentSignature) {
+                signaturePad.fromDataURL(currentSignature);
+            }
+        }
+        
+        // Initialiser la validation Bootstrap
+        function initBootstrapValidation() {
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }
+        
+        // Formater la taille des fichiers
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Afficher une erreur
+        function showError(message) {
+            const errorMessage = document.getElementById('error-message');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('d-none');
+            loadingSpinner.classList.add('d-none');
+        }
+        
+        // Soumission du formulaire
+        document.getElementById('dynamic-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const submitBtn = document.getElementById('submit-btn');
+            const signatureData = document.getElementById('signature-data').value;
+            
+            // Verifier qu'il y a une signature
+            if (formData.signature && formData.signature.required && !signatureData) {
+                alert('Veuillez signer le document avant de valider.');
+                return;
+            }
+            
+            // Desactiver le bouton
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generation...';
+            
+            // Preparer les donnees
+            const formValues = {};
+            const formDataObj = new FormData(form);
+            
+            for (let [key, value] of formDataObj.entries()) {
+                if (key !== 'signature') {
+                    formValues[key] = value;
+                }
+            }
+            
+            formValues.signature = signatureData;
+            formValues.formId = formData.id;
+            formValues.formTitle = formData.title;
+            
+            try {
+                const response = await fetch('/api/generate-pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formValues)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Succes - afficher le modal
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    document.getElementById('success-message').textContent = 
+                        data.message || 'Le PDF a ete genere avec succes.';
+                    
+                    if (data.pdfUrl) {
+                        document.getElementById('download-pdf-btn').href = data.pdfUrl;
+                    }
+                    
+                    successModal.show();
+                    
+                    // Reinitialiser le formulaire
+                    form.reset();
+                    signaturePad.clear();
+                    currentSignature = '';
+                    document.getElementById('signature-data').value = '';
+                    form.classList.remove('was-validated');
+                    
+                } else {
+                    throw new Error(data.error || 'Erreur lors de la generation du PDF');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert(`Erreur: ${error.message}`);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Valider et Generer PDF';
+            }
+        });
+        
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+            logoutModal.show();
+        });
+        
+        document.getElementById('confirm-logout').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'GET'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

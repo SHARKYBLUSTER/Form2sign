@@ -1,0 +1,747 @@
+/* =========================================================================
+   Form2Sign - Styles CSS Principaux
+   ========================================================================= */
+
+/* =========================================================================
+   VARIABLES CSS
+   ========================================================================= */
+:root {
+    /* Couleurs principales */
+    --primary-color: #007bff;
+    --primary-dark: #0069d9;
+    --primary-light: #6ea8fe;
+    
+    --secondary-color: #6c757d;
+    --secondary-dark: #5a6268;
+    --secondary-light: #889197;
+    
+    --success-color: #28a745;
+    --success-dark: #218838;
+    --success-light: #75b79e;
+    
+    --danger-color: #dc3545;
+    --danger-dark: #c82333;
+    --danger-light: #e46651;
+    
+    --warning-color: #ffc107;
+    --warning-dark: #e0a800;
+    --warning-light: #ffd43b;
+    
+    --info-color: #17a2b8;
+    --info-dark: #138496;
+    --info-light: #65c1cb;
+    
+    /* Couleurs neutres */
+    --white: #ffffff;
+    --black: #000000;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #6c757d;
+    --gray-600: #495057;
+    --gray-700: #343a40;
+    --gray-800: #212529;
+    --gray-900: #121212;
+    
+    /* Ombre */
+    --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --box-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    
+    /* Bordure */
+    --border-radius: 0.375rem;
+    --border-radius-sm: 0.25rem;
+    --border-radius-lg: 0.5rem;
+    
+    /* Espacement */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Police */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.25rem;
+    --font-size-sm: 0.875rem;
+    
+    /* Transition */
+    --transition: all 0.3s ease;
+}
+
+/* =========================================================================
+   RESET ET STYLES DE BASE
+   ========================================================================= */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--gray-800);
+    background-color: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================================
+   LAYOUT PRINCIPAL
+   ========================================================================= */
+
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+/* =========================================================================
+   NAVBAR
+   ========================================================================= */
+
+.navbar {
+    box-shadow: var(--box-shadow);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--white) !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+}
+
+/* =========================================================================
+   CARTES (CARDS)
+   ========================================================================= */
+
+.card {
+    border: none;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.card-header {
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0 !important;
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.card-body {
+    padding: var(--spacing-lg);
+}
+
+.card-footer {
+    border-top: 1px solid var(--gray-200);
+    background-color: transparent;
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+/* =========================================================================
+   BOUTONS
+   ========================================================================= */
+
+.btn {
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    transition: var(--transition);
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: var(--font-size-lg);
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: var(--font-size-sm);
+}
+
+.btn-primary {
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* =========================================================================
+   FORMULAIRES
+   ========================================================================= */
+
+.form-control,
+.form-select {
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    font-size: var(--font-size-base);
+    transition: var(--transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+.form-control-lg {
+    padding: 0.75rem 1.25rem;
+    font-size: var(--font-size-lg);
+    border-radius: var(--border-radius);
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+.form-check-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.input-group-text {
+    border-radius: var(--border-radius);
+    background-color: var(--gray-100);
+    border-color: var(--gray-300);
+}
+
+/* ========================================================================= 
+   INPUT VALIDATION STYLES
+   ========================================================================= */
+
+.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.is-invalid:focus {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+    color: var(--danger-color);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-xs);
+    display: none;
+}
+
+.was-validated .form-control:invalid ~ .invalid-feedback,
+.was-validated .form-select:invalid ~ .invalid-feedback,
+.was-validated .form-check-input:invalid ~ .invalid-feedback {
+    display: block;
+}
+
+/* =========================================================================
+   TABLEAUX
+   ========================================================================= */
+
+.table {
+    margin-bottom: var(--spacing-md);
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    padding: var(--spacing-md) var(--spacing-sm);
+}
+
+.table thead th {
+    background-color: var(--gray-100);
+    border-bottom: 2px solid var(--gray-200);
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--gray-100);
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* =========================================================================
+   ALERTES
+   ========================================================================= */
+
+.alert {
+    border: none;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--box-shadow-sm);
+}
+
+.alert-primary {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: var(--primary-dark);
+    border-left: 4px solid var(--primary-color);
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success-dark);
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-dark);
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: var(--warning-dark);
+    border-left: 4px solid var(--warning-color);
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: var(--info-dark);
+    border-left: 4px solid var(--info-color);
+}
+
+/* =========================================================================
+   MODALS
+   ========================================================================= */
+
+.modal-content {
+    border: none;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius-lg);
+}
+
+.modal-header {
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-body {
+    padding: var(--spacing-lg);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--gray-200);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+}
+
+.modal-footer .btn {
+    min-width: 100px;
+}
+
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* =========================================================================
+   SPINNER
+   ========================================================================= */
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+}
+
+.spinner-border-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-width: 0.2em;
+}
+
+/* =========================================================================
+   SIGNATURE PAD
+   ========================================================================= */
+
+#signature-pad {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--border-radius);
+    background-color: var(--white);
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.signature-container {
+    margin-bottom: var(--spacing-lg);
+}
+
+.signature-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    margin-top: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.signature-controls button {
+    min-width: 120px;
+}
+
+/* =========================================================================
+   CHAMPS DE FICHIERS
+   ========================================================================= */
+
+.form-control[type="file"] {
+    padding: 0.5rem;
+}
+
+/* =========================================================================
+   EMPTY STATES
+   ========================================================================= */
+
+.empty-state {
+    padding: var(--spacing-xl) var(--spacing-md);
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--gray-400);
+    margin-bottom: var(--spacing-md);
+}
+
+.empty-state h4 {
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-sm);
+}
+
+.empty-state p {
+    color: var(--gray-500);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* =========================================================================
+   LOADING STATES
+   ========================================================================= */
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-xl);
+}
+
+.loading-spinner .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+}
+
+.loading-spinner p {
+    margin-top: var(--spacing-md);
+    color: var(--gray-600);
+}
+
+/* =========================================================================
+   ICONES
+   ========================================================================= */
+
+i.fas, i.far, i.fab {
+    font-size: 1em;
+    vertical-align: middle;
+}
+
+.navbar-brand i {
+    font-size: 1.25em;
+}
+
+.card-header i {
+    font-size: 1.25em;
+}
+
+.btn i {
+    margin-right: 0.25rem;
+}
+
+/* =========================================================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   ========================================================================= */
+
+/* Touch targets pour mobile (minimum 48x48px) */
+.btn {
+    min-height: 48px;
+}
+
+.form-control,
+.form-select {
+    min-height: 48px;
+}
+
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.3rem;
+}
+
+.form-check-label {
+    padding-left: 10px;
+    line-height: 1.5;
+}
+
+/* Desactiver le zoom sur les champs de formulaire */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    font-size: 16px !important;
+}
+
+/* Optimisation pour ecrans tactiles */
+@media (hover: none) and (pointer: coarse) {
+    /* Agrandir les elements pour les ecrans tactiles */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .form-control,
+    .form-select {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 1.1rem;
+    }
+    
+    /* Signature pad plus grand sur mobile */
+    #signature-pad {
+        height: 250px;
+    }
+    
+    .signature-controls button {
+        min-width: 140px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+/* Responsivite generale */
+@media (max-width: 768px) {
+    .navbar-collapse {
+        background-color: rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        border-radius: var(--border-radius);
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    
+    .modal-content {
+        margin: 0;
+    }
+    
+    .table-responsive {
+        margin-bottom: 1rem;
+    }
+    
+    /* Reduire la taille des icones dans les petits ecrans */
+    .navbar-brand i {
+        font-size: 1em;
+    }
+    
+    .card-header i {
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    /* Signature pad encore plus grand sur petit ecran */
+    #signature-pad {
+        height: 200px;
+    }
+    
+    .signature-controls {
+        flex-direction: column;
+    }
+    
+    .signature-controls button {
+        width: 100%;
+    }
+}
+
+/* =========================================================================
+   ANIMATIONS
+   ========================================================================= */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease;
+}
+
+.table tbody tr {
+    animation: slideIn 0.3s ease forwards;
+    opacity: 0;
+}
+
+.table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+.table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+.table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+.table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+.table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+/* =========================================================================
+   UTILITAIRES
+   ========================================================================= */
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+.text-warning {
+    color: var(--warning-color) !important;
+}
+
+.text-info {
+    color: var(--info-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+/* =========================================================================
+   SCROLLBAR
+   ========================================================================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-200);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-500);
+}
+
+/* =========================================================================
+   IMPRESSION
+   ========================================================================= */
+
+@media print {
+    .navbar,
+    .btn,
+    .signature-controls,
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background-color: white;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+}
