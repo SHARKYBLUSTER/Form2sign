@@ -433,15 +433,24 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
     
-    // Titre du document
-    doc.fontSize(20).font('Helvetica-Bold').text('Form2sign', { align: 'center' });
+    // Titre du document (avec substitution de variables si défini dans le YAML)
+    let displayTitle = 'Form2sign';
+    if (pdfConfig.title) {
+      displayTitle = pdfConfig.title;
+      Object.keys(footerVariables).forEach(key => {
+        displayTitle = displayTitle.replace(new RegExp(`\{${key}\}`, 'g'), footerVariables[key]);
+      });
+    }
+    doc.fontSize(20).font('Helvetica-Bold').text(displayTitle, { align: 'center' });
     doc.moveDown();
     doc.fontSize(12).font('Helvetica').text(`ID: ${formId}`, { align: 'center' });
     doc.moveDown(2);
     
-    // Date de signature
-    doc.fontSize(10).text(`Signé le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, { align: 'right' });
-    doc.moveDown();
+    // Date de signature (conditionnelle selon include_timestamp)
+    if (pdfConfig.include_timestamp !== false) {
+      doc.fontSize(10).text(`Signé le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, { align: 'right' });
+      doc.moveDown();
+    }
     
     // Separateur
     doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
