@@ -29,30 +29,6 @@ services:
     networks:
       - form2sign-network
 
-  # Development service (with nodemon for auto-reload)
-  app-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: form2sign-app-dev
-    ports:
-      - "3000:3000"
-    volumes:
-      # Mount source code for live reload
-      - .:/app
-      - /app/node_modules
-      # Persistent storage
-      - ./backend/uploads/pdfs:/app/backend/uploads/pdfs
-      - ./backend/forms:/app/backend/forms
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-    env_file:
-      - ./backend/config/.env
-    command: npm run dev
-    restart: unless-stopped
-    networks:
-      - form2sign-network
 
 networks:
   form2sign-network:
