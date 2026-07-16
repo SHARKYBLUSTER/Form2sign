@@ -137,6 +137,8 @@ cp backend/config/.env.example backend/config/.env
 
 ## 🔌 Routes API
 
+⚠️ **Important** : Pour toutes les requetes vers les endpoints authentifies, utilisez `credentials: 'include'` dans vos appels fetch() pour envoyer le cookie de session.
+
 ### Authentification
 | Methode | Endpoint | Description | Authentification requise |
 |---------|----------|-------------|--------------------------|

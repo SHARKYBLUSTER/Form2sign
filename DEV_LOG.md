@@ -52,16 +52,19 @@
 - Implementation directe dans app.js (sans service separat pour l'instant)
 - Implementation des endpoints API :
   - GET /api/forms (liste des formulaires)
-  - GET /api/forms/:id (details d'un formulaire) - **FIX**: Ajoute pour resoudre "Route non trouvee"
+  - GET /api/forms/:id (details d'un formulaire) - **FIX 1**: Ajoute pour resoudre "Route non trouvee"
 - Utilisation de js-yaml pour parser les fichiers YAML
 - Pages frontend existantes :
   - `frontend/views/form-list.html`
   - `frontend/views/form.html`
 - Template YAML :
   - `backend/forms/template.yaml`
+- **FIX 2** : Ajout de `credentials: 'include'` a tous les appels fetch() pour envoyer les cookies de session httpOnly
 - **Problemes rencontrés** : 
   - Route /api/forms/:id manquante -> erreur "Route non trouvée" lors du clic sur "Remplir"
-  - **Solution**: Ajout de la route dans app.js avec parsing YAML via js-yaml
+  - **Solution 1**: Ajout de la route dans app.js avec parsing YAML via js-yaml
+  - Les requetes fetch n'envoyaient pas les cookies -> session non reconnue
+  - **Solution 2**: Ajout de `credentials: 'include'` dans tous les fetch() des pages HTML
 - **Statut** : ✅ Partiellement termine (chargement des formulaires fonctionnel)
 
 ---
@@ -309,11 +312,16 @@ docker volume prune
 - Preparation pour le developpement
 
 ### v1.0.1 - Fix chargement formulaires (16/07/2026)
-- **FIX**: Ajout de la route API /api/forms/:id pour charger un formulaire specifique
+- **FIX 1**: Ajout de la route API /api/forms/:id pour charger un formulaire specifique
 - Integration de js-yaml pour le parsing des fichiers YAML
 - Correction du bug "Route non trouvée" lors du clic sur le bouton "Remplir"
 
+### v1.0.2 - Fix cookies de session (16/07/2026)
+- **FIX 2**: Ajout de `credentials: 'include'` a tous les appels fetch()
+- Correction du bug de session non reconnue (cookies httpOnly non envoyes)
+- Tous les appels API authentifies fonctionnent maintenant correctement
+
 ---
 
-*Derniere mise a jour : 16/07/2026 - Phase 2 (Formulaires) partiellement terminee*
+*Derniere mise a jour : 16/07/2026 - Phase 2 (Formulaires) fonctionnelle*
 *Projet : Form2Sign*
