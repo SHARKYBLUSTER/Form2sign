@@ -61,8 +61,8 @@ app.use(express.json({ limit: '10mb' }));
 // Middleware pour parser les données URL-encoded
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Middleware pour servir les fichiers statiques (frontend)
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Middleware pour servir UNIQUEMENT les assets statiques (CSS, JS, images)
+// Les pages HTML sont gérées par des routes explicites ci-dessous
 app.use('/static', express.static(path.join(__dirname, '../frontend/public')));
 
 // Configuration CORS

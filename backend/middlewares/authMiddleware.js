@@ -10,12 +10,15 @@
  */
 const requireAuth = (req, res, next) => {
     try {
+        console.log('🔐 Vérification auth - Session:', req.sessionID, 'User:', req.session.user);
         if (req.session.user?.authenticated) {
             // Utilisateur authentifié, continuer
+            console.log('✅ Utilisateur authentifié:', req.session.user.username);
             return next();
         }
         
         // Non authentifié
+        console.log('❌ Utilisateur non authentifié - Redirection vers login');
         return res.status(401).json({
             success: false,
             error: 'Accès non autorisé - Veuillez vous connecter'
@@ -36,11 +39,14 @@ const requireAuth = (req, res, next) => {
  */
 const requireAuthRedirect = (req, res, next) => {
     try {
+        console.log('🔐 Vérification auth (redirect) - Session:', req.sessionID, 'User:', req.session.user);
         if (req.session.user?.authenticated) {
+            console.log('✅ Utilisateur authentifié (redirect):', req.session.user.username);
             return next();
         }
         
         // Rediriger vers la page de login
+        console.log('❌ Utilisateur non authentifié - Redirection vers /');
         return res.redirect('/');
         
     } catch (error) {

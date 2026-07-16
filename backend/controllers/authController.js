@@ -88,7 +88,17 @@ const login = async (req, res) => {
             authenticated: true
         };
         
-        console.log(`✅ Connexion réussie pour: ${username}`);
+        // Sauvegarder explicitement la session
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) {
+                    console.error('❌ Erreur lors de la sauvegarde de la session:', err);
+                    return reject(err);
+                }
+                console.log(`✅ Connexion réussie pour: ${username}`);
+                resolve();
+            });
+        });
         
         res.json({
             success: true,
