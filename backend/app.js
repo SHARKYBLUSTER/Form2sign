@@ -361,8 +361,9 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
-    // Charger la configuration du formulaire pour obtenir les options PDF
+    // Charger la configuration du formulaire pour obtenir les options PDF et l'ordre des champs
     let pdfConfig = {};
+    let fieldsOrder = [];
     try {
       const formsDir = path.join(__dirname, FORMS_DIRECTORY);
       const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
@@ -377,9 +378,13 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         if (form.pdf) {
           pdfConfig = form.pdf;
         }
+        if (form.fields && Array.isArray(form.fields)) {
+          fieldsOrder = form.fields.map(field => field.id);
+          console.log(`Order des champs pour ${formId}:`, fieldsOrder);
+        }
       }
     } catch (err) {
-      console.warn('Impossible de charger la configuration PDF du formulaire:', err.message);
+      console.warn('Impossible de charger la configuration du formulaire:', err.message);
     }
     
     // Creer un nom de fichier au format: yyyy_mm_dd_hhmmss_FormID.pdf
@@ -458,30 +463,10 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     
     doc.fontSize(12).font('Helvetica');
     
-    // Obtenir l'ordre des champs depuis le formulaire YAML pour respecter l'ordre défini
-    let fieldsOrder = [];
-    try {
-      const formsDir = path.join(__dirname, FORMS_DIRECTORY);
-      const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
-      const formFile = yamlFiles.find(file => path.parse(file).name === formId);
-      
-      if (formFile) {
-        const filePath = path.join(formsDir, formFile);
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        const formData = yaml.load(fileContent);
-        const form = formData.form || formData;
-        if (form.fields && Array.isArray(form.fields)) {
-          fieldsOrder = form.fields.map(field => field.id);
-        }
-      }
-    } catch (err) {
-      console.warn('Impossible de charger l ordre des champs du formulaire:', err.message);
-    }
-    
     // Afficher les champs dans l'ordre défini dans le formulaire
     const displayKeys = fieldsOrder.length > 0 ? fieldsOrder : Object.keys(formValues);
     displayKeys.forEach(key => {
-      if (key !== 'formId' && key !== 'formTitle' && key !== 'signature' && formValues[key] !== undefined) {
+      if (formValues[key] !== undefined) {
         const value = formValues[key];
         doc.text(`${key}: ${value || 'N/A'}`);
         doc.moveDown(0.5);
