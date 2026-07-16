@@ -219,7 +219,8 @@
                     if (allPdfs.length === 0) {
                         emptyState.classList.remove('d-none');
                     } else {
-                        renderPdfs(allPdfs);
+                        // Réappliquer les filtres actuels après le rechargement
+                        filterPdfs();
                         pdfList.classList.remove('d-none');
                     }
                 } else {
