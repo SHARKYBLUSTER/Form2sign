@@ -154,9 +154,15 @@ form:
     button_color: "#007bff"
     
   # Options de PDF (optionnel)
+  # Ces options permettent de personnaliser le PDF généré
   pdf:
+    # Titre du PDF (peut inclure des variables comme {full_name}, {date}, etc.)
     title: "Formulaire signé - {full_name}"
-    footer: "Généré le {date} à {time}"
+    # Texte à afficher en footer du PDF
+    footer: "Document signé électroniquement via Form2Sign"
+    # Inclure un timestamp automatique
     include_timestamp: true
+    # Taille de page: A4, A5, Letter, etc.
     page_size: "A4"
+    # Orientation: portrait ou landscape
     orientation: "portrait"

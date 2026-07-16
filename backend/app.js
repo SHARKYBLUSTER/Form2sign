@@ -361,6 +361,27 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
+    // Charger la configuration du formulaire pour obtenir le footer PDF
+    let pdfFooter = null;
+    try {
+      const formsDir = path.join(__dirname, FORMS_DIRECTORY);
+      const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
+      const formFile = yamlFiles.find(file => path.parse(file).name === formId);
+      
+      if (formFile) {
+        const filePath = path.join(formsDir, formFile);
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const formData = yaml.load(fileContent);
+        const form = formData.form || formData;
+        
+        if (form.pdf && form.pdf.footer) {
+          pdfFooter = form.pdf.footer;
+        }
+      }
+    } catch (err) {
+      console.warn('Impossible de charger la configuration PDF du formulaire:', err.message);
+    }
+    
     // Creer un nom de fichier au format: yyyy_mm_dd_hhmmss_FormID.pdf
     const now = new Date();
     const dateFolder = now.toISOString().split('T')[0];
@@ -450,6 +471,12 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     }
     
     doc.moveDown();
+    
+    // Footer personnalisé si défini dans le formulaire
+    if (pdfFooter) {
+      doc.fontSize(8).font('Helvetica').text(pdfFooter, { align: 'center', width: 500 });
+      doc.moveDown();
+    }
     
     // Finaliser le PDF
     doc.end();
