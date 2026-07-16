@@ -361,8 +361,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
-    // Charger la configuration du formulaire pour obtenir les options PDF et l'ordre des champs
-    let pdfConfig = {};
+    // Charger uniquement l'ordre des champs depuis le formulaire YAML
     let fieldsOrder = [];
     try {
       const formsDir = path.join(__dirname, FORMS_DIRECTORY);
@@ -375,30 +374,22 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         const formData = yaml.load(fileContent);
         const form = formData.form || formData;
         
-        if (form.pdf) {
-          pdfConfig = form.pdf;
-        }
         if (form.fields && Array.isArray(form.fields)) {
           fieldsOrder = form.fields.map(field => field.id);
         }
       }
     } catch (err) {
-      console.warn('Impossible de charger la configuration du formulaire:', err.message);
+      console.warn('Impossible de charger l ordre des champs du formulaire:', err.message);
     }
     
-    // Utiliser les valeurs du .env comme fallback si non définies dans le formulaire YAML
-    pdfConfig = {
-      title: pdfConfig.title || process.env.PDF_TITLE,
-      footer: pdfConfig.footer || process.env.PDF_FOOTER,
-      include_timestamp: pdfConfig.include_timestamp !== false && process.env.PDF_INCLUDE_TIMESTAMP !== 'false',
-      page_size: pdfConfig.page_size || process.env.PDF_PAGE_SIZE || 'A4',
-      orientation: pdfConfig.orientation || process.env.PDF_ORIENTATION || 'portrait'
+    // Configuration PDF depuis .env uniquement
+    const pdfConfig = {
+      title: process.env.PDF_TITLE,
+      footer: process.env.PDF_FOOTER,
+      include_timestamp: process.env.PDF_INCLUDE_TIMESTAMP !== 'false',
+      page_size: process.env.PDF_PAGE_SIZE || 'A4',
+      orientation: process.env.PDF_ORIENTATION || 'portrait'
     };
-    
-    // Convertir include_timestamp en boolean si c'est une string
-    if (typeof pdfConfig.include_timestamp === 'string') {
-      pdfConfig.include_timestamp = pdfConfig.include_timestamp.toLowerCase() === 'true';
-    }
     
     // Creer un nom de fichier au format: yyyy_mm_dd_hhmmss_FormID.pdf
     const now = new Date();

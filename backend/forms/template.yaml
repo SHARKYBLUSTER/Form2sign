@@ -4,6 +4,9 @@
 # Ce fichier est un template pour créer de nouveaux formulaires.
 # Copiez ce fichier et renommez-le avec un nom descriptif (ex: contract.yaml)
 #
+# NOTE: Les options de PDF (titre, footer, taille, orientation, timestamp) 
+# sont désormais configurées dans le fichier .env et non dans les formulaires YAML.
+#
 # Format :
 # - form: metadata du formulaire
 #   - id: identifiant unique
@@ -153,16 +156,3 @@ form:
     text_color: "#333333"
     button_color: "#007bff"
     
-  # Options de PDF (optionnel)
-  # Ces options permettent de personnaliser le PDF généré
-  pdf:
-    # Titre du PDF (peut inclure des variables comme {full_name}, {date}, etc.)
-    title: "Formulaire signé - {full_name}"
-    # Texte à afficher en footer du PDF
-    footer: "Document signé électroniquement via Form2Sign"
-    # Inclure un timestamp automatique
-    include_timestamp: true
-    # Taille de page: A4, A5, Letter, etc.
-    page_size: "A4"
-    # Orientation: portrait ou landscape
-    orientation: "portrait"
