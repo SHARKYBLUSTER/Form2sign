@@ -96,22 +96,48 @@
 
 ---
 
-### [Date a venir] - Interface Mobile et Signature (Phase 3)
-- **Phase 3** : Interface optimisee mobile avec capture de signature
-- Creation du layout responsive avec Bootstrap 5 :
-  - `frontend/public/css/style.css`
-- Optimisation pour ecrans tactiles :
-  - Boutons et champs suffisamment grands (>48x48px)
-  - Desactivation du zoom sur les champs
-- Integration de Signature Pad :
-  - `frontend/public/js/signature.js`
-- Creation du canvas de signature :
-  - Composant HTML dans `form.html`
-- Fonctions clear/redo pour la signature
-- Capture de la signature comme image (Data URL PNG)
-- Envoi de la signature + donnees formulaire au backend
-- **Problemes rencontrés** : [A completer]
-- **Statut** : ⏳ En attente
+### 17/07/2026 - Améliorations Interface Formulaire (Phase 3 - Suite)
+- **Phase 3** : Finalisation de l'interface utilisateur
+- Ajout d'un bouton **Annuler** dans la zone de signature :
+  - Permet de retourner à la liste des formulaires sans enregistrer
+  - Positionné à côté des boutons "Effacer" et "Recommencer"
+  - Style: `btn btn-outline-secondary` avec icône fa-ban
+  - Redirection vers `/form-list.html`
+- Modification du bouton **Recommencer** :
+  - Réinitialise maintenant **tout le formulaire** (form.reset()) en plus de la signature
+  - Supprime aussi la classe `was-validated` de Bootstrap
+- Echange des couleurs des boutons :
+  - **Effacer** : `btn-outline-danger` → `btn-outline-warning`
+  - **Recommencer** : `btn-outline-warning` → `btn-outline-danger`
+  - pour une meilleure distinction visuelle et cohérence avec l'action
+- **Fichiers modifies** :
+  - `frontend/views/form.html` (boutons et JavaScript)
+- **Statut** : ✅ Terminé
+
+---
+
+### 17/07/2026 - Roadmap pour l'Enrichissement PDF
+- **Nouvelle documentation** : Creation de la roadmap complete pour l'enrichissement des PDF
+- Creation du fichier [ROADMAP-PDF-ENRICHMENT.md](ROADMAP-PDF-ENRICHMENT.md)
+- Definition de la **Solution 1** (recommandee) avec section `pdf` dans le YAML
+- Detail de **9 phases d'implémentation** avec tâches, durée, livrables
+- Timeline estimée : **14-19 jours ouvrés** (jusqu'au 7 août 2026)
+- Definition des **Milestones** :
+  - MVP (26 juillet) : Logo + introduction + variables + espacement
+  - Version Complète (4 août) : Toutes les options
+  - Production Ready (7 août) : Déploiement final
+- **Fichiers créés/modifiés** :
+  - `ROADMAP-PDF-ENRICHMENT.md` (nouveau)
+  - `README.md` (mis à jour avec section personnalisation PDF)
+  - `DEV_LOG.md` (mis à jour)
+- **Fonctionnalités prévues** :
+  - Logo en en-tête avec positionnement
+  - Texte d'introduction avec sauts de ligne
+  - Sections personnalisées (texte, séparateurs, images, espacements)
+  - Pied de page personnalisé avec pagination
+  - Contrôle des styles et marges
+  - Variables dynamiques ({date}, {champ_id}, etc.)
+- **Statut** : ✅ Documentation terminée, implémentation à venir
 
 ---
 
@@ -201,12 +227,14 @@
 | 2 | Formulaires dynamiques | ✅ Termine | 16/07/2026 | 16/07/2026 | Chargement, upload et suppression des formulaires fonctionnels |
 | 2.5 | Upload de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour uploader de nouveaux formulaires YAML |
 | 2.6 | Suppression de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour supprimer des formulaires avec confirmation |
-| 3 | Interface Mobile + Signature | ✅ Termine | 16/07/2026 | 16/07/2026 | Signature Pad integree, canvas responsive |
+| 3 | Interface Mobile + Signature | ✅ Termine | 16/07/2026 | 17/07/2026 | Signature Pad integree, canvas responsive, bouton Annuler ajouté |
 | 4 | Generation PDF | ✅ Termine | 16/07/2026 | 16/07/2026 | Route POST /api/generate-pdf avec PDFKit |
 | 5 | Stockage PDFs | ✅ Termine | 16/07/2026 | 16/07/2026 | Organisation par date, telechargement et visualisation |
 | 6 | Tests | ⏳ En attente | - | - | |
 | 7 | Conteneurisation Docker | ✅ Termine | 16/07/2026 | 16/07/2026 | Configuration Docker et docker-compose |
 | 8 | Deployment | ⏳ En attente | - | - | |
+| 9 | Personnalisation PDF (MVP) | ⏳ Planifie | 18/07/2026 | 26/07/2026 | Logo + introduction + variables + espacement |
+| 10 | Personnalisation PDF (Complete) | ⏳ Planifie | 27/07/2026 | 04/08/2026 | Toutes les options de la Solution 1 |
 
 ---
 
@@ -368,9 +396,5 @@ docker volume prune
 
 ---
 
-*Derniere mise a jour : 16/07/2026 - v1.4.0 (Generation de PDF)
-*Projet : Form2Sign*
-*Projet : Form2Sign*
-
-*Derniere mise a jour : 16/07/2026 - v1.3.0 (Suppression de formulaires via interface web)*
+*Derniere mise a jour : 17/07/2026 - v1.5.0 (Ameliorations interface + Roadmap PDF)*
 *Projet : Form2Sign*

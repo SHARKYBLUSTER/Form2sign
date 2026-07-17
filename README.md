@@ -114,6 +114,13 @@ npm restart  # ou Ctrl+C puis npm start
 
 ---
 
+## 📄 Documentation Additionnelle
+
+- [ROADMAP-PDF-ENRICHMENT.md](ROADMAP-PDF-ENRICHMENT.md) - Roadmap pour l'enrichissement des PDF
+- [DEV_LOG.md](DEV_LOG.md) - Journal de développement complet
+
+---
+
 ## 🛠️ Configuration
 
 ### Variables d'environnement (.env)
@@ -456,7 +463,51 @@ docker-compose up -d
 
 ---
 
+## 🎨 Personnalisation des PDF
+
+Form2Sign permet de personnaliser l'apparence des PDF generes directement depuis le fichier YAML de chaque formulaire.
+
+### Fonctionnalites disponibles (via la section `pdf` dans le YAML) :
+- **Logo** : Ajout d'un logo en en-tête (haut à gauche, centré ou à droite)
+- **Texte d'introduction** : Texte avec sauts de ligne avant les champs
+- **Sections personnalisées** : Ajout de texte, séparateurs, images, espacements
+- **Pied de page personnalisé** : Avec pagination automatique
+- **Styles** : Contrôle des polices, couleurs, tailles
+- **Marges** : Personnalisation des marges de la page
+- **Variables dynamiques** : Utilisation de `{date}`, `{champ_id}`, etc.
+
+### Exemple minimal :
+```yaml
+form:
+  id: mon_contrat
+  title: "Contrat Client"
+  pdf:
+    header:
+      logo: "/static/images/logo.png"
+      logo_position: "top-left"
+      title: "CONTRAT OFFICIEL"
+    introduction: "Ce document officialise votre accord.\n\nDate: {date}"
+    footer:
+      left: "© 2024 Entreprise"
+      center: "Page {pageNumber} de {pageCount}"
+      right: "Généré le {date}"
+  fields:
+    - id: nom_client
+      label: "Nom du client"
+      type: text
+      required: true
+```
+
+> ⚠️ **Pour plus de détails**, consultez [ROADMAP-PDF-ENRICHMENT.md](ROADMAP-PDF-ENRICHMENT.md)
+
+---
+
 ## 📝 Changelog
+
+### v1.5.0 - Améliorations Interface Formulaire (17/07/2026)
+- Ajout d'un bouton **Annuler** dans la zone de signature pour retourner à la liste des formulaires
+- Echange des couleurs des boutons **Effacer** (orange) et **Recommencer** (rouge) pour meilleure visibilité
+- Bouton **Recommencer** réinitialise maintenant tout le formulaire (pas seulement la signature)
 
 ### v1.4.0 - Generation de PDF (16/07/2026)
 - Implementation de l'API POST /api/generate-pdf
