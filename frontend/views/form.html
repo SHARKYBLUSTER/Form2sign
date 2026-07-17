@@ -109,13 +109,18 @@
                                         <canvas id="signature-pad" width="300" height="250" style="touch-action: none; user-select: none; display: block;"></canvas>
                                         <div class="signature-controls">
                                             <button type="button" 
+                                                    id="cancel-form" 
+                                                    class="btn btn-outline-secondary">
+                                                <i class="fas fa-ban me-1"></i> Annuler
+                                            </button>
+                                            <button type="button" 
                                                     id="clear-signature" 
-                                                    class="btn btn-outline-danger">
+                                                    class="btn btn-outline-warning">
                                                 <i class="fas fa-times me-1"></i> Effacer
                                             </button>
                                             <button type="button" 
                                                     id="redo-signature" 
-                                                    class="btn btn-outline-warning">
+                                                    class="btn btn-outline-danger">
                                                 <i class="fas fa-undo me-1"></i> Recommencer
                                             </button>
                                         </div>
@@ -504,9 +509,19 @@
             
             // Bouton Recommencer
             document.getElementById('redo-signature').addEventListener('click', () => {
+                // Effacer la signature
                 signaturePad.clear();
                 currentSignature = '';
                 document.getElementById('signature-data').value = '';
+                
+                // Reinitialiser tout le formulaire
+                document.getElementById('dynamic-form').reset();
+                document.getElementById('dynamic-form').classList.remove('was-validated');
+            });
+            
+            // Bouton Annuler - retourner à la liste des formulaires
+            document.getElementById('cancel-form').addEventListener('click', () => {
+                window.location.href = '/form-list.html';
             });
             
             // Capturer la signature quand on change
