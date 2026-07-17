@@ -68,25 +68,28 @@ Permettre aux utilisateurs de personnaliser l'apparence des PDF générés direc
 
 ### Phase 2: Mise à jour du Template YAML 📝
 **Durée:** 1-2 jours  
-**Statut:** Non démarré  
+**Statut:** ✅ Terminé (17/07/2026)  
 **Responsable:** Développeur  
 
 #### Tâches :
-- [ ] Mettre à jour `backend/forms/template.yaml` avec la nouvelle structure
-- [ ] Ajouter des exemples complets pour chaque option
-- [ ] Documenter toutes les options disponibles dans le template
-- [ ] Créer un fichier `README-PDF-CUSTOMIZATION.md` avec la documentation
+- [x] Mettre à jour `backend/forms/template.yaml` avec la nouvelle structure
+- [x] Ajouter des exemples complets pour chaque option
+- [x] Documenter toutes les options disponibles dans le template
+- [x] Créer un fichier `README-PDF-CUSTOMIZATION.md` avec la documentation
+- [x] Créer un exemple de formulaire enrichi (`contrat-enrichi.yaml`)
 - [ ] Valider le schema YAML (optionnel: ajouter un schema JSON pour validation)
 
 #### Livrables :
-- [ ] `template.yaml` mis à jour avec section `pdf`
-- [ ] `README-PDF-CUSTOMIZATION.md` créé
-- [ ] Exemples de formulaires YAML enrichis
+- [x] `template.yaml` mis à jour avec section `pdf`
+- [x] `README-PDF-CUSTOMIZATION.md` créé
+- [x] `examples/contrat-enrichi.yaml` créé
+- [x] Exemples de formulaires YAML enrichis
 
 #### Fichiers modifiés :
 ```
 backend/forms/template.yaml
 backend/forms/README-PDF-CUSTOMIZATION.md (nouveau)
+backend/forms/examples/contrat-enrichi.yaml (nouveau)
 ```
 
 ---
@@ -370,9 +373,9 @@ README.md (mis à jour)
 | Phase | Durée | Début | Fin | Statut |
 |-------|-------|-------|-----|--------|
 | Phase 1: Préparation | 1 jour | 17/07 | 17/07 | ✅ Terminé |
-| Phase 2: Template YAML | 1-2 jours | 18/07 | 19/07 | ⏳ Non démarré |
-| Phase 3: Lecture Options | 1-2 jours | 20/07 | 21/07 | ⏳ Non démarré |
-| Phase 4: Fonctions Rendering | 3-5 jours | 22/07 | 26/07 | ⏳ Non démarré |
+| Phase 2: Template YAML | 1-2 jours | 17/07 | 17/07 | ✅ Terminé |
+| Phase 3: Lecture Options | 1-2 jours | 18/07 | 19/07 | ⏳ Non démarré |
+| Phase 4: Fonctions Rendering | 3-5 jours | 20/07 | 26/07 | ⏳ Non démarré |
 | Phase 5: Intégration PDF | 2-3 jours | 27/07 | 29/07 | ⏳ Non démarré |
 | Phase 6: Frontend UI | 2-3 jours | 30/07 | 01/08 | ⏳ Non démarré |
 | Phase 7: Tests | 2-3 jours | 02/08 | 04/08 | ⏳ Non démarré |
@@ -380,7 +383,8 @@ README.md (mis à jour)
 | Phase 9: Déploiement | 1 jour | 07/08 | 07/08 | ⏳ Non démarré |
 
 **Date de livraison estimée:** 7 août 2026  
-**Durée totale:** ~14-19 jours ouvrés
+**Durée totale:** ~14-19 jours ouvrés  
+**Progression:** Phase 2/9 terminée (11%)
 
 ---
 
@@ -553,5 +557,14 @@ Avant de commencer l'implémentation :
 
 **Document créé le:** 17 juillet 2026  
 **Dernière mise à jour:** 17 juillet 2026  
-**Version:** 1.0  
+**Version:** 1.1  
 **Auteur:** Mistral Vibe (avec supervision humaine)
+
+---
+
+## 📝 Historique des Mises à Jour
+
+| Version | Date | Modifications | Auteur |
+|---------|------|---------------|--------|
+| 1.0 | 17/07/2026 | Version initiale - Roadmap complète créée | Mistral Vibe |
+| 1.1 | 17/07/2026 | Phase 2 terminée: template.yaml mis à jour, README-PDF-CUSTOMIZATION.md créé, exemple contrat-enrichi.yaml ajouté | Mistral Vibe |

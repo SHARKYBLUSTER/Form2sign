@@ -4,8 +4,7 @@
 # Ce fichier est un template pour créer de nouveaux formulaires.
 # Copiez ce fichier et renommez-le avec un nom descriptif (ex: contract.yaml)
 #
-# NOTE: Les options de PDF (titre, footer, taille, orientation, timestamp) 
-# sont désormais configurées dans le fichier .env et non dans les formulaires YAML.
+# Structure complète avec support de la personnalisation PDF (Solution 1)
 #
 # Format :
 # - form: metadata du formulaire
@@ -15,7 +14,7 @@
 #   - fields: liste des champs
 #     - id: identifiant du champ
 #     - label: texte affiché
-#     - type: type du champ (text, email, password, date, select, checkbox, textarea)
+#     - type: type du champ (text, email, password, date, select, checkbox, textarea, number, radio, file)
 #     - required: obligatoire ou non
 #     - placeholder: texte d'aide
 #     - validation: règle de validation (optionnel)
@@ -24,6 +23,54 @@
 #     - required: obligatoire ou non
 #     - label: texte affiché
 #     - instructions: texte d'aide
+#   - style: styles CSS additionnels (optionnel)
+#   - pdf: OPTIONS DE PERSONNALISATION PDF (NOUVEAU - Solution 1)
+#     - page: configuration de la page
+#       - size: taille (A4, A5, Letter, Legal)
+#       - orientation: orientation (portrait, landscape)
+#       - margins: marges {top, bottom, left, right}
+#     - header: en-tête du PDF
+#       - logo: chemin vers le logo (relatif à /frontend/public/)
+#       - logo_position: position (top-left, top-center, top-right)
+#       - logo_width: largeur du logo
+#       - logo_height: hauteur du logo
+#       - title: titre personnalisé (supporte les variables)
+#       - title_font_size: taille de la police du titre
+#       - subtitle: sous-titre (optionnel)
+#       - subtitle_font_size: taille de la police du sous-titre
+#     - introduction: texte d'introduction
+#       - text: texte (supporte \n pour sauts de ligne et {variables})
+#       - font_size: taille de police
+#       - color: couleur du texte (hex ou nom)
+#       - spacing_after: nombre de lignes vides après
+#     - custom_sections: sections personnalisées (tableau)
+#       - type: text, separator, image, spacing
+#       - content: contenu (texte, chemin image, etc.)
+#       - style: styles (font_size, color, align: left/center/right)
+#       - height: hauteur pour les séparateurs
+#       - width: largeur pour les séparateurs
+#       - spacing_before: espacement avant
+#       - spacing_after: espacement après
+#     - footer: pied de page
+#       - text: texte du pied de page (supporte {pageNumber}, {pageCount}, {date}, etc.)
+#       - font_size: taille de police
+#       - color: couleur du texte
+#       - align: alignement (left, center, right)
+#     - spacing: espacements
+#       - between_fields: espacement entre les champs
+#       - after_header: lignes vides après l'en-tête
+#       - before_signature: lignes vides avant la signature
+#     - styles: styles globaux
+#       - font_family: famille de police par défaut
+#       - text_color: couleur de texte par défaut
+#       - title_color: couleur du titre
+#
+# Variables disponibles dans les textes:
+#   {full_name}, {date}, {time}, {form_id}, {form_title}, {pageNumber}, {pageCount}
+#   {<field_id>} - valeur de n'importe quel champ (ex: {company_name})
+#
+# Chemins des images:
+#   Relatifs à /frontend/public/ (ex: /static/images/logo.png)
 # =============================================================================
 
 form:
@@ -155,4 +202,103 @@ form:
     background_color: "#ffffff"
     text_color: "#333333"
     button_color: "#007bff"
+  
+  # ============================================================================
+  # PERSONNALISATION PDF (Solution 1) - TOUTES LES OPTIONS SONT FACULTATIVES
+  # ============================================================================
+  # Cette section permet de personnaliser l'apparence du PDF generé.
+  # Si cette section est absente, les valeurs par défaut seront utilisées.
+  #
+  pdf:
+    # Configuration de la page
+    page:
+      size: A4                    # Taille: A4, A5, Letter, Legal
+      orientation: portrait       # Orientation: portrait, landscape
+      margins:                   # Marges en points (1 point = 1/72 inch)
+        top: 50
+        bottom: 50
+        left: 50
+        right: 50
+    
+    # Configuration de l'en-tête
+    header:
+      # Logo (chemin relatif à /frontend/public/)
+      logo: /static/images/logo.png
+      logo_position: top-left    # Position: top-left, top-center, top-right
+      logo_width: 100            # Largeur du logo en points
+      logo_height: 50            # Hauteur du logo en points
+      
+      # Titre de l'en-tête (supporte les variables: {full_name}, {form_title}, etc.)
+      title: "Contrat - {full_name}"
+      title_font_size: 20       # Taille de la police du titre
+      title_color: "#000000"    # Couleur du titre (hex ou nom)
+      
+      # Sous-titre optionnel
+      subtitle: "Document à signer électroniquement"
+      subtitle_font_size: 12
+      subtitle_color: "#666666"
+    
+    # Texte d'introduction (apparaît après l'en-tête)
+    introduction:
+      text: |
+        Ce document est un contrat entre {company_name} et {full_name}.
+        
+        Signé le {date} à {time}.
+        
+        Veuillez remplir tous les champs et signer ci-dessous.
+      font_size: 12
+      color: "#333333"
+      spacing_after: 2          # Nombre de lignes vides après l'introduction
+    
+    # Sections personnalisées (tableau de sections à insérer avant la signature)
+    custom_sections:
+      # Section de type texte
+      - type: text
+        content: "Conditions générales de vente"
+        style:
+          font_size: 14
+          font: Helvetica-Bold
+          color: "#000000"
+          align: center
+        spacing_before: 1
+        spacing_after: 1
+      
+      # Section séparateur
+      - type: separator
+        color: "#cccccc"
+        width: 500
+        height: 1
+        spacing_before: 0.5
+        spacing_after: 1
+      
+      # Section de texte avec variables
+      - type: text
+        content: "Entreprise: {company_name}\nEmail: {email}\nDate: {date}"
+        style:
+          font_size: 10
+          color: "#555555"
+        spacing_after: 1
+      
+      # Section espace
+      - type: spacing
+        lines: 1
+    
+    # Configuration du pied de page (apparaît sur chaque page)
+    footer:
+      text: "Page {pageNumber} sur {pageCount} - Document signé électroniquement via Form2Sign - {date}"
+      font_size: 8
+      color: "#999999"
+      align: center
+    
+    # Espacements globaux
+    spacing:
+      between_fields: 0.5      # Espacement entre les champs du formulaire
+      after_header: 1          # Lignes vides après l'en-tête
+      before_signature: 2     # Lignes vides avant la section signature
+    
+    # Styles globaux (appliqués si non spécifiés ailleurs)
+    styles:
+      font_family: Helvetica   # Famille de police par défaut
+      text_color: "#000000"    # Couleur de texte par défaut
+      title_color: "#000000"  # Couleur des titres
     

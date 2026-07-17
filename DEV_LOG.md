@@ -141,6 +141,43 @@
 
 ---
 
+### 17/07/2026 - Phase 2: Implémentation Structure PDF (Solution 1)
+- **Phase 2 de la roadmap PDF** : Mise à jour des templates YAML avec la structure `pdf`
+- Mise à jour du fichier **`template.yaml`** avec :
+  - Documentation complète de toutes les options PDF
+  - Exemple complet de la section `pdf` avec toutes les sous-sections
+  - Structure hierarchique : page, header, introduction, custom_sections, footer, spacing, styles
+  - Commentaires détaillés et exemples pour chaque option
+- Création du fichier **`README-PDF-CUSTOMIZATION.md`** (15.7 Ko) dans `backend/forms/` avec :
+  - Guide de démarrage rapide
+  - Référence complète de toutes les options avec tableaux
+  - Exemples détaillés pour chaque type de section
+  - Documentation des variables disponibles
+  - Bonnes pratiques et dépannage
+  - Limites connues et rétrocompatibilité
+- Création du fichier **`examples/contrat-enrichi.yaml`** (10.9 Ko) démontrant :
+  - Logo en en-tête avec positionnement
+  - Titre et sous-titre dynamiques avec variables
+  - Texte d'introduction avec sauts de ligne
+  - 5 articles structurés avec séparateurs colorés
+  - Conditions spéciales avec substitution de variables
+  - Pied de page avec pagination
+  - Styles personnalisés
+- **Fichiers créés/modifiés** :
+  - `backend/forms/template.yaml` (mis à jour avec section pdf complète)
+  - `backend/forms/README-PDF-CUSTOMIZATION.md` (nouveau - documentation complète)
+  - `backend/forms/examples/contrat-enrichi.yaml` (nouveau - exemple complet)
+  - `backend/forms/examples/` (répertoire créé)
+- **Tâches de la roadmap marquées comme terminées** :
+  - [x] Mettre à jour template.yaml avec la nouvelle structure
+  - [x] Ajouter des exemples complets pour chaque option
+  - [x] Documenter toutes les options disponibles dans le template
+  - [x] Créer README-PDF-CUSTOMIZATION.md
+  - [x] Créer un exemple de formulaire enrichi
+- **Statut** : ✅ Phase 2 terminée, prêt pour la Phase 3 (Backend - Lecture des options PDF)
+
+---
+
 ### 16/07/2026 - Generation de PDF (Phase 4)
 - **Phase 4** : Generation de PDF avec formulaire + signature + date
 - Implementation directe dans app.js (sans service separat pour l'instant)
@@ -233,8 +270,12 @@
 | 6 | Tests | ⏳ En attente | - | - | |
 | 7 | Conteneurisation Docker | ✅ Termine | 16/07/2026 | 16/07/2026 | Configuration Docker et docker-compose |
 | 8 | Deployment | ⏳ En attente | - | - | |
-| 9 | Personnalisation PDF (MVP) | ⏳ Planifie | 18/07/2026 | 26/07/2026 | Logo + introduction + variables + espacement |
-| 10 | Personnalisation PDF (Complete) | ⏳ Planifie | 27/07/2026 | 04/08/2026 | Toutes les options de la Solution 1 |
+| 9 | Personnalisation PDF (Phase 2 - Template) | ✅ Termine | 17/07/2026 | 17/07/2026 | Structure YAML + documentation + exemple complet |
+| 10 | Personnalisation PDF (Phase 3 - Backend) | ⏳ Planifie | 18/07/2026 | 21/07/2026 | Lecture des options PDF depuis le YAML |
+| 11 | Personnalisation PDF (Phase 4 - Rendering) | ⏳ Planifie | 22/07/2026 | 26/07/2026 | Fonctions renderHeader, renderIntroduction, etc. |
+| 12 | Personnalisation PDF (Phase 5 - Intégration) | ⏳ Planifie | 27/07/2026 | 29/07/2026 | Intégration dans POST /api/generate-pdf |
+| 13 | Personnalisation PDF (MVP) | ⏳ Planifie | 22/07/2026 | 26/07/2026 | Logo + introduction + variables + espacement |
+| 14 | Personnalisation PDF (Complete) | ⏳ Planifie | 27/07/2026 | 04/08/2026 | Toutes les options de la Solution 1 |
 
 ---
 
@@ -394,7 +435,23 @@ docker volume prune
   - GET /api/pdfs/view/:date/:filename - Visualise un PDF
 - Organisation des PDFs par date (YYYY-MM-DD)
 
+### v1.5.0 - Ameliorations interface + Roadmap PDF (17/07/2026)
+- Bouton Annuler ajouté dans form.html
+- Bouton Recommencer réinitialise tout le formulaire
+- Echange des couleurs des boutons Effacer et Recommencer
+- Creation de ROADMAP-PDF-ENRICHMENT.md
+- Mise à jour README.md avec section personnalisation PDF
+
+### v1.5.1 - Phase 2 PDF: Structure YAML (17/07/2026)
+- Mise à jour de template.yaml avec section pdf complète
+- Création de README-PDF-CUSTOMIZATION.md (documentation complète)
+- Création de examples/contrat-enrichi.yaml (exemple complet)
+- Création du répertoire backend/forms/examples/
+- Documentation de toutes les options: page, header, introduction, custom_sections, footer, spacing, styles
+- Documentation des variables dynamiques et chemins d'images
+- Phase 2 de la roadmap PDF marquée comme terminée
+
 ---
 
-*Derniere mise a jour : 17/07/2026 - v1.5.0 (Ameliorations interface + Roadmap PDF)*
+*Derniere mise a jour : 17/07/2026 - v1.5.1 (Phase 2 PDF: Structure YAML et Documentation)*
 *Projet : Form2Sign*
