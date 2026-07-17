@@ -25,13 +25,13 @@ services:
     env_file:
       - ./backend/config/.env
     restart: unless-stopped
-    networks:
-      - form2sign-network
+    networks: [proxy]
+    
 
 
 networks:
-  form2sign-network:
-    driver: bridge
+  proxy:
+    external: true
 
 volumes:
   pdf_storage:
