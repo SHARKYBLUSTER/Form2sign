@@ -490,6 +490,226 @@ app.post('/api/config', requireAuthRedirect, (req, res) => {
   }
 });
 
+// ============================================================================
+// FONCTIONS UTILITAIRES POUR LA PERSONNALISATION PDF (Solution 1)
+// ============================================================================
+
+/**
+ * Valeurs par défaut pour les options PDF
+ */
+const DEFAULT_PDF_OPTIONS = {
+  page: {
+    size: 'A4',
+    orientation: 'portrait',
+    margins: {
+      top: 50,
+      bottom: 50,
+      left: 50,
+      right: 50
+    }
+  },
+  header: {
+    logo: null,
+    logo_position: 'top-left',
+    logo_width: 100,
+    logo_height: 50,
+    title: null,
+    title_font_size: 20,
+    title_color: '#000000',
+    subtitle: null,
+    subtitle_font_size: 12,
+    subtitle_color: '#666666'
+  },
+  introduction: {
+    text: null,
+    font_size: 12,
+    color: '#333333',
+    spacing_after: 1
+  },
+  custom_sections: [],
+  footer: {
+    text: null,
+    font_size: 8,
+    color: '#999999',
+    align: 'center'
+  },
+  spacing: {
+    between_fields: 0.5,
+    after_header: 1,
+    before_signature: 2
+  },
+  styles: {
+    font_family: 'Helvetica',
+    text_color: '#000000',
+    title_color: '#000000'
+  }
+};
+
+/**
+ * Valide et normalise les options PDF avec des valeurs par défaut
+ * @param {Object} pdfOptions - Options PDF du formulaire
+ * @returns {Object} Options PDF validées et normalisées
+ */
+function validateAndNormalizePdfOptions(pdfOptions) {
+  if (!pdfOptions || typeof pdfOptions !== 'object') {
+    return DEFAULT_PDF_OPTIONS;
+  }
+
+  // Créer une copie profonde pour éviter de modifier l'original
+  const normalized = JSON.parse(JSON.stringify(DEFAULT_PDF_OPTIONS));
+
+  // Valider et fusionner la configuration de la page
+  if (pdfOptions.page && typeof pdfOptions.page === 'object') {
+    if (pdfOptions.page.size && ['A4', 'A5', 'Letter', 'Legal'].includes(pdfOptions.page.size)) {
+      normalized.page.size = pdfOptions.page.size;
+    }
+    if (pdfOptions.page.orientation && ['portrait', 'landscape'].includes(pdfOptions.page.orientation)) {
+      normalized.page.orientation = pdfOptions.page.orientation;
+    }
+    if (pdfOptions.page.margins && typeof pdfOptions.page.margins === 'object') {
+      normalized.page.margins = {
+        top: typeof pdfOptions.page.margins.top === 'number' && pdfOptions.page.margins.top >= 0 ? pdfOptions.page.margins.top : normalized.page.margins.top,
+        bottom: typeof pdfOptions.page.margins.bottom === 'number' && pdfOptions.page.margins.bottom >= 0 ? pdfOptions.page.margins.bottom : normalized.page.margins.bottom,
+        left: typeof pdfOptions.page.margins.left === 'number' && pdfOptions.page.margins.left >= 0 ? pdfOptions.page.margins.left : normalized.page.margins.left,
+        right: typeof pdfOptions.page.margins.right === 'number' && pdfOptions.page.margins.right >= 0 ? pdfOptions.page.margins.right : normalized.page.margins.right
+      };
+    }
+  }
+
+  // Valider et fusionner l'en-tête
+  if (pdfOptions.header && typeof pdfOptions.header === 'object') {
+    if (typeof pdfOptions.header.logo === 'string') {
+      normalized.header.logo = pdfOptions.header.logo;
+    }
+    if (pdfOptions.header.logo_position && ['top-left', 'top-center', 'top-right'].includes(pdfOptions.header.logo_position)) {
+      normalized.header.logo_position = pdfOptions.header.logo_position;
+    }
+    if (typeof pdfOptions.header.logo_width === 'number' && pdfOptions.header.logo_width > 0) {
+      normalized.header.logo_width = pdfOptions.header.logo_width;
+    }
+    if (typeof pdfOptions.header.logo_height === 'number' && pdfOptions.header.logo_height > 0) {
+      normalized.header.logo_height = pdfOptions.header.logo_height;
+    }
+    if (typeof pdfOptions.header.title === 'string') {
+      normalized.header.title = pdfOptions.header.title;
+    }
+    if (typeof pdfOptions.header.title_font_size === 'number' && pdfOptions.header.title_font_size > 0) {
+      normalized.header.title_font_size = pdfOptions.header.title_font_size;
+    }
+    if (typeof pdfOptions.header.title_color === 'string') {
+      normalized.header.title_color = pdfOptions.header.title_color;
+    }
+    if (typeof pdfOptions.header.subtitle === 'string') {
+      normalized.header.subtitle = pdfOptions.header.subtitle;
+    }
+    if (typeof pdfOptions.header.subtitle_font_size === 'number' && pdfOptions.header.subtitle_font_size > 0) {
+      normalized.header.subtitle_font_size = pdfOptions.header.subtitle_font_size;
+    }
+    if (typeof pdfOptions.header.subtitle_color === 'string') {
+      normalized.header.subtitle_color = pdfOptions.header.subtitle_color;
+    }
+  }
+
+  // Valider et fusionner l'introduction
+  if (pdfOptions.introduction && typeof pdfOptions.introduction === 'object') {
+    if (typeof pdfOptions.introduction.text === 'string') {
+      normalized.introduction.text = pdfOptions.introduction.text;
+    }
+    if (typeof pdfOptions.introduction.font_size === 'number' && pdfOptions.introduction.font_size > 0) {
+      normalized.introduction.font_size = pdfOptions.introduction.font_size;
+    }
+    if (typeof pdfOptions.introduction.color === 'string') {
+      normalized.introduction.color = pdfOptions.introduction.color;
+    }
+    if (typeof pdfOptions.introduction.spacing_after === 'number' && pdfOptions.introduction.spacing_after >= 0) {
+      normalized.introduction.spacing_after = pdfOptions.introduction.spacing_after;
+    }
+  }
+
+  // Valider et fusionner les sections personnalisées
+  if (Array.isArray(pdfOptions.custom_sections)) {
+    normalized.custom_sections = pdfOptions.custom_sections.map(section => {
+      const validatedSection = {};
+      if (typeof section.type === 'string' && ['text', 'separator', 'image', 'spacing'].includes(section.type)) {
+        validatedSection.type = section.type;
+        if (section.content !== undefined) {
+          validatedSection.content = section.content;
+        }
+        if (section.style && typeof section.style === 'object') {
+          validatedSection.style = { ...section.style };
+        }
+        if (typeof section.width === 'number' && section.width > 0) {
+          validatedSection.width = section.width;
+        }
+        if (typeof section.height === 'number' && section.height > 0) {
+          validatedSection.height = section.height;
+        }
+        if (typeof section.align === 'string' && ['left', 'center', 'right'].includes(section.align)) {
+          validatedSection.align = section.align;
+        }
+        if (typeof section.spacing_before === 'number' && section.spacing_before >= 0) {
+          validatedSection.spacing_before = section.spacing_before;
+        }
+        if (typeof section.spacing_after === 'number' && section.spacing_after >= 0) {
+          validatedSection.spacing_after = section.spacing_after;
+        }
+        if (typeof section.lines === 'number' && section.lines >= 0) {
+          validatedSection.lines = section.lines;
+        }
+      }
+      return validatedSection;
+    }).filter(s => s.type); // Filtrer les sections invalides
+  }
+
+  // Valider et fusionner le pied de page
+  if (pdfOptions.footer && typeof pdfOptions.footer === 'object') {
+    if (typeof pdfOptions.footer.text === 'string') {
+      normalized.footer.text = pdfOptions.footer.text;
+    }
+    if (typeof pdfOptions.footer.font_size === 'number' && pdfOptions.footer.font_size > 0) {
+      normalized.footer.font_size = pdfOptions.footer.font_size;
+    }
+    if (typeof pdfOptions.footer.color === 'string') {
+      normalized.footer.color = pdfOptions.footer.color;
+    }
+    if (typeof pdfOptions.footer.align === 'string' && ['left', 'center', 'right'].includes(pdfOptions.footer.align)) {
+      normalized.footer.align = pdfOptions.footer.align;
+    }
+  }
+
+  // Valider et fusionner les espacements
+  if (pdfOptions.spacing && typeof pdfOptions.spacing === 'object') {
+    if (typeof pdfOptions.spacing.between_fields === 'number' && pdfOptions.spacing.between_fields >= 0) {
+      normalized.spacing.between_fields = pdfOptions.spacing.between_fields;
+    }
+    if (typeof pdfOptions.spacing.after_header === 'number' && pdfOptions.spacing.after_header >= 0) {
+      normalized.spacing.after_header = pdfOptions.spacing.after_header;
+    }
+    if (typeof pdfOptions.spacing.before_signature === 'number' && pdfOptions.spacing.before_signature >= 0) {
+      normalized.spacing.before_signature = pdfOptions.spacing.before_signature;
+    }
+  }
+
+  // Valider et fusionner les styles globaux
+  if (pdfOptions.styles && typeof pdfOptions.styles === 'object') {
+    if (typeof pdfOptions.styles.font_family === 'string') {
+      normalized.styles.font_family = pdfOptions.styles.font_family;
+    }
+    if (typeof pdfOptions.styles.text_color === 'string') {
+      normalized.styles.text_color = pdfOptions.styles.text_color;
+    }
+    if (typeof pdfOptions.styles.title_color === 'string') {
+      normalized.styles.title_color = pdfOptions.styles.title_color;
+    }
+  }
+
+  return normalized;
+}
+
+// ============================================================================
+// ROUTES POUR LES FORMULAIRES
+// ============================================================================
+
 // Route pour charger un formulaire spécifique par son ID
 app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
   try {
@@ -515,6 +735,9 @@ app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
     // Extraire les données du formulaire
     const form = formData.form || formData;
     
+    // Valider et normaliser les options PDF avec des valeurs par défaut
+    const pdfOptions = validateAndNormalizePdfOptions(form.pdf);
+    
     res.json({ 
       success: true, 
       form: {
@@ -524,7 +747,7 @@ app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
         fields: form.fields || [],
         signature: form.signature || { required: true, label: 'Signature', instructions: 'Signez ici' },
         style: form.style || {},
-        pdf: form.pdf || {}
+        pdf: pdfOptions
       }
     });
   } catch (error) {

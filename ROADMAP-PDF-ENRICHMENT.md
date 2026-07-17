@@ -3,7 +3,7 @@
 **Projet:** Form2Sign - Personnalisation avancée des PDF via template YAML  
 **Solution:** Section `pdf` complète dans le template YAML  
 **Date:** 17 juillet 2026  
-**Statut:** À démarrer  
+**Statut:** En cours - Phase 3 terminée  
 
 ---
 
@@ -96,18 +96,31 @@ backend/forms/examples/contrat-enrichi.yaml (nouveau)
 
 ### Phase 3: Backend - Lecture des Options PDF 📖
 **Durée:** 1-2 jours  
-**Statut:** Non démarré  
+**Statut:** ✅ Terminé (17/07/2026)  
 **Responsable:** Développeur  
 
 #### Tâches :
-- [ ] Modifier `GET /api/forms/:id` pour inclure `form.pdf` dans la réponse
-- [ ] Ajouter une validation basique des options PDF
-- [ ] Gérer les valeurs par défaut pour les options manquantes
-- [ ] S'assurer de la rétrocompatibilité (formulaires sans section pdf)
+- [x] Modifier `GET /api/forms/:id` pour inclure `form.pdf` dans la réponse
+- [x] Ajouter une validation basique des options PDF
+- [x] Gérer les valeurs par défaut pour les options manquantes
+- [x] S'assurer de la rétrocompatibilité (formulaires sans section pdf)
 
 #### Code à modifier :
 **Fichier:** `backend/app.js`  
 **Lignes:** 494-538 (route GET /api/forms/:id)
+
+#### Implémentation :
+- Ajout de `DEFAULT_PDF_OPTIONS` avec toutes les valeurs par défaut
+- Création de `validateAndNormalizePdfOptions(pdfOptions)` pour valider et normaliser
+- Validation des types, valeurs numériques positives, enum pour les positions/orientations
+- Filtrage des sections personnalisées invalides
+- Rétrocompatibilité totale : formulaires sans section pdf reçoivent les valeurs par défaut
+
+#### Tests :
+- [x] Vérifier que les formulaires existants fonctionnent toujours (rétrocompatibilité)
+- [x] Vérifier que les nouvelles options sont bien retournées
+- [x] Tester avec un formulaire ayant une section pdf complète
+- [x] Tester avec un formulaire ayant une section pdf partielle
 
 ```javascript
 // Ajouter form.pdf dans la réponse
@@ -374,7 +387,7 @@ README.md (mis à jour)
 |-------|-------|-------|-----|--------|
 | Phase 1: Préparation | 1 jour | 17/07 | 17/07 | ✅ Terminé |
 | Phase 2: Template YAML | 1-2 jours | 17/07 | 17/07 | ✅ Terminé |
-| Phase 3: Lecture Options | 1-2 jours | 18/07 | 19/07 | ⏳ Non démarré |
+| Phase 3: Lecture Options | 1-2 jours | 17/07 | 17/07 | ✅ Terminé |
 | Phase 4: Fonctions Rendering | 3-5 jours | 20/07 | 26/07 | ⏳ Non démarré |
 | Phase 5: Intégration PDF | 2-3 jours | 27/07 | 29/07 | ⏳ Non démarré |
 | Phase 6: Frontend UI | 2-3 jours | 30/07 | 01/08 | ⏳ Non démarré |
@@ -384,7 +397,7 @@ README.md (mis à jour)
 
 **Date de livraison estimée:** 7 août 2026  
 **Durée totale:** ~14-19 jours ouvrés  
-**Progression:** Phase 2/9 terminée (11%)
+**Progression:** Phase 3/9 terminée (22%)
 
 ---
 
@@ -557,7 +570,7 @@ Avant de commencer l'implémentation :
 
 **Document créé le:** 17 juillet 2026  
 **Dernière mise à jour:** 17 juillet 2026  
-**Version:** 1.1  
+**Version:** 1.2  
 **Auteur:** Mistral Vibe (avec supervision humaine)
 
 ---
@@ -568,3 +581,4 @@ Avant de commencer l'implémentation :
 |---------|------|---------------|--------|
 | 1.0 | 17/07/2026 | Version initiale - Roadmap complète créée | Mistral Vibe |
 | 1.1 | 17/07/2026 | Phase 2 terminée: template.yaml mis à jour, README-PDF-CUSTOMIZATION.md créé, exemple contrat-enrichi.yaml ajouté | Mistral Vibe |
+| 1.2 | 17/07/2026 | Phase 3 terminée: validateAndNormalizePdfOptions() implémentée, GET /api/forms/:id mis à jour avec validation et valeurs par défaut | Mistral Vibe |

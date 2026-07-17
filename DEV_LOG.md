@@ -178,6 +178,40 @@
 
 ---
 
+### 17/07/2026 - Phase 3: Backend - Lecture des Options PDF (Solution 1)
+- **Phase 3 de la roadmap PDF** : Implémentation de la validation et normalisation des options PDF dans le backend
+- Creation de **`DEFAULT_PDF_OPTIONS`** dans `backend/app.js` :
+  - Structure complete avec toutes les valeurs par defaut pour chaque section
+  - page (size, orientation, margins), header, introduction, custom_sections, footer, spacing, styles
+  - Valeurs par defaut alignées avec la documentation
+- Implémentation de la fonction **`validateAndNormalizePdfOptions(pdfOptions)`** :
+  - Validation des types (object, array, string, number)
+  - Validation des enum (size: A4/A5/Letter/Legal, orientation: portrait/landscape)
+  - Validation des valeurs numériques > 0 (largeurs, hauteurs, tailles de police)
+  - Validation des positions (top-left/top-center/top-right pour logo, left/center/right pour alignement)
+  - Validation des sections personnalisées (type: text/separator/image/spacing)
+  - Filtrage des sections invalides
+  - Création d'une copie profonde pour éviter la mutation
+- Modification de la route **GET /api/forms/:id** :
+  - Appel à `validateAndNormalizePdfOptions(form.pdf)` pour traiter les options PDF
+  - Retour des options PDF validées et normalisées dans la réponse
+  - Rétrocompatibilité totale : formulaires sans section pdf reçoivent DEFAULT_PDF_OPTIONS
+- **Fichiers modifiés** :
+  - `backend/app.js` (ajout ~150 lignes : DEFAULT_PDF_OPTIONS + validateAndNormalizePdfOptions + modification route)
+- **Tâches de la roadmap marquées comme terminées** :
+  - [x] Modifier GET /api/forms/:id pour inclure form.pdf dans la réponse
+  - [x] Ajouter une validation basique des options PDF
+  - [x] Gérer les valeurs par défaut pour les options manquantes
+  - [x] S'assurer de la rétrocompatibilité (formulaires sans section pdf)
+- **Tests validés** :
+  - [x] Formulaires existants (sans section pdf) fonctionnent toujours
+  - [x] Nouvelles options PDF sont bien retournées
+  - [x] Formulaire avec section pdf complète → validation et normalisation OK
+  - [x] Formulaire avec section pdf partielle → valeurs par défaut pour options manquantes
+- **Statut** : ✅ Phase 3 terminée, prêt pour la Phase 4 (Backend - Fonctions de Rendering)
+
+---
+
 ### 16/07/2026 - Generation de PDF (Phase 4)
 - **Phase 4** : Generation de PDF avec formulaire + signature + date
 - Implementation directe dans app.js (sans service separat pour l'instant)
