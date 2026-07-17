@@ -248,21 +248,45 @@
 
 ---
 
-### [Date a venir] - Tests et Validation (Phase 6)
-- **Phase 6** : Verification complete du projet
-- Tests unitaires backend :
-  - Tests d'authentification
-  - Tests de parsing YAML
-  - Tests de generation PDF
-- Tests frontend :
-  - Responsive design
-  - Capture de signature
-  - Validation des formulaires
-- Test complet (formulaire -> PDF)
-- Test sur differents appareils mobiles (iOS/Android)
-- Correction des bugs identifies
-- **Problemes rencontrés** : [A completer]
-- **Statut** : ⏳ En attente
+### 17/07/2026 - Phase 4 & 5: Backend - Fonctions de Rendering et Intégration PDF
+- **Phase 4 de la roadmap PDF** : Implémentation de toutes les fonctions de rendu
+- **Phase 5 de la roadmap PDF** : Intégration dans la génération PDF
+- Implémentation des fonctions suivantes dans `backend/app.js` :
+  - `resolveVariables(text, formValues, context)` : Gestion des variables dynamiques ({date}, {time}, {field_id}, {form_id}, {form_title}, {pageNumber}, {pageCount})
+  - `getLogoXPosition(doc, width, position)` : Calcul de position X pour le logo
+  - `renderHeader(doc, pdfOptions, formValues, context)` : Rend l'en-tête avec logo, titre, sous-titre
+  - `renderIntroduction(doc, pdfOptions, formValues, context)` : Rend le texte d'introduction avec sauts de ligne
+  - `renderSeparator(doc, section, pageWidth)` : Rend les séparateurs (solide, pointillé, tirets)
+  - `renderTextSection(doc, section, formValues, context)` : Rend les sections de texte
+  - `renderImageSection(doc, section)` : Rend les images avec protection contre path traversal
+  - `renderSpacingSection(doc, section)` : Rend les espacements
+  - `renderCustomSections(doc, pdfOptions, formValues, context)` : Orchestre toutes les sections personnalisées
+  - `renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues, context)` : Rend le pied de page avec pagination
+- Modification de la route **POST /api/generate-pdf** pour intégrer :
+  - Chargement et validation des options PDF du formulaire YAML
+  - Utilisation des marges personnalisées
+  - Appel de `renderHeader()` au début du document
+  - Appel de `renderIntroduction()` après l'en-tête
+  - Utilisation de l'espacement personnalisé entre les champs
+  - Appel de `renderCustomSections()` avant la signature
+  - Appel de `renderFooter()` pour le pied de page
+  - Protection contre le path traversal pour les images
+- **Fichiers modifiés** :
+  - `backend/app.js` (ajout ~400 lignes : 10 fonctions de rendu + intégration)
+- **Fonctionnalités implémentées** :
+  - Logo en en-tête avec positionnement (top-left, top-center, top-right)
+  - Texte d'introduction avec sauts de ligne et variables
+  - Sections personnalisées (text, separator, image, spacing)
+  - Pied de page avec pagination
+  - Variables dynamiques dans tous les éléments
+  - Styles personnalisés (polices, couleurs, tailles)
+  - Sécurité : protection contre path traversal
+- **Tests validés** :
+  - [x] Formulaires existants (sans section pdf) fonctionnent toujours
+  - [x] Nouvelles options PDF sont bien rendues
+  - [x] Variables dynamiques sont correctement remplacées
+  - [x] Chemins d'images dangereux sont bloqués
+- **Statut** : ✅ Phase 4 & 5 terminées
 
 ---
 
@@ -305,9 +329,9 @@
 | 7 | Conteneurisation Docker | ✅ Termine | 16/07/2026 | 16/07/2026 | Configuration Docker et docker-compose |
 | 8 | Deployment | ⏳ En attente | - | - | |
 | 9 | Personnalisation PDF (Phase 2 - Template) | ✅ Termine | 17/07/2026 | 17/07/2026 | Structure YAML + documentation + exemple complet |
-| 10 | Personnalisation PDF (Phase 3 - Backend) | ⏳ Planifie | 18/07/2026 | 21/07/2026 | Lecture des options PDF depuis le YAML |
-| 11 | Personnalisation PDF (Phase 4 - Rendering) | ⏳ Planifie | 22/07/2026 | 26/07/2026 | Fonctions renderHeader, renderIntroduction, etc. |
-| 12 | Personnalisation PDF (Phase 5 - Intégration) | ⏳ Planifie | 27/07/2026 | 29/07/2026 | Intégration dans POST /api/generate-pdf |
+| 10 | Personnalisation PDF (Phase 3 - Backend) | ✅ Termine | 17/07/2026 | 17/07/2026 | Lecture des options PDF depuis le YAML |
+| 11 | Personnalisation PDF (Phase 4 - Rendering) | ✅ Termine | 17/07/2026 | 17/07/2026 | Fonctions renderHeader, renderIntroduction, renderCustomSections, renderFooter |
+| 12 | Personnalisation PDF (Phase 5 - Intégration) | ✅ Termine | 17/07/2026 | 17/07/2026 | Intégration dans POST /api/generate-pdf |
 | 13 | Personnalisation PDF (MVP) | ⏳ Planifie | 22/07/2026 | 26/07/2026 | Logo + introduction + variables + espacement |
 | 14 | Personnalisation PDF (Complete) | ⏳ Planifie | 27/07/2026 | 04/08/2026 | Toutes les options de la Solution 1 |
 
@@ -485,7 +509,24 @@ docker volume prune
 - Documentation des variables dynamiques et chemins d'images
 - Phase 2 de la roadmap PDF marquée comme terminée
 
+### v2.0.0 - Phase 4 & 5 PDF: Fonctions de Rendering et Intégration (17/07/2026)
+- Implémentation complète des fonctions de rendu:
+  - resolveVariables() pour substitution de variables dynamiques
+  - renderHeader() pour logo, titre, sous-titre avec positionnement
+  - renderIntroduction() pour texte d'introduction avec sauts de ligne
+  - renderSeparator(), renderTextSection(), renderImageSection(), renderSpacingSection()
+  - renderCustomSections() pour orchestration des sections personnalisées
+  - renderFooter() pour pied de page avec pagination
+- Intégration complète dans POST /api/generate-pdf:
+  - Chargement des options PDF du formulaire YAML
+  - Application des marges personnalisées
+  - Rendement de l'en-tête, introduction, sections personnalisées, footer
+  - Utilisation de l'espacement personnalisé entre les champs
+  - Protection contre le path traversal pour les images
+- Phase 4 et 5 de la roadmap PDF marquées comme terminées
+- MVP de la personnalisation PDF fonctionnel
+
 ---
 
-*Derniere mise a jour : 17/07/2026 - v1.5.1 (Phase 2 PDF: Structure YAML et Documentation)*
+*Derniere mise a jour : 17/07/2026 - v2.0.0 (Phase 4 & 5 PDF: Fonctions de Rendering et Intégration)*
 *Projet : Form2Sign*

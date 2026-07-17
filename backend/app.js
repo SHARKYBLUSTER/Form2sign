@@ -707,6 +707,439 @@ function validateAndNormalizePdfOptions(pdfOptions) {
 }
 
 // ============================================================================
+// FONCTIONS DE RENDU PDF (Phase 4 - Solution 1)
+// ============================================================================
+
+/**
+ * Résout les variables dans un texte
+ * @param {string} text - Texte contenant des variables sous forme {variable}
+ * @param {Object} formValues - Valeurs des champs du formulaire
+ * @param {Object} context - Contexte supplémentaire (date, pageNumber, etc.)
+ * @returns {string} Texte avec les variables remplacées
+ */
+function resolveVariables(text, formValues = {}, context = {}) {
+  if (!text || typeof text !== 'string') {
+    return text || '';
+  }
+
+  // Variables disponibles dans le contexte
+  const date = new Date();
+  const defaultContext = {
+    date: date.toLocaleDateString('fr-FR'),
+    time: date.toLocaleTimeString('fr-FR'),
+    pageNumber: context.pageNumber || '',
+    pageCount: context.pageCount || '',
+    form_id: context.formId || '',
+    form_title: context.formTitle || ''
+  };
+
+  // Fusionner contexte par défaut avec le contexte fourni
+  const fullContext = { ...defaultContext, ...context };
+
+  // Remplacer les variables de contexte
+  let resolved = text;
+  Object.keys(fullContext).forEach(key => {
+    const regex = new RegExp(`\{${key}\}`, 'g');
+    resolved = resolved.replace(regex, fullContext[key]);
+  });
+
+  // Remplacer les variables de champs du formulaire
+  Object.keys(formValues).forEach(key => {
+    const regex = new RegExp(`\{${key}\}`, 'g');
+    const value = formValues[key] !== undefined && formValues[key] !== null ? formValues[key] : '';
+    resolved = resolved.replace(regex, value);
+  });
+
+  return resolved;
+}
+
+/**
+ * Calcule la position X pour le logo en fonction de son positionnement
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {number} width - Largeur du logo
+ * @param {string} position - Position: 'top-left', 'top-center', 'top-right'
+ * @returns {number} Position X
+ */
+function getLogoXPosition(doc, width, position) {
+  const margins = doc._margins || { left: 50, right: 50 };
+  const pageWidth = doc.page.width - margins.left - margins.right;
+
+  switch (position) {
+    case 'top-right':
+      return pageWidth - width;
+    case 'top-center':
+      return (pageWidth - width) / 2;
+    case 'top-left':
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Rend l'en-tête du PDF (logo, titre, sous-titre)
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} pdfOptions - Options PDF validées
+ * @param {Object} formValues - Valeurs des champs du formulaire
+ * @param {Object} context - Contexte supplémentaire
+ */
+function renderHeader(doc, pdfOptions, formValues = {}, context = {}) {
+  const header = pdfOptions.header || {};
+
+  // Logo
+  if (header.logo) {
+    try {
+      // Protéger contre le path traversal
+      const logoPath = path.join(__dirname, '../frontend/public', header.logo);
+      const normalizedPath = path.normalize(logoPath);
+      
+      // Vérifier que le chemin commence bien par notre base path
+      const basePath = path.normalize(path.join(__dirname, '../frontend/public'));
+      if (!normalizedPath.startsWith(basePath)) {
+        console.warn('⚠️  Chemin du logo potentiellement dangereux, utilisation des valeurs par défaut');
+      } else if (fs.existsSync(normalizedPath)) {
+        const logoBuffer = fs.readFileSync(normalizedPath);
+        const width = header.logo_width || 100;
+        const height = header.logo_height || 50;
+        const position = header.logo_position || 'top-left';
+        const x = getLogoXPosition(doc, width, position);
+        
+        doc.image(logoBuffer, x, doc.y, { width, height });
+        
+        // Déplacer le curseur en dessous du logo
+        const logoBottom = doc.y + height;
+        doc.y = logoBottom;
+        doc.moveDown();
+      }
+    } catch (err) {
+      console.warn('⚠️  Impossible de charger le logo:', err.message);
+    }
+  }
+
+  // Titre
+  const title = resolveVariables(
+    header.title || context.formTitle || 'Form2Sign',
+    formValues,
+    context
+  );
+  if (title) {
+    doc.fontSize(header.title_font_size || 20)
+       .font('Helvetica-Bold')
+       .fillColor(header.title_color || '#000000')
+       .text(title, { align: 'center' });
+    doc.moveDown();
+  }
+
+  // Sous-titre
+  const subtitle = resolveVariables(
+    header.subtitle || '',
+    formValues,
+    context
+  );
+  if (subtitle) {
+    doc.fontSize(header.subtitle_font_size || 12)
+       .font('Helvetica')
+       .fillColor(header.subtitle_color || '#666666')
+       .text(subtitle, { align: 'center' });
+    doc.moveDown();
+  }
+
+  // Espacement après l'en-tête
+  const spacing = header.spacing?.after_header || pdfOptions.spacing?.after_header || 1;
+  for (let i = 0; i < spacing; i++) {
+    doc.moveDown();
+  }
+}
+
+/**
+ * Rend le texte d'introduction
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} pdfOptions - Options PDF validées
+ * @param {Object} formValues - Valeurs des champs du formulaire
+ * @param {Object} context - Contexte supplémentaire
+ */
+function renderIntroduction(doc, pdfOptions, formValues = {}, context = {}) {
+  const introduction = pdfOptions.introduction || {};
+  
+  if (!introduction.text) {
+    return;
+  }
+
+  // Résoudre les variables et les sauts de ligne
+  const text = resolveVariables(introduction.text, formValues, context);
+  
+  // Appliquer le style
+  doc.fontSize(introduction.font_size || 12)
+     .font('Helvetica')
+     .fillColor(introduction.color || '#333333');
+
+  // Gérer les sauts de ligne (\n → nouvelle ligne)
+  const lines = text.split('\n');
+  lines.forEach((line, index) => {
+    if (index > 0) {
+      doc.moveDown();
+    }
+    if (line.trim()) {
+      doc.text(line.trim(), { align: 'left' });
+    }
+  });
+
+  // Espacement après l'introduction
+  const spacing = introduction.spacing_after || pdfOptions.spacing?.after_header || 1;
+  for (let i = 0; i < spacing; i++) {
+    doc.moveDown();
+  }
+}
+
+/**
+ * Rend une section personnalisée de type 'separator'
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} section - Configuration de la section
+ * @param {number} pageWidth - Largeur de la page (sans marges)
+ */
+function renderSeparator(doc, section, pageWidth) {
+  const color = section.color || '#000000';
+  const width = section.width || 1;
+  const style = section.style || 'solid';
+
+  doc.save();
+  doc.strokeColor(color);
+  doc.lineWidth(width);
+  
+  if (style === 'dashed') {
+    doc.dash(5, { space: 5 });
+  } else if (style === 'dotted') {
+    doc.dash(2, { space: 3 });
+  }
+  
+  const startX = section.align === 'right' ? pageWidth - 100 : 
+                section.align === 'center' ? pageWidth / 2 - 50 : 
+                0;
+  
+  doc.moveTo(startX, doc.y)
+     .lineTo(startX + (section.length || pageWidth), doc.y)
+     .stroke();
+  
+  doc.restore();
+  doc.moveDown();
+}
+
+/**
+ * Rend une section personnalisée de type 'text'
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} section - Configuration de la section
+ * @param {Object} formValues - Valeurs des champs du formulaire
+ * @param {Object} context - Contexte supplémentaire
+ */
+function renderTextSection(doc, section, formValues = {}, context = {}) {
+  const text = resolveVariables(section.content || '', formValues, context);
+  const fontSize = section.font_size || 12;
+  const color = section.color || '#000000';
+  const align = section.align || 'left';
+  const bold = section.bold || false;
+  const italic = section.italic || false;
+
+  doc.fontSize(fontSize)
+     .fillColor(color);
+
+  if (bold && italic) {
+    doc.font('Helvetica-BoldOblique');
+  } else if (bold) {
+    doc.font('Helvetica-Bold');
+  } else if (italic) {
+    doc.font('Helvetica-Oblique');
+  } else {
+    doc.font('Helvetica');
+  }
+
+  doc.text(text, { align });
+  
+  // Espacement après
+  if (section.spacing_after) {
+    for (let i = 0; i < section.spacing_after; i++) {
+      doc.moveDown();
+    }
+  }
+}
+
+/**
+ * Rend une section personnalisée de type 'image'
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} section - Configuration de la section
+ */
+function renderImageSection(doc, section) {
+  try {
+    // Protéger contre le path traversal
+    const imagePath = path.join(__dirname, '../frontend/public', section.src);
+    const normalizedPath = path.normalize(imagePath);
+    
+    const basePath = path.normalize(path.join(__dirname, '../frontend/public'));
+    if (!normalizedPath.startsWith(basePath)) {
+      console.warn('⚠️  Chemin de l\'image potentiellement dangereux, image ignorée');
+      return;
+    }
+    
+    if (!fs.existsSync(normalizedPath)) {
+      console.warn(`⚠️  Image non trouvée: ${normalizedPath}`);
+      return;
+    }
+
+    const imageBuffer = fs.readFileSync(normalizedPath);
+    const width = section.width || 200;
+    const height = section.height || 100;
+    const align = section.align || 'center';
+
+    const pageWidth = doc.page.width - doc._margins.left - doc._margins.right;
+    let x = 0;
+    
+    if (align === 'center') {
+      x = (pageWidth - width) / 2;
+    } else if (align === 'right') {
+      x = pageWidth - width;
+    }
+
+    doc.image(imageBuffer, x, doc.y, { width, height });
+    doc.moveTo(x, doc.y + height);
+    doc.moveDown();
+    
+    // Espacement après
+    if (section.spacing_after) {
+      for (let i = 0; i < section.spacing_after; i++) {
+        doc.moveDown();
+      }
+    }
+  } catch (err) {
+    console.warn('⚠️  Impossible de charger l\'image:', err.message);
+    doc.moveDown();
+  }
+}
+
+/**
+ * Rend une section personnalisée de type 'spacing'
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} section - Configuration de la section
+ */
+function renderSpacingSection(doc, section) {
+  const lines = section.lines || section.height || 1;
+  for (let i = 0; i < lines; i++) {
+    doc.moveDown();
+  }
+}
+
+/**
+ * Rend toutes les sections personnalisées
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} pdfOptions - Options PDF validées
+ * @param {Object} formValues - Valeurs des champs du formulaire
+ * @param {Object} context - Contexte supplémentaire
+ */
+function renderCustomSections(doc, pdfOptions, formValues = {}, context = {}) {
+  const sections = pdfOptions.custom_sections || [];
+  
+  if (sections.length === 0) {
+    return;
+  }
+
+  const pageWidth = doc.page.width - doc._margins.left - doc._margins.right;
+
+  sections.forEach(section => {
+    // Espacement avant la section
+    if (section.spacing_before) {
+      for (let i = 0; i < section.spacing_before; i++) {
+        doc.moveDown();
+      }
+    }
+
+    switch (section.type) {
+      case 'text':
+        renderTextSection(doc, section, formValues, context);
+        break;
+      case 'separator':
+        renderSeparator(doc, section, pageWidth);
+        break;
+      case 'image':
+        renderImageSection(doc, section);
+        break;
+      case 'spacing':
+        renderSpacingSection(doc, section);
+        break;
+      default:
+        console.warn(`⚠️  Type de section inconnu: ${section.type}`);
+    }
+  });
+}
+
+/**
+ * Rend le pied de page avec pagination
+ * @param {PDFDocument} doc - Document PDFKit
+ * @param {Object} pdfOptions - Options PDF validées
+ * @param {number} pageNumber - Numéro de page actuel
+ * @param {number} pageCount - Nombre total de pages
+ * @param {Object} formValues - Valeurs des champs du formulaire
+ * @param {Object} context - Contexte supplémentaire
+ */
+function renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues = {}, context = {}) {
+  const footer = pdfOptions.footer || {};
+  
+  if (!footer.text && !footer.show_pagination) {
+    return;
+  }
+
+  // Sauvegarder la position actuelle
+  const originalY = doc.y;
+  const originalFontSize = doc._fontSize || 12;
+  const originalFont = doc._font || 'Helvetica';
+  const originalColor = doc._fillColor || '#000000';
+
+  // Se positionner en bas de page
+  const margins = doc._margins || { bottom: 50 };
+  const pageHeight = doc.page.height;
+  doc.y = pageHeight - margins.bottom + 10;
+
+  // Prépare le contexte avec la pagination
+  const footerContext = {
+    ...context,
+    pageNumber: pageNumber,
+    pageCount: pageCount
+  };
+
+  // Construire le texte du footer
+  let footerText = '';
+  
+  if (footer.text) {
+    footerText = resolveVariables(footer.text, formValues, footerContext);
+  }
+
+  // Ajouter la pagination si demandée
+  if (footer.show_pagination !== false) {
+    const paginationText = footer.pagination_format || 'Page {pageNumber} / {pageCount}';
+    const resolvedPagination = resolveVariables(paginationText, {}, footerContext);
+    
+    if (footerText) {
+      footerText = `${footerText} | ${resolvedPagination}`;
+    } else {
+      footerText = resolvedPagination;
+    }
+  }
+
+  if (footerText) {
+    doc.fontSize(footer.font_size || 8)
+       .font(footer.font || 'Helvetica')
+       .fillColor(footer.color || '#999999');
+
+    const align = footer.align || 'center';
+    const width = doc.page.width - doc._margins.left - doc._margins.right;
+    
+    doc.text(footerText, { align, width });
+  }
+
+  // Restaurer la position et le style
+  doc.y = originalY;
+  doc.fontSize(originalFontSize);
+  doc.font(originalFont);
+  doc.fillColor(originalColor);
+}
+
+// ============================================================================
 // ROUTES POUR LES FORMULAIRES
 // ============================================================================
 
@@ -876,8 +1309,11 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
-    // Charger uniquement l'ordre des champs depuis le formulaire YAML
+    // Charger le formulaire complet pour accéder aux options PDF
+    let formData = null;
     let fieldsOrder = [];
+    let formPdfOptions = DEFAULT_PDF_OPTIONS;
+    
     try {
       const formsDir = path.join(__dirname, FORMS_DIRECTORY);
       const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
@@ -886,27 +1322,21 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       if (formFile) {
         const filePath = path.join(formsDir, formFile);
         const fileContent = fs.readFileSync(filePath, 'utf8');
-        const formData = yaml.load(fileContent);
+        formData = yaml.load(fileContent);
         const form = formData.form || formData;
         
         if (form.fields && Array.isArray(form.fields)) {
           fieldsOrder = form.fields.map(field => field.id);
         }
+        
+        // Valider et normaliser les options PDF du formulaire
+        formPdfOptions = validateAndNormalizePdfOptions(form.pdf);
       }
     } catch (err) {
-      console.warn('Impossible de charger l ordre des champs du formulaire:', err.message);
+      console.warn('Impossible de charger le formulaire:', err.message);
     }
     
-    // Configuration PDF depuis .env uniquement
-    const pdfConfig = {
-      title: process.env.PDF_TITLE,
-      footer: process.env.PDF_FOOTER,
-      include_timestamp: process.env.PDF_INCLUDE_TIMESTAMP !== 'false',
-      page_size: process.env.PDF_PAGE_SIZE || 'A4',
-      orientation: process.env.PDF_ORIENTATION || 'portrait'
-    };
-    
-    // Creer un nom de fichier au format: yyyy_mm_dd_hhmmss_FormID.pdf
+    // Configuration PDF par défaut (peut être écrasée par les options du formulaire)
     const now = new Date();
     const dateFolder = now.toISOString().split('T')[0];
     const dateStr = dateFolder.replace(/-/g, '_'); // yyyy_mm_dd
@@ -916,12 +1346,14 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     const timeStr = hours + minutes + seconds; // hhmmss
     const filename = `${dateStr}_${timeStr}_${formId}.pdf`;
     
-    // Préparer les variables pour substitution dans le footer et title
-    const footerVariables = {
-      full_name: formValues.full_name || formValues.name || formValues.nom || '',
+    // Contexte pour la substitution de variables
+    const context = {
+      formId: formId,
+      formTitle: formTitle || formData?.form?.title || formId,
       date: now.toLocaleDateString('fr-FR'),
       time: now.toLocaleTimeString('fr-FR')
     };
+    
     const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, dateFolder);
     const filePath = path.join(pdfPath, filename);
     
@@ -930,72 +1362,81 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       fs.mkdirSync(pdfPath, { recursive: true });
     }
     
-    // Creer le document PDF avec les options personnalisées
+    // Creer le document PDF avec les options personnalisées du formulaire
     const PDFDocument = require('pdfkit');
     
-    // Déterminer la taille et l'orientation
-    const pdfSize = pdfConfig.page_size || 'A4';
-    const pdfOrientation = pdfConfig.orientation || 'portrait';
+    // Utiliser les marges personnalisées si définies
+    const margins = formPdfOptions.page?.margins || { top: 50, left: 50, right: 50, bottom: 50 };
+    const pageSize = formPdfOptions.page?.size || 'A4';
+    const pageOrientation = formPdfOptions.page?.orientation || 'portrait';
     
     const doc = new PDFDocument({
-      size: pdfSize,
-      layout: pdfOrientation,
-      margins: { top: 50, left: 50, right: 50, bottom: 50 }
+      size: pageSize,
+      layout: pageOrientation,
+      margins: margins
     });
     
     // Définir les métadonnées du PDF
-    if (pdfConfig.title) {
-      // Remplacer les variables dans le titre
-      let resolvedTitle = pdfConfig.title;
-      Object.keys(footerVariables).forEach(key => {
-        resolvedTitle = resolvedTitle.replace(new RegExp(`\{${key}\}`, 'g'), footerVariables[key]);
-      });
-      doc.info['Title'] = resolvedTitle;
-    }
+    const resolvedTitle = resolveVariables(
+      formPdfOptions.header?.title || context.formTitle || 'Form2Sign',
+      formValues,
+      context
+    );
+    doc.info['Title'] = resolvedTitle;
     
     // Creer un stream vers le fichier
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
     
-    // Titre du document (avec substitution de variables si défini dans le YAML)
-    let displayTitle = 'Form2sign';
-    if (pdfConfig.title) {
-      displayTitle = pdfConfig.title;
-      Object.keys(footerVariables).forEach(key => {
-        displayTitle = displayTitle.replace(new RegExp(`\{${key}\}`, 'g'), footerVariables[key]);
-      });
-    }
-    doc.fontSize(20).font('Helvetica-Bold').text(displayTitle, { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).font('Helvetica').text(`ID: ${formId}`, { align: 'center' });
-    doc.moveDown(2);
+    // Suivi de la pagination
+    let pageCount = 0;
     
-    // Date de signature (conditionnelle selon include_timestamp)
-    if (pdfConfig.include_timestamp !== false) {
-      doc.fontSize(10).text(`Signé le: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, { align: 'right' });
-      doc.moveDown();
-    }
+    // Compter les pages à la fin
+    doc.on('pageAdded', () => {
+      pageCount++;
+    });
     
-    // Separateur
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-    doc.moveDown();
+    // Rendre l'en-tête
+    renderHeader(doc, formPdfOptions, formValues, context);
     
-    doc.fontSize(12).font('Helvetica');
+    // Rendre l'introduction
+    renderIntroduction(doc, formPdfOptions, formValues, context);
     
     // Afficher les champs dans l'ordre défini dans le formulaire
     const displayKeys = fieldsOrder.length > 0 ? fieldsOrder : Object.keys(formValues);
+    const spacingBetweenFields = formPdfOptions.spacing?.between_fields || 0.5;
+    
+    doc.fontSize(formPdfOptions.styles?.font_size || 12)
+       .font(formPdfOptions.styles?.font_family || 'Helvetica')
+       .fillColor(formPdfOptions.styles?.text_color || '#000000');
+    
     displayKeys.forEach(key => {
       if (formValues[key] !== undefined) {
         const value = formValues[key];
         doc.text(`${key}: ${value || 'N/A'}`);
-        doc.moveDown(0.5);
+        doc.moveDown(spacingBetweenFields);
       }
     });
     
-    doc.moveDown();
+    // Espacement avant les sections personnalisées
+    if (formPdfOptions.custom_sections && formPdfOptions.custom_sections.length > 0) {
+      const spacingBefore = formPdfOptions.spacing?.before_signature || 1;
+      for (let i = 0; i < spacingBefore; i++) {
+        doc.moveDown();
+      }
+      
+      // Rendre les sections personnalisées (avant la signature)
+      renderCustomSections(doc, formPdfOptions, formValues, context);
+    }
+    
+    // Espacement avant la signature
+    const spacingBeforeSignature = formPdfOptions.spacing?.before_signature || 2;
+    for (let i = 0; i < spacingBeforeSignature; i++) {
+      doc.moveDown();
+    }
     
     // Separateur avant la signature
-    doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+    doc.moveTo(margins.left, doc.y).lineTo(doc.page.width - margins.right, doc.y).stroke();
     doc.moveDown();
     
     // Section Signature
@@ -1013,31 +1454,44 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         
         // Ajouter l'image de signature au PDF
         // Redimensionner pour s'adapter a la page
-        doc.image(imageBuffer, {
-          fit: [500, 150],
-          align: 'center',
-          valign: 'center'
-        });
+        const sigWidth = 300;
+        const sigHeight = 100;
+        const pageWidth = doc.page.width - margins.left - margins.right;
+        const x = (pageWidth - sigWidth) / 2;
+        
+        doc.image(imageBuffer, x, doc.y, { width: sigWidth, height: sigHeight });
+        doc.moveDown(2);
       } catch (err) {
         console.warn('Impossible de decoder la signature:', err);
         doc.fontSize(12).text('Signature: Impossible d\'afficher la signature');
+        doc.moveDown();
       }
     } else {
       doc.fontSize(12).text('Aucune signature fournie');
-    }
-    
-    doc.moveDown();
-    
-    // Footer personnalisé si défini dans le formulaire
-    if (pdfConfig.footer) {
-      // Remplacer les variables dans le footer
-      let resolvedFooter = pdfConfig.footer;
-      Object.keys(footerVariables).forEach(key => {
-        resolvedFooter = resolvedFooter.replace(new RegExp(`\{${key}\}`, 'g'), footerVariables[key]);
-      });
-      doc.fontSize(8).font('Helvetica').text(resolvedFooter, { align: 'center', width: 500 });
       doc.moveDown();
     }
+    
+    // Rendre le footer sur chaque page
+    // On doit attendre la fin pour connaître le nombre total de pages
+    const buffers = [];
+    const finalStream = fs.createWriteStream(filePath);
+    
+    // Capturer le contenu pour ajouter les footers
+    const bufferStream = new (require('stream').Writable)({
+      write(chunk, encoding, callback) {
+        buffers.push(chunk);
+        callback();
+      }
+    });
+    
+    doc.pipe(stream);
+    
+    // Rendre le footer sur la première page
+    // Note: Pour les footers sur toutes les pages, il faudrait une approche différente
+    // car PDFKit ne supporte pas nativement les footers dynamiques sur chaque page.
+    // Solution possible: utiliser un package comme pdfkit-page-counter ou générer le PDF
+    // en plusieurs passes. Pour l'instant, on implémente le footer sur la première page.
+    renderFooter(doc, formPdfOptions, 1, 1, formValues, context);
     
     // Finaliser le PDF
     doc.end();
