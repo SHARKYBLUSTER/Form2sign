@@ -1474,7 +1474,7 @@ function replacePlaceholders(text, values = {}) {
  * @param {Object} pdfOptions - Options de génération PDF (format, margins, orientation)
  * @returns {Promise<Buffer>} Buffer contenant le PDF généré
  */
-async function captureHtmlToPdf(html, pdfOptions = {}) {
+async function captureHtmlToPdf(html, pdfOptions = {}, baseUrl = null) {
   // Options par défaut pour Puppeteer
   const defaultOptions = {
     format: 'A4',
@@ -1499,6 +1499,11 @@ async function captureHtmlToPdf(html, pdfOptions = {}) {
       left: marginValue,
       right: marginValue
     };
+  }
+  
+  // Remplacer les chemins relatifs des images par des URLs absolues si baseUrl est fourni
+  if (baseUrl) {
+    html = html.replace(/src="\/static\//g, `src="${baseUrl}/static/`);
   }
   
   // Lancer Puppeteer
@@ -1843,12 +1848,15 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         // Générer le HTML à partir du template
         const html = generateHtmlFromTemplate(formData, formValues, signature);
         
+        // Construire la base URL pour les images (http://localhost:3000 ou l'host du serveur)
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        
         // Capturer le HTML en PDF avec Puppeteer
         const pdfBuffer = await captureHtmlToPdf(html, {
           format: templatePdfOptions.format || formPdfOptions.page?.size || 'A4',
           orientation: templatePdfOptions.orientation || formPdfOptions.page?.orientation || 'portrait',
           margin: templatePdfOptions.margin || formPdfOptions.page?.margins
-        });
+        }, baseUrl);
         
         // Sauvegarder le PDF
         fs.writeFileSync(filePath, pdfBuffer);
