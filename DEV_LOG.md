@@ -222,9 +222,9 @@
   - Toutes les donnees des champs du formulaire (tries alphabetiquement)
   - La signature capturee (image PNG base64)
   - Pied de page avec mention "Form2Sign - Document genere automatiquement"
-- Stockage automatique des PDFs generes dans uploads/pdfs/[date]/
-- Nom de fichier unique: [formId]_[formTitle]_[timestamp].pdf
-- Retourne l'URL de telechargement /api/pdfs/download/[date]/[filename]
+- Stockage automatique des PDFs generes dans uploads/pdfs/
+- Nom de fichier unique: [date]_[timestamp]_[formId].pdf
+- Retourne l'URL de telechargement /api/pdfs/download/[filename]
 - Integration avec le frontend form.html
 - **Problemes rencontrés** : Route POST /api/generate-pdf manquante causait erreur "Route non trouvee"
 - **Solution**: Ajout de la route dans app.js avec le middleware requireAuth
@@ -539,5 +539,17 @@ docker volume prune
 - Identifiants par defaut: admin / admin
 - Mise a jour de la documentation (README.md, DEV_LOG.md)
 
-*Derniere mise a jour : 18/07/2026 - v2.0.1 (Authentification sans hashing, credentials admin/admin)*
+### v2.0.2 - Correction acces aux PDFs (18/07/2026)
+- **FIX** : Resolution du probleme d'acces aux PDFs generes
+- Suppression de la creation de sous-dossiers par date dans uploads/pdfs/
+- Stockage direct des PDFs dans uploads/pdfs/ pour simplifier les permissions
+- Modification des routes API :
+  - GET /api/pdfs/download/:filename (au lieu de /:date/:filename)
+  - GET /api/pdfs/view/:filename (au lieu de /:date/:filename)
+  - DELETE /api/pdfs/:id mise a jour pour chercher dans le repertoire racine
+- Correction de docker-compose.yml : suppression du conflit de montage de volumes
+- Mise a jour de la documentation (README.md, DEV_LOG.md)
+- Ajout d'une section de resolution de problemes pour les permissions PDF
+
+*Derniere mise a jour : 18/07/2026 - v2.0.2 (Correction permissions PDF)
 *Projet : Form2Sign*

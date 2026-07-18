@@ -183,7 +183,7 @@ cp backend/config/.env.example backend/config/.env
 
 ### Etape 6: Telecharger le PDF
 1. Une fois le PDF genere, vous pourrez le telecharger
-2. Les PDFs sont aussi stockes dans `backend/uploads/pdfs/[date]/`
+2. Les PDFs sont stockes dans `backend/uploads/pdfs/`
 
 ---
 
@@ -212,8 +212,8 @@ cp backend/config/.env.example backend/config/.env
 |---------|----------|-------------|--------------------------|
 | GET | `/api/pdfs` | Liste tous les PDFs generes | ✅ Oui |
 | DELETE | `/api/pdfs/:id` | Supprime un PDF | ✅ Oui |
-| GET | `/api/pdfs/download/:date/:filename` | Telecharge un PDF | ✅ Oui |
-| GET | `/api/pdfs/view/:date/:filename` | Visualise un PDF dans le navigateur | ✅ Oui |
+| GET | `/api/pdfs/download/:filename` | Telecharge un PDF | ✅ Oui |
+| GET | `/api/pdfs/view/:filename` | Visualise un PDF dans le navigateur | ✅ Oui |
 
 ---
 
@@ -237,7 +237,7 @@ Form2sign/
 │   │   ├── template.yaml            # Template de base
 │   │   └── [nom_du_formulaire].yaml
 │   └── uploads/                     # Stockage des fichiers
-│       └── pdfs/                    # PDFs generes (organises par date)
+│       └── pdfs/                    # PDFs generes
 │
 ├── frontend/                        # Frontend HTML/CSS/JS
 │   ├── views/
@@ -447,6 +447,19 @@ docker compose up -d
 - Verifiez que la signature a ete capturee
 - Verifiez les logs du backend : `docker compose logs app`
 
+### Impossible d'acceder au PDF genere
+
+**Probleme :** Le PDF est genere mais impossible de le telecharger ou de l'afficher
+
+**Solutions :**
+- Verifiez les permissions sur le dossier `backend/uploads/pdfs/` :
+  ```bash
+  sudo chown -R 1001:1001 ./backend/uploads
+  docker compose restart
+  ```
+- Verifiez que le PDF existe dans le dossier : `ls -la backend/uploads/pdfs/`
+- Verifiez les logs : `docker compose logs app`
+
 ---
 
 ## 📦 Dependances
@@ -527,8 +540,8 @@ form:
 ### v1.4.0 - Generation de PDF (16/07/2026)
 - Implementation de l'API POST /api/generate-pdf
 - Generation de PDF avec PDFKit contenant les donnees du formulaire, la signature et la date
-- Stockage automatique des PDFs generes dans uploads/pdfs/[date]/
-- Nom de fichier unique: [formId]_[formTitle]_[timestamp].pdf
+- Stockage automatique des PDFs generes dans uploads/pdfs/
+- Nom de fichier unique: [date]_[timestamp]_[formId].pdf
 - Retourne l'URL de telechargement du PDF au frontend
 
 ### v1.3.0 - Suppression de formulaires (16/07/2026)

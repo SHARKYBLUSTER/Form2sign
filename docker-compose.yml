@@ -12,12 +12,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # Persistent storage for PDFs
-      - ./backend/uploads/pdfs:/app/backend/uploads/pdfs
+      # Persistent storage for uploads (includes pdfs subdirectory)
+      - ./backend/uploads:/app/backend/uploads
       # Persistent storage for forms
       - ./backend/forms:/app/backend/forms
-      # Persistent storage for uploads (if any)
-      - ./backend/uploads:/app/backend/uploads
       # Persistent storage for config
       - ./backend/config:/app/backend/config
     environment:

@@ -59,8 +59,7 @@ const FORMS_DIRECTORY = process.env.FORMS_DIRECTORY || './forms';
 // Creer les repertoires s'ils n'existent pas
 const directories = [
   PDF_STORAGE_PATH,
-  FORMS_DIRECTORY,
-  path.join(PDF_STORAGE_PATH, new Date().toISOString().split('T')[0])
+  FORMS_DIRECTORY
 ];
 
 directories.forEach(dir => {
@@ -1338,8 +1337,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     
     // Configuration PDF par défaut (peut être écrasée par les options du formulaire)
     const now = new Date();
-    const dateFolder = now.toISOString().split('T')[0];
-    const dateStr = dateFolder.replace(/-/g, '_'); // yyyy_mm_dd
+    const dateStr = now.toISOString().split('T')[0].replace(/-/g, '_'); // yyyy_mm_dd
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
@@ -1354,13 +1352,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       time: now.toLocaleTimeString('fr-FR')
     };
     
-    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, dateFolder);
-    const filePath = path.join(pdfPath, filename);
-    
-    // Creer le repertoire de date s'il n'existe pas
-    if (!fs.existsSync(pdfPath)) {
-      fs.mkdirSync(pdfPath, { recursive: true });
-    }
+    const filePath = path.join(__dirname, PDF_STORAGE_PATH, filename);
     
     // Creer le document PDF avec les options personnalisées du formulaire
     const PDFDocument = require('pdfkit');
@@ -1512,7 +1504,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     res.json({
       success: true,
       message: 'PDF genere avec succes',
-      pdfUrl: `/api/pdfs/download/${dateFolder}/${filename}`,
+      pdfUrl: `/api/pdfs/download/${filename}`,
       filename: filename,
       formId: formId
     });
@@ -1532,49 +1524,42 @@ app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
   try {
     const pdfsDir = path.join(__dirname, PDF_STORAGE_PATH);
     
-    // Lister tous les PDFs dans les sous-repertoires
+    // Lister tous les PDFs dans le repertoire
     const pdfs = [];
-    const dates = fs.readdirSync(pdfsDir);
+    const pdfFiles = fs.readdirSync(pdfsDir).filter(file => file.endsWith('.pdf'));
     
-    dates.forEach(date => {
-      const dateDir = path.join(pdfsDir, date);
-      if (fs.existsSync(dateDir) && fs.statSync(dateDir).isDirectory()) {
-        const pdfFiles = fs.readdirSync(dateDir).filter(file => file.endsWith('.pdf'));
-        
-        pdfFiles.forEach(pdfFile => {
-          const pdfPath = path.join(dateDir, pdfFile);
-          const stat = fs.statSync(pdfPath);
-          
-          // Extraire le formId et la date complète du nom de fichier
-          // Format: yyyy_mm_dd_hhmmss_formId.pdf
-          const parts = path.parse(pdfFile).name.split('_');
-          // Le formId est tout ce qui vient après les 4 premiers éléments (yyyy, mm, dd, hhmmss)
-          const formId = parts.slice(4).join('_') || 'unknown';
-          const formTitle = formId;
-          
-          // Extraire la date complète pour le tri (yyyy-mm-ddThh:mm:ss)
-          const yyyy = parts[0];
-          const mm = parts[1];
-          const dd = parts[2];
-          const hhmmss = parts[3];
-          const hh = hhmmss.substring(0, 2);
-          const minutes = hhmmss.substring(2, 4);
-          const ss = hhmmss.substring(4, 6);
-          const fullDateStr = `${yyyy}-${mm}-${dd}T${hh}:${minutes}:${ss}`;
-          
-          pdfs.push({
-            id: path.parse(pdfFile).name,
-            filename: pdfFile,
-            formId: formId,
-            formTitle: formTitle,
-            date: date,
-            fullDate: fullDateStr,
-            size: stat.size,
-            downloadUrl: `/api/pdfs/download/${date}/${pdfFile}`,
-            viewUrl: `/api/pdfs/view/${date}/${pdfFile}`
-          });
-        });
-      }
+    pdfFiles.forEach(pdfFile => {
+      const filePath = path.join(pdfsDir, pdfFile);
+      const stat = fs.statSync(filePath);
+      
+      // Extraire le formId et la date complète du nom de fichier
+      // Format: yyyy_mm_dd_hhmmss_formId.pdf
+      const parts = path.parse(pdfFile).name.split('_');
+      // Le formId est tout ce qui vient après les 4 premiers éléments (yyyy, mm, dd, hhmmss)
+      const formId = parts.slice(4).join('_') || 'unknown';
+      const formTitle = formId;
+      
+      // Extraire la date complète pour le tri (yyyy-mm-ddThh:mm:ss)
+      const yyyy = parts[0];
+      const mm = parts[1];
+      const dd = parts[2];
+      const hhmmss = parts[3];
+      const hh = hhmmss.substring(0, 2);
+      const minutes = hhmmss.substring(2, 4);
+      const ss = hhmmss.substring(4, 6);
+      const fullDateStr = `${yyyy}-${mm}-${dd}T${hh}:${minutes}:${ss}`;
+      
+      pdfs.push({
+        id: path.parse(pdfFile).name,
+        filename: pdfFile,
+        formId: formId,
+        formTitle: formTitle,
+        date: '',
+        fullDate: fullDateStr,
+        size: stat.size,
+        downloadUrl: `/api/pdfs/download/${pdfFile}`,
+        viewUrl: `/api/pdfs/view/${pdfFile}`
+      });
     });
     
     // Trier par date complete (la plus recente en premier)
@@ -1596,30 +1581,18 @@ app.delete('/api/pdfs/:id', requireAuthRedirect, (req, res) => {
     const pdfId = req.params.id;
     const pdfsDir = path.join(__dirname, PDF_STORAGE_PATH);
     
-    // Rechercher le PDF dans les sous-repertoires
+    // Rechercher le PDF dans le repertoire
     let pdfFound = false;
-    const dates = fs.readdirSync(pdfsDir);
+    const pdfFiles = fs.readdirSync(pdfsDir);
     
-    for (const date of dates) {
-      const dateDir = path.join(pdfsDir, date);
-      if (fs.existsSync(dateDir) && fs.statSync(dateDir).isDirectory()) {
-        const pdfFiles = fs.readdirSync(dateDir);
+    for (const pdfFile of pdfFiles) {
+      if (path.parse(pdfFile).name === pdfId) {
+        const pdfPath = path.join(pdfsDir, pdfFile);
+        fs.unlinkSync(pdfPath);
+        pdfFound = true;
         
-        for (const pdfFile of pdfFiles) {
-          if (path.parse(pdfFile).name === pdfId) {
-            const pdfPath = path.join(dateDir, pdfFile);
-            fs.unlinkSync(pdfPath);
-            pdfFound = true;
-            
-            // Nettoyer le repertoire de date s'il est vide
-            if (fs.readdirSync(dateDir).length === 0) {
-              fs.rmdirSync(dateDir);
-            }
-            
-            res.json({ success: true, message: 'PDF supprime avec succes' });
-            return;
-          }
-        }
+        res.json({ success: true, message: 'PDF supprime avec succes' });
+        return;
       }
     }
     
@@ -1639,10 +1612,10 @@ app.delete('/api/pdfs/:id', requireAuthRedirect, (req, res) => {
 });
 
 // Route pour telecharger un PDF
-app.get('/api/pdfs/download/:date/:filename', requireAuthRedirect, (req, res) => {
+app.get('/api/pdfs/download/:filename', requireAuthRedirect, (req, res) => {
   try {
-    const { date, filename } = req.params;
-    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, date, filename);
+    const { filename } = req.params;
+    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, filename);
     
     if (!fs.existsSync(pdfPath)) {
       return res.status(404).json({ 
@@ -1662,10 +1635,10 @@ app.get('/api/pdfs/download/:date/:filename', requireAuthRedirect, (req, res) =>
 });
 
 // Route pour visualiser un PDF
-app.get('/api/pdfs/view/:date/:filename', requireAuthRedirect, (req, res) => {
+app.get('/api/pdfs/view/:filename', requireAuthRedirect, (req, res) => {
   try {
-    const { date, filename } = req.params;
-    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, date, filename);
+    const { filename } = req.params;
+    const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, filename);
     
     if (!fs.existsSync(pdfPath)) {
       return res.status(404).json({ 
