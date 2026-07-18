@@ -1463,26 +1463,9 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       doc.moveDown();
     }
     
-    // Rendre le footer sur chaque page
-    // On doit attendre la fin pour connaître le nombre total de pages
-    const buffers = [];
-    const finalStream = fs.createWriteStream(filePath);
-    
-    // Capturer le contenu pour ajouter les footers
-    const bufferStream = new (require('stream').Writable)({
-      write(chunk, encoding, callback) {
-        buffers.push(chunk);
-        callback();
-      }
-    });
-    
-    doc.pipe(stream);
-    
     // Rendre le footer sur la première page
-    // Note: Pour les footers sur toutes les pages, il faudrait une approche différente
-    // car PDFKit ne supporte pas nativement les footers dynamiques sur chaque page.
-    // Solution possible: utiliser un package comme pdfkit-page-counter ou générer le PDF
-    // en plusieurs passes. Pour l'instant, on implémente le footer sur la première page.
+    // Note: PDFKit ne supporte pas nativement les footers dynamiques sur chaque page.
+    // Pour les footers sur toutes les pages, utiliser un package comme pdfkit-page-counter.
     renderFooter(doc, formPdfOptions, 1, 1, formValues, context);
     
     // Finaliser le PDF
@@ -1520,7 +1503,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
 });
 
 // Route pour lister les PDFs generes
-app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
+app.get('/api/pdfs', requireAuth, (req, res) => {
   try {
     const pdfsDir = path.join(__dirname, PDF_STORAGE_PATH);
     
@@ -1576,7 +1559,7 @@ app.get('/api/pdfs', requireAuthRedirect, (req, res) => {
 });
 
 // Route pour supprimer un PDF
-app.delete('/api/pdfs/:id', requireAuthRedirect, (req, res) => {
+app.delete('/api/pdfs/:id', requireAuth, (req, res) => {
   try {
     const pdfId = req.params.id;
     const pdfsDir = path.join(__dirname, PDF_STORAGE_PATH);
@@ -1612,7 +1595,7 @@ app.delete('/api/pdfs/:id', requireAuthRedirect, (req, res) => {
 });
 
 // Route pour telecharger un PDF
-app.get('/api/pdfs/download/:filename', requireAuthRedirect, (req, res) => {
+app.get('/api/pdfs/download/:filename', requireAuth, (req, res) => {
   try {
     const { filename } = req.params;
     const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, filename);
@@ -1635,7 +1618,7 @@ app.get('/api/pdfs/download/:filename', requireAuthRedirect, (req, res) => {
 });
 
 // Route pour visualiser un PDF
-app.get('/api/pdfs/view/:filename', requireAuthRedirect, (req, res) => {
+app.get('/api/pdfs/view/:filename', requireAuth, (req, res) => {
   try {
     const { filename } = req.params;
     const pdfPath = path.join(__dirname, PDF_STORAGE_PATH, filename);
