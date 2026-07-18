@@ -1,19 +1,22 @@
 # Form2Sign
 
-## 📌 Description
+## Description
 
 Form2Sign est une application web **mobile-first** qui permet de :
 - Remplir des formulaires dynamiques definis via des fichiers YAML
 - Capturer une signature via l'ecran tactile d'un telephone mobile
 - Generer un PDF contenant le formulaire rempli, la signature et la date
 - Stocker les PDFs generes dans un repertoire dedie
+- Telecharger les fichiers YAML des formulaires
 - Proteger l'acces par authentification (login/mot de passe via .env - **admin/admin** par defaut)
+
+L'application utilise **Puppeteer** pour la capture web vers PDF, offrant une generation fidele du rendu HTML.
 
 L'application est entierement conteneurisee avec **Docker** pour un deploiement facile.
 
 ---
 
-## ⚙️ Prerequis
+## Prerequis
 
 ### Pour le developpement local (sans Docker)
 - Node.js 18+ (recommande : 20 LTS)
@@ -26,7 +29,7 @@ L'application est entierement conteneurisee avec **Docker** pour un deploiement 
 
 ---
 
-## 🚀 Installation & Demarrage
+## Installation & Demarrage
 
 ### Methode 1: Avec Docker (recommande pour la production)
 
@@ -47,7 +50,7 @@ nano backend/config/.env  # ou utilisez votre editeur prefere
 # sinon elle utilise directement UID 1001. Cela permet au conteneur d'ecrire dans les volumes montes.
 awk -F: '{ if ($3 == 1001) print $1 }' /etc/passwd | xargs -I {} sudo chown -R {}:{} ./backend/uploads ./backend/forms ./backend/config 2>/dev/null || sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
 
-# Permissions pour le fichier .env (necessaire pour l'interface de configuration)
+# Permissions pour le fichier .env
 sudo chown 1001:1001 ./backend/config/.env
 sudo chmod 666 ./backend/config/.env
 
@@ -104,14 +107,14 @@ git pull origin main
 docker compose up -d --build
 ```
 
-> ⚠️ **Si vous avez des erreurs de permissions lors du git pull** :
+> **Si vous avez des erreurs de permissions lors du git pull** :
 > ```bash
 > sudo git pull origin main
 > sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
 > sudo chown 1001:1001 ./backend/config/.env
 > sudo chmod 666 ./backend/config/.env
 > ```
-> **Solution recommandée pour éviter ces problèmes** : Utilisez l'Option 1 ci-dessous.
+> **Solution recommandee pour eviter ces problemes** : Utilisez l'Option 1 ci-dessous.
 
 #### Sans Docker
 ```bash
@@ -127,7 +130,7 @@ npm restart  # ou Ctrl+C puis npm start
 
 ---
 
-## ✅ Test et Validation
+## Test et Validation
 
 ### Procedure complete pour tester après une mise à jour
 
@@ -160,8 +163,10 @@ docker compose ps
 2. Connectez-vous avec : **admin** / **admin**
 3. Selectionnez un formulaire
 4. Remplissez les champs et signez
-5. Generez un PDF
-6. Telechargez le PDF et verifiez qu'il s'ouvre sans erreur
+5. Visualisez l'aperçu HTML
+6. Generez le PDF avec le bouton "Approuver"
+7. Le PDF est genere et vous etes redirige vers la liste des PDFs
+8. Telechargez le PDF et verifiez qu'il s'ouvre sans erreur
 
 #### Verification serveur :
 ```bash
@@ -177,14 +182,14 @@ curl -I http://localhost:3000/api/pdfs/download/[NOM_DU_PDF].pdf
 
 ---
 
-## 📄 Documentation Additionnelle
+## Documentation Additionnelle
 
-- [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) - Roadmap pour la refactorisation capture web vers PDF
-- [DEV_LOG.md](DEV_LOG.md) - Journal de développement complet
+- [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) - Roadmap de la refactorisation capture web vers PDF
+- [DEV_LOG.md](DEV_LOG.md) - Journal de developpement complet
 
 ---
 
-## 🛠️ Configuration
+## Configuration
 
 ### Variables d'environnement (.env)
 
@@ -196,18 +201,18 @@ cp backend/config/.env.example backend/config/.env
 
 | Variable | Description | Valeur par defaut | Requise |
 |----------|-------------|------------------|---------|
-| APP_USER | Nom d'utilisateur pour la connexion | `admin` | ✅ Oui |
-| APP_PASSWORD | Mot de passe | `admin` | ✅ Oui |
-| SESSION_SECRET | Cle secrete pour les cookies de session | `super_secret_key_form2sign_2026_change_me` | ✅ Oui |
-| PORT | Port sur lequel l'application ecoute | `3000` | ✅ Oui |
-| NODE_ENV | Environnement (development/production) | `development` | ❌ Non |
-| PDF_STORAGE_PATH | Chemin de stockage des PDFs | `./uploads/pdfs` | ❌ Non |
-| FORMS_DIRECTORY | Repertoire des formulaires YAML | `./forms` | ❌ Non |
-| LOGO_STORAGE_PATH | Chemin de stockage des logos | `./uploads/logos` | ❌ Non |
+| APP_USER | Nom d'utilisateur pour la connexion | `admin` | Oui |
+| APP_PASSWORD | Mot de passe | `admin` | Oui |
+| SESSION_SECRET | Cle secrete pour les cookies de session | `super_secret_key_form2sign_2026_change_me` | Oui |
+| PORT | Port sur lequel l'application ecoute | `3000` | Oui |
+| NODE_ENV | Environnement (development/production) | `development` | Non |
+| PDF_STORAGE_PATH | Chemin de stockage des PDFs | `./uploads/pdfs` | Non |
+| FORMS_DIRECTORY | Repertoire des formulaires YAML | `./forms` | Non |
+| LOGO_STORAGE_PATH | Chemin de stockage des logos | `./uploads/logos` | Non |
 
-> ⚠️ **IMPORTANT** : Ne commitez JAMAIS le fichier `.env` dans Git. Il contient des informations sensibles.
+> **IMPORTANT** : Ne commitez JAMAIS le fichier `.env` dans Git. Il contient des informations sensibles.
 >
-> **Identifiants par defaut :**
+> **Identifiants par defaut** :
 > - Nom d'utilisateur : `admin`
 > - Mot de passe : `admin`
 >
@@ -215,7 +220,7 @@ cp backend/config/.env.example backend/config/.env
 
 ---
 
-## 📱 Utilisation
+## Utilisation
 
 ### Etape 1: Connexion
 1. Accedez a l'application via votre navigateur : `http://localhost:3000`
@@ -224,25 +229,25 @@ cp backend/config/.env.example backend/config/.env
 ### Etape 2: Selectionner un formulaire
 1. Une fois connecte, vous verrez la liste des formulaires disponibles
 2. Les formulaires sont definis dans des fichiers YAML dans `backend/forms/`
+3. Chaque carte de formulaire a un bouton de telechargement du fichier YAML (icone orange)
 
 ### Etape 3: Remplir le formulaire
-1. Selectionnez un formulaire
+1. Selectionnez un formulaire en cliquant sur "Remplir"
 2. Remplissez tous les champs requis
 3. Certains champs peuvent avoir des validations (email, date, etc.)
 
 ### Etape 4: Capturer la signature
 1. Utilisez la zone de signature pour dessiner avec votre doigt ou un stylet
 2. Vous pouvez effacer avec le bouton "Effacer" ou recommencer avec "Recommencer"
+3. Le bouton "Annuler" permet de retourner a la liste des formulaires
 
-### Etape 5: Valider et generer le PDF
-1. Cliquez sur le bouton "Valider" ou "Generer PDF"
-2. Le systeme va generer un PDF contenant :
-   - Les donnees du formulaire rempli
-   - Votre signature
-   - La date et heure de generation
+### Etape 5: Visualiser l'aperçu et generer le PDF
+1. Cliquez sur le bouton "Aperçu" pour voir le rendu HTML
+2. Dans l'aperçu, le bouton "Approuver" genere le PDF
+3. Une fois le PDF genere, vous etes redirige automatiquement vers la liste des PDFs
 
 ### Etape 6: Telecharger le PDF
-1. Une fois le PDF genere, vous pourrez le telecharger
+1. Dans la liste des PDFs, vous pouvez telecharger ou visualiser chaque PDF genere
 2. Les PDFs sont stockes dans `backend/uploads/pdfs/`
 
 ### Gestion des Logos
@@ -253,56 +258,62 @@ cp backend/config/.env.example backend/config/.env
    - Supprimer des logos
 3. Pour utiliser un logo dans un formulaire, referencez-le dans votre fichier YAML:
    ```yaml
-   pdf:
-     header:
-       logo: /static/logos/votre-logo.png
-       logo_width: 100
-       logo_height: 50
-       logo_position: top-left
+   template:
+     style: |
+       body { font-family: Arial; }
+     layout: |
+       <div class="header">
+         <img src="/static/logos/votre-logo.png" width="120"/>
+         <h1>Mon Contrat</h1>
+       </div>
+       <p>Client: {client_name}</p>
+       <div class="signature-area">
+         <img src="{signature}" alt="Signature" />
+       </div>
    ```
    > **Note**: Les logos sont accessibles via le chemin `/api/logos/[filename]` dans l'API ou `/static/logos/[filename]` dans les formulaires YAML
 
 ---
 
-## 🔌 Routes API
+## Routes API
 
-⚠️ **Important** : Pour toutes les requetes vers les endpoints authentifies, utilisez `credentials: 'include'` dans vos appels fetch() pour envoyer le cookie de session.
+> **Important** : Pour toutes les requetes vers les endpoints authentifies, utilisez `credentials: 'include'` dans vos appels fetch() pour envoyer le cookie de session.
 
 ### Authentification
 | Methode | Endpoint | Description | Authentification requise |
 |---------|----------|-------------|--------------------------|
-| POST | `/api/login` | Connexion avec identifiants | ❌ Non |
-| GET | `/api/logout` | Deconnexion | ✅ Oui |
-| GET | `/api/auth/status` | Verifie le statut de connexion | ❌ Non |
+| POST | `/api/login` | Connexion avec identifiants | Non |
+| GET | `/api/logout` | Deconnexion | Oui |
+| GET | `/api/auth/status` | Verifie le statut de connexion | Non |
 
 ### Formulaires
 | Methode | Endpoint | Description | Authentification requise |
 |---------|----------|-------------|--------------------------|
-| GET | `/api/forms` | Liste les formulaires disponibles | ✅ Oui |
-| GET | `/api/forms/:id` | Charge un formulaire specifique par son ID | ✅ Oui |
-| POST | `/api/forms/upload` | Telecharge un nouveau formulaire YAML | ✅ Oui |
-| DELETE | `/api/forms/:id` | Supprime un formulaire | ✅ Oui |
-| POST | `/api/generate-pdf` | Genere un PDF a partir des donnees du formulaire | ✅ Oui |
+| GET | `/api/forms` | Liste les formulaires disponibles | Oui |
+| GET | `/api/forms/:id` | Charge un formulaire specifique par son ID | Oui |
+| POST | `/api/forms/upload` | Telecharge un nouveau formulaire YAML | Oui |
+| DELETE | `/api/forms/:id` | Supprime un formulaire | Oui |
+| POST | `/api/generate-pdf` | Genere un PDF a partir des donnees du formulaire | Oui |
 
 ### PDFs
 | Methode | Endpoint | Description | Authentification requise |
 |---------|----------|-------------|--------------------------|
-| GET | `/api/pdfs` | Liste tous les PDFs generes | ✅ Oui |
-| DELETE | `/api/pdfs/:id` | Supprime un PDF | ✅ Oui |
-| GET | `/api/pdfs/download/:filename` | Telecharge un PDF | ✅ Oui |
-| GET | `/api/pdfs/view/:filename` | Visualise un PDF dans le navigateur | ✅ Oui |
+| GET | `/api/pdfs` | Liste tous les PDFs generes | Oui |
+| DELETE | `/api/pdfs/:id` | Supprime un PDF | Oui |
+| GET | `/api/pdfs/download/:filename` | Telecharge un PDF | Oui |
+| GET | `/api/pdfs/view/:filename` | Visualise un PDF dans le navigateur | Oui |
 
 ### Logos
 | Methode | Endpoint | Description | Authentification requise |
 |---------|----------|-------------|--------------------------|
-| GET | `/api/logos` | Liste tous les logos disponibles | ✅ Oui |
-| POST | `/api/logos/upload` | Telecharge un nouveau logo (PNG, JPG, JPEG, SVG) | ✅ Oui |
-| DELETE | `/api/logos/:filename` | Supprime un logo | ✅ Oui |
-| GET | `/api/logos/:filename` | Charge un logo pour affichage | ✅ Oui |
+| GET | `/api/logos` | Liste tous les logos disponibles | Oui |
+| POST | `/api/logos/upload` | Telecharge un nouveau logo (PNG, JPG, JPEG, SVG) | Oui |
+| DELETE | `/api/logos/:filename` | Supprime un logo | Oui |
+| GET | `/api/logos/:filename` | Charge un logo pour affichage | Oui |
 
 ---
 
-## 📁 Structure du Projet
+## Structure du Projet
 
 ```
 Form2sign/
@@ -312,24 +323,27 @@ Form2sign/
 │   ├── config/
 │   │   ├── .env                      # Variables d'environnement (SECRETE)
 │   │   └── .env.example              # Template pour .env
-│   ├── controllers/                  # Controleurs Express
+│   ├── controllers/
 │   │   └── authController.js        # Gestion de l'authentification
-│   ├── routes/                      # Routes Express
+│   ├── routes/
 │   │   └── authRoutes.js             # Routes d'authentification
-│   ├── middlewares/                 # Middlewares Express
+│   ├── middlewares/
 │   │   └── authMiddleware.js        # Verification d'authentification
 │   ├── forms/                       # Formulaires dynamiques (fichiers YAML)
 │   │   ├── template.yaml            # Template de base
 │   │   └── [nom_du_formulaire].yaml
 │   └── uploads/                     # Stockage des fichiers
-│       └── pdfs/                    # PDFs generes
+│       ├── pdfs/                    # PDFs generes
+│       └── logos/                   # Logos uploades
 │
 ├── frontend/                        # Frontend HTML/CSS/JS
 │   ├── views/
 │   │   ├── login.html               # Page de connexion
 │   │   ├── form-list.html           # Liste des formulaires
 │   │   ├── form.html                # Formulaire a remplir
+│   │   ├── preview.html             # Apercu HTML avant generation PDF
 │   │   ├── pdf-list.html            # Liste des PDFs generes
+│   │   ├── config.html              # Configuration (logos)
 │   │   └── logout.html              # Page de deconnexion
 │   └── public/
 │       └── css/
@@ -344,11 +358,9 @@ Form2sign/
 └── DEV_LOG.md                       # Journal de developpement
 ```
 
-> ⚠️ **Note** : Certains repertoires mentionnes dans la structure (models, services, js/) sont prevus pour une evolution future mais ne sont pas encore implémentes. Le code actuel est concentre dans app.js pour simplifier.
-
 ---
 
-## 👨‍💻 Developpement
+## Developpement
 
 ### Commandes utiles
 
@@ -386,14 +398,9 @@ npm run dev
 
 # Demarrer en mode production
 npm start
-
-# Lancer les tests
-npm test
 ```
 
 ### Ajouter un nouveau formulaire
-
-**Methodes possibles :**
 
 **Via l'interface web (recommande) :**
 1. Connectez-vous a l'application
@@ -405,17 +412,11 @@ npm test
 **Via le systeme de fichiers (manuel) :**
 1. Creez un fichier `.yaml` dans le repertoire `backend/forms/`
 2. Suivez le format definis dans `backend/forms/template.yaml`
-3. Exemple minimal :
 
-### Supprimer un formulaire
-Via l'interface web :
-1. Dans la liste des formulaires, cliquez sur l'icône poubelle (🗑️) sur la carte du formulaire
-2. Confirmez la suppression dans la modal
-3. Le formulaire est supprimé et la liste est rechargée automatiquement
+### Format YAML (v2.0+) :
 
-**Attention** : Cette action est irreversible. Le fichier YAML est définitivement supprimé du serveur.
+Form2Sign utilise Puppeteer pour la capture web vers PDF. Vous definissez une page web HTML/CSS dans votre YAML.
 
-### Format v2.0+ (recommandé) :
 ```yaml
 form:
   id: mon_formulaire
@@ -439,7 +440,7 @@ form:
       format: A4
       orientation: portrait
       margin: 15mm
-
+  
   fields:
     - id: nom
       label: "Nom complet"
@@ -452,29 +453,45 @@ form:
       type: email
       required: true
       validation: "email"
-
+  
   signature:
     required: true
     label: "Signature"
     instructions: "Signez avec votre doigt ou un stylet"
 ```
 
+**Fonctionnalites disponibles :**
+- **Placeholders dynamiques** : `{field_id}`, `{date}`, `{time}`, `{form_id}`, `{form_title}`, `{signature}`
+- **CSS complet** : Tous les styles CSS standard sont supportes
+- **Images et logos** : Via `<img src="/static/logos/nom.png">`
+- **Format PDF** : A4, A5, Letter, Legal
+- **Orientation** : portrait ou landscape
+- **Marges** : Personnalisation complete
+
 3. Redemarrez l'application pour prendre en compte le nouveau formulaire
+
+### Supprimer un formulaire
+Via l'interface web :
+1. Dans la liste des formulaires, cliquez sur l'icone poubelle sur la carte du formulaire
+2. Confirmez la suppression dans la modal
+3. Le formulaire est supprimé et la liste est rechargée automatiquement
+
+**Attention** : Cette action est irreversible. Le fichier YAML est définitivement supprimé du serveur.
 
 ---
 
-## 🐛 Resolution des problemes
+## Resolution des problemes
 
 ### Le conteneur ne demarre pas
 
 ```bash
-# Vérifier que Docker est installe
+# Verifier que Docker est installe
 docker --version
 
-# Vérifier les logs
+# Verifier les logs
 docker compose logs
 
-# Vérifier les volumes
+# Verifier les volumes
 docker volume ls
 
 # Verifier les conteneurs en cours
@@ -495,7 +512,7 @@ docker compose ps -a
 # Donner les permissions a l'utilisateur du conteneur (UID 1001)
 sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
 
-# Pour le fichier .env specifiquement (si vous avez des problemes de sauvegarde via l'interface Configuration)
+# Pour le fichier .env specifiquement
 sudo chown 1001:1001 ./backend/config/.env
 sudo chmod 666 ./backend/config/.env
 
@@ -504,7 +521,7 @@ docker compose down
 docker compose up -d
 ```
 
-**Explication :** Le Dockerfile cree un utilisateur `nodejs` avec UID 1001 pour des raisons de securite. Les volumes montes depuis l'hote doivent etre accessibles par cet utilisateur. Pour l'interface de configuration (page Configuration), le fichier `.env` doit etre accessible en ecriture par le conteneur.
+**Explication :** Le Dockerfile cree un utilisateur `nodejs` avec UID 1001 pour des raisons de securite. Les volumes montes depuis l'hote doivent etre accessibles par cet utilisateur.
 
 ### Erreur de connexion
 
@@ -514,11 +531,11 @@ docker compose up -d
 - Verifiez que `APP_USER` et `APP_PASSWORD` sont correctement definis dans `.env`
 - Verifiez les majuscules/minuscules (la connexion est sensible a la casse)
 - Les identifiants par defaut sont: **admin** / **admin**
-- Si vous avez perdu le mot de passe, réinitialisez-le avec :
+- Si vous avez perdu le mot de passe, reinitialisez-le avec :
   ```bash
   sudo sed -i 's/^APP_PASSWORD=.*/APP_PASSWORD=admin/' backend/config/.env
   ```
-  Puis redémarrez l'application.
+  Puis redemarrez l'application.
 
 ### Le formulaire ne s'affiche pas
 
@@ -540,7 +557,7 @@ docker compose up -d
 
 ### Le PDF n'est pas genere
 
-**Probleme :** Cliquer sur "Generer PDF" ne fait rien
+**Probleme :** Cliquer sur "Approuver" ne fait rien
 
 **Solutions :**
 - Verifiez que tous les champs requis sont remplis
@@ -562,7 +579,7 @@ docker compose up -d
 
 ---
 
-## 📦 Dependances
+## Dependances
 
 ### Backend (Node.js)
 
@@ -571,7 +588,7 @@ docker compose up -d
 | express | ^4.18.2 | Framework web |
 | express-session | ^1.17.3 | Gestion des sessions |
 | dotenv | ^16.3.1 | Chargement des variables d'environnement |
-| puppeteer | ^21.0.0 | Capture web vers PDF |
+| puppeteer | ^21.11.0 | Capture web vers PDF |
 | js-yaml | ^4.1.0 | Parsing des fichiers YAML |
 | cors | ^2.8.5 | Gestion CORS |
 | multer | ^1.4.5-lts.1 | Upload de fichiers |
@@ -585,89 +602,41 @@ docker compose up -d
 
 ---
 
-## 🎨 Personnalisation des PDF (v2.0+)
+## Changelog
 
-Form2Sign utilise maintenant un système de **capture web vers PDF** via Puppeteer. Vous définissez une page web HTML/CSS dans votre YAML, et le PDF est une capture exacte de cette page.
+### v2.1.0 - Capture Web vers PDF et Améliorations (18/07/2026)
+- **Nouveau systeme PDF** : Passage de pdfkit a Puppeteer pour la capture web vers PDF
+- **Nouvelle structure YAML** : Les templates definissent maintenant du HTML/CSS avec section `template` (style + layout)
+- **Apercu HTML obligatoire** : L'utilisateur voit un aperçu avant de générer le PDF
+- **Nouveau flux** : form.html -> preview.html -> generation PDF
+- Bouton "Approuver" remplace "Generer PDF" dans l'aperçu
+- Redirection vers /pdfs.html apres generation PDF
+- Bouton "Telecharger YAML" ajoute sur chaque carte de formulaire (icone orange)
+- Suppression de la configuration PDF centralisee via .env (maintenant dans le YAML)
+- Suppression de la section Configuration PDF dans config.html
+- Correction du logo dans les PDFs (chemin /static/logos/)
+- Nouvelles dependances : puppeteer
+- Configuration Docker mise a jour pour Puppeteer
+- Migration complete des formulaires existants vers le nouveau format
 
-### Nouvelle structure YAML (v2.0+) :
+### v2.0.0 - Personnalisation PDF Complete (17/07/2026)
+- Implementation de toutes les options de personnalisation PDF
+- Logo en en-tete avec positionnement
+- Texte d'introduction avec sauts de ligne
+- Sections personnalisees (text, separator, image, spacing)
+- Pied de page avec pagination
+- Variables dynamiques dans tous les elements
+- Styles personnalises (polices, couleurs, tailles)
 
-```yaml
-form:
-  id: mon_contrat
-  title: "Contrat Client"
-  
-  template:
-    # Styles CSS pour la page
-    style: |
-      body { font-family: Arial; }
-      .header { text-align: center; }
-      .signature-area { border: 2px dashed #ccc; }
-      
-    # Layout HTML avec placeholders
-    layout: |
-      <div class="header">
-        <h1>CONTRAT</h1>
-        <p>Entre {company_name} et {client_name}</p>
-      </div>
-      <p><strong>Date:</strong> {date}</p>
-      <div class="signature-area">
-        <img src="{signature}" alt="Signature" />
-      </div>
-    
-    # Options PDF
-    pdf:
-      format: A4
-      orientation: portrait
-      margin: 15mm
+### v1.5.0 - Ameliorations Interface Formulaire (17/07/2026)
+- Ajout d'un bouton **Annuler** dans la zone de signature pour retourner a la liste des formulaires
+- Echange des couleurs des boutons **Effacer** (orange) et **Recommencer** (rouge) pour meilleure visibilite
+- Bouton **Recommencer** reinitialise maintenant tout le formulaire
 
-  fields:
-    - id: company_name
-      label: "Nom de l'entreprise"
-      type: text
-      required: true
-    - id: client_name
-      label: "Nom du client"
-      type: text
-      required: true
-
-  signature:
-    required: true
-    label: "Signature"
-```
-
-### Fonctionnalités disponibles :
-- **Placeholders dynamiques** : `{field_id}`, `{date}`, `{time}`, `{form_id}`, `{form_title}`, `{signature}`
-- **CSS complet** : Tous les styles CSS standard sont supportés
-- **Images et logos** : Via `<img src="/static/logos/nom.png">`
-- **Format PDF** : A4, A5, Letter, Legal
-- **Orientation** : portrait ou landscape
-- **Marges** : Personnalisation complète
-
-Pour plus de détails, consultez [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md).
-
----
-
-## 📝 Changelog
-
-### v1.5.0 - Améliorations Interface Formulaire (17/07/2026)
-- Ajout d'un bouton **Annuler** dans la zone de signature pour retourner à la liste des formulaires
-- Echange des couleurs des boutons **Effacer** (orange) et **Recommencer** (rouge) pour meilleure visibilité
-- Bouton **Recommencer** réinitialise maintenant tout le formulaire
-
-### v2.0.0 - Refactorisation Capture Web vers PDF (18/07/2026)
-- **Nouveau système de génération PDF** : Passage de pdfkit à Puppeteer pour une capture fidèle de la page web
-- **Nouvelle structure YAML** : Les templates définissent maintenant du HTML/CSS au lieu de la structure PDF
-- **Aperçu HTML obligatoire** : L'utilisateur voit un aperçu avant de générer le PDF
-- **Nouvelle dépendance** : Ajout de Puppeteer (^21.0.0)
-- **Configuration Docker** : Ajout des dépendances système pour Chrome
-- Migration complète des formulaires existants vers le nouveau format
-- Voir [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) pour les détails complets
-
-### v1.5.1 - Authentification simplifiée (18/07/2026)
+### v1.5.1 - Authentification simplifiee (18/07/2026)
 - Suppression du hashing des mots de passe (bcryptjs)
 - Comparaison directe des identifiants depuis le fichier .env
 - Identifiants par defaut: **admin / admin**
-- Mise a jour de la documentation
 
 ### v1.4.0 - Generation de PDF (16/07/2026)
 - Implementation initiale de l'API POST /api/generate-pdf
@@ -675,7 +644,7 @@ Pour plus de détails, consultez [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md
 - Nom de fichier unique: [date]_[timestamp]_[formId].pdf
 
 ### v1.3.0 - Suppression de formulaires (16/07/2026)
-- Ajout d'une icône poubelle sur chaque carte de formulaire
+- Ajout d'une icone poubelle sur chaque carte de formulaire
 - Implementation d'une modal de confirmation de suppression
 - Implementation de l'API DELETE /api/forms/:id
 - Suppression physique du fichier YAML du serveur
@@ -698,7 +667,7 @@ Pour plus de détails, consultez [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md
 - Creation de `authRoutes.js` (POST /api/login, GET /api/logout, GET /api/auth/status)
 - Creation de `authMiddleware.js` pour la protection des routes
 - Integration dans `app.js` avec protection des routes frontales et API
-- Identifiants configures directement dans le fichier `.env` (admin/password123 par defaut)
+- Identifiants configures directement dans le fichier `.env`
 - Gestion des sessions avec express-session
 
 ### v1.0.0 - Initialisation (16/07/2026)
@@ -709,19 +678,19 @@ Pour plus de détails, consultez [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md
 
 ---
 
-## 📜 Licence
+## Licence
 
 MIT License - Voir le fichier [LICENSE](LICENSE) pour plus de details.
 
 ---
 
-## 👤 Contributeurs
+## Contributeurs
 
-- [Votre Nom] - Developpeur principal
+- SHARKYBLUSTER - Developpeur principal
 
 ---
 
-## 📞 Support
+## Support
 
 Pour toute question ou problème, consultez :
 1. Le fichier [DEV_LOG.md](DEV_LOG.md) pour l'historique du developpement
