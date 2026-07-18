@@ -13,6 +13,7 @@ const path = require('path');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const multer = require('multer');
+const puppeteer = require('puppeteer');
 
 // Charger les variables d'environnement
 const envPath = path.join(__dirname, 'config', '.env');
@@ -1381,6 +1382,170 @@ function renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues = {}, c
 }
 
 // ============================================================================
+// FONCTIONS POUR LA CAPTURE WEB->PDF (Phase 2 - Nouveau Systeme)
+// ============================================================================
+
+/**
+ * Génère un HTML complet à partir d'un template YAML et des valeurs de formulaire
+ * @param {Object} formData - Données du formulaire YAML
+ * @param {Object} formValues - Valeurs des champs du formulaire
+ * @param {string} signature - Signature en base64 (optionnel)
+ * @returns {string} HTML complet
+ */
+function generateHtmlFromTemplate(formData, formValues = {}, signature = null) {
+  const form = formData.form || formData;
+  const template = form.template || {};
+  
+  // Récupérer les options PDF pour le contexte
+  const pdfOptions = template.pdf || {};
+  
+  // Créer le contexte pour la substitution de variables
+  const now = new Date();
+  const context = {
+    date: now.toLocaleDateString('fr-FR'),
+    time: now.toLocaleTimeString('fr-FR'),
+    form_id: form.id || '',
+    form_title: form.title || ''
+  };
+  
+  // Fusionner les valeurs des champs avec le contexte
+  const allValues = { ...formValues, ...context };
+  
+  // Si une signature est fournie, l'ajouter aux valeurs
+  if (signature) {
+    allValues.signature = signature;
+  }
+  
+  // Remplacer les placeholders dans le style et le layout
+  const style = template.style ? replacePlaceholders(template.style, allValues) : '';
+  const layout = template.layout ? replacePlaceholders(template.layout, allValues) : '<p>Aucun contenu défini</p>';
+  
+  // Générer le HTML complet
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${form.title || form.id || 'Form2Sign'}</title>
+    <style>
+        ${style}
+    </style>
+</head>
+<body>
+    ${layout}
+</body>
+</html>
+  `;
+  
+  return html;
+}
+
+/**
+ * Remplace les placeholders {variable} dans un texte
+ * @param {string} text - Texte contenant des placeholders
+ * @param {Object} values - Objet avec les valeurs de remplacement
+ * @returns {string} Texte avec les placeholders remplacés
+ */
+function replacePlaceholders(text, values = {}) {
+  if (!text || typeof text !== 'string') {
+    return text || '';
+  }
+  
+  let result = text;
+  
+  // Remplacer chaque placeholder {key} par sa valeur
+  Object.keys(values).forEach(key => {
+    const regex = new RegExp(`\{${key}\}`, 'g');
+    const value = values[key] !== undefined && values[key] !== null ? values[key] : '';
+    result = result.replace(regex, value);
+  });
+  
+  return result;
+}
+
+/**
+ * Capture un HTML et le convertit en PDF via Puppeteer
+ * @param {string} html - HTML à capturer
+ * @param {Object} pdfOptions - Options de génération PDF (format, margins, orientation)
+ * @returns {Promise<Buffer>} Buffer contenant le PDF généré
+ */
+async function captureHtmlToPdf(html, pdfOptions = {}) {
+  // Options par défaut pour Puppeteer
+  const defaultOptions = {
+    format: 'A4',
+    orientation: 'portrait',
+    margin: {
+      top: '10mm',
+      bottom: '10mm',
+      left: '10mm',
+      right: '10mm'
+    }
+  };
+  
+  // Fusionner les options
+  const options = { ...defaultOptions, ...pdfOptions };
+  
+  // Convertir les marges si c'est une valeur unique
+  if (typeof options.margin === 'string' || typeof options.margin === 'number') {
+    const marginValue = typeof options.margin === 'number' ? `${options.margin}mm` : options.margin;
+    options.margin = {
+      top: marginValue,
+      bottom: marginValue,
+      left: marginValue,
+      right: marginValue
+    };
+  }
+  
+  // Lancer Puppeteer
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
+  });
+  
+  try {
+    const page = await browser.newPage();
+    
+    // Définir le contenu HTML
+    await page.setContent(html, {
+      waitUntil: 'networkidle0'
+    });
+    
+    // Appliquer les marges via CSS pour Puppeteer
+    // Puppeteer gère les marges via l'option margin
+    const pdfBuffer = await page.pdf({
+      format: options.format,
+      printBackground: true,
+      margin: options.margin,
+      preferCSSPageSize: true
+    });
+    
+    return pdfBuffer;
+  } finally {
+    await browser.close();
+  }
+}
+
+/**
+ * Vérifie si un formulaire utilise la nouvelle structure (template-based)
+ * @param {Object} formData - Données du formulaire
+ * @returns {boolean} true si le formulaire utilise la nouvelle structure
+ */
+function isNewTemplateForm(formData) {
+  const form = formData.form || formData;
+  return form.template && (form.template.layout || form.template.style);
+}
+
+// ============================================================================
 // ROUTES POUR LES FORMULAIRES
 // ============================================================================
 
@@ -1412,16 +1577,22 @@ app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
     // Valider et normaliser les options PDF avec des valeurs par défaut
     const pdfOptions = validateAndNormalizePdfOptions(form.pdf);
     
+    // Vérifier si c'est un nouveau formulaire avec template
+    const usesTemplate = isNewTemplateForm(formData);
+    
     res.json({ 
       success: true, 
       form: {
         id: form.id || formId,
         title: form.title || formId,
         description: form.description || '',
+        version: form.version || '1.0.0',
         fields: form.fields || [],
         signature: form.signature || { required: true, label: 'Signature', instructions: 'Signez ici' },
         style: form.style || {},
-        pdf: pdfOptions
+        pdf: pdfOptions,
+        template: usesTemplate ? form.template : undefined,
+        usesTemplate: usesTemplate
       }
     });
   } catch (error) {
@@ -1429,6 +1600,65 @@ app.get('/api/forms/:id', requireAuthRedirect, (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: 'Impossible de charger le formulaire',
+      message: NODE_ENV === 'development' ? error.message : undefined 
+    });
+  }
+});
+
+// Route pour obtenir l'aperçu HTML d'un formulaire (NOUVEAU - Phase 2)
+app.get('/api/forms/:id/preview', requireAuthRedirect, async (req, res) => {
+  try {
+    const formId = req.params.id;
+    const formsDir = path.join(__dirname, FORMS_DIRECTORY);
+    
+    // Trouver le fichier YAML correspondant
+    const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
+    const formFile = yamlFiles.find(file => path.parse(file).name === formId);
+    
+    if (!formFile) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Formulaire non trouvé' 
+      });
+    }
+    
+    // Lire et parser le fichier YAML
+    const filePath = path.join(formsDir, formFile);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const formData = yaml.load(fileContent);
+    
+    // Vérifier que le formulaire utilise la nouvelle structure
+    if (!isNewTemplateForm(formData)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Ce formulaire n\'utilise pas la nouvelle structure template. Utilisez la génération PDF classique.'
+      });
+    }
+    
+    // Extraire les valeurs des champs depuis la query string (pour l'aperçu)
+    // Les valeurs sont passées en query params: ?field1=value1&field2=value2
+    const formValues = {};
+    Object.keys(req.query).forEach(key => {
+      if (key !== 'signature') {
+        formValues[key] = req.query[key];
+      }
+    });
+    
+    // Récupérer la signature si fournie (en base64)
+    const signature = req.query.signature || null;
+    
+    // Générer le HTML
+    const html = generateHtmlFromTemplate(formData, formValues, signature);
+    
+    // Envoyer le HTML
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+    
+  } catch (error) {
+    console.error('Erreur lors de la génération de l\'aperçu:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Impossible de générer l\'aperçu',
       message: NODE_ENV === 'development' ? error.message : undefined 
     });
   }
@@ -1539,6 +1769,9 @@ app.delete('/api/forms/:id', requireAuthRedirect, (req, res) => {
 });
 
 // POST /api/generate-pdf - Generer un PDF a partir des donnees du formulaire
+// Supporte les DEUX systemes: 
+// - Ancien systeme: pdfkit (pour les formulaires sans template)
+// - Nouveau systeme: Puppeteer (pour les formulaires avec template)
 app.post('/api/generate-pdf', requireAuth, async (req, res) => {
   try {
     const { formId, formTitle, signature, ...formValues } = req.body;
@@ -1550,7 +1783,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
-    // Charger le formulaire complet pour accéder aux options PDF
+    // Charger le formulaire complet
     let formData = null;
     let fieldsOrder = [];
     let formPdfOptions = DEFAULT_PDF_OPTIONS;
@@ -1577,7 +1810,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       console.warn('Impossible de charger le formulaire:', err.message);
     }
     
-    // Configuration PDF par défaut (peut être écrasée par les options du formulaire)
+    // Configuration PDF par défaut
     const now = new Date();
     const dateStr = now.toISOString().split('T')[0].replace(/-/g, '_'); // yyyy_mm_dd
     const hours = now.getHours().toString().padStart(2, '0');
@@ -1586,7 +1819,6 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     const timeStr = hours + minutes + seconds; // hhmmss
     const filename = `${dateStr}_${timeStr}_${formId}.pdf`;
     
-    // Contexte pour la substitution de variables
     const context = {
       formId: formId,
       formTitle: formTitle || formData?.form?.title || formId,
@@ -1596,7 +1828,55 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     
     const filePath = path.join(__dirname, PDF_STORAGE_PATH, filename);
     
-    // Creer le document PDF avec les options personnalisées du formulaire
+    // ==========================================================================
+    // NOUVEAU SYSTEME: Utiliser Puppeteer si le formulaire a un template
+    // ==========================================================================
+    if (formData && isNewTemplateForm(formData)) {
+      try {
+        // Extraire les options PDF du template
+        const templatePdfOptions = formData.form?.template?.pdf || {};
+        
+        // Générer le HTML à partir du template
+        const html = generateHtmlFromTemplate(formData, formValues, signature);
+        
+        // Capturer le HTML en PDF avec Puppeteer
+        const pdfBuffer = await captureHtmlToPdf(html, {
+          format: templatePdfOptions.format || formPdfOptions.page?.size || 'A4',
+          orientation: templatePdfOptions.orientation || formPdfOptions.page?.orientation || 'portrait',
+          margin: templatePdfOptions.margin || formPdfOptions.page?.margins
+        });
+        
+        // Sauvegarder le PDF
+        fs.writeFileSync(filePath, pdfBuffer);
+        
+        console.log(`✅ PDF genere avec Puppeteer: ${filename}`);
+        
+        // Retourner le chemin du PDF
+        return res.json({
+          success: true,
+          message: 'PDF genere avec succes (systeme Web-to-PDF)',
+          pdfUrl: `/api/pdfs/download/${filename}`,
+          filename: filename,
+          formId: formId,
+          method: 'puppeteer'
+        });
+        
+      } catch (puppeteerError) {
+        console.error('❌ Erreur avec Puppeteer, tentative avec pdfkit:', puppeteerError.message);
+        // Si Puppeteer échoue, on peut tenter de tomber sur pdfkit
+        // Mais pour l'instant, on retourne l'erreur
+        return res.status(500).json({
+          success: false,
+          error: 'Impossible de generer le PDF avec Puppeteer',
+          message: NODE_ENV === 'development' ? puppeteerError.message : undefined,
+          fallback: false
+        });
+      }
+    }
+    
+    // ==========================================================================
+    // ANCIEN SYSTEME: Utiliser pdfkit pour les formulaires sans template
+    // ==========================================================================
     const PDFDocument = require('pdfkit');
     
     // Utiliser les marges personnalisées si définies

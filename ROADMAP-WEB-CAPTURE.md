@@ -38,10 +38,10 @@ Transformer Form2Sign : passer de la génération PDF directe (pdfkit) à la cap
 - Nettoyer ancien code pdfkit
 
 ## Phase 2 : Backend Noyau (4-6h)
-- Implémenter generateHtmlFromTemplate()
-- Implémenter captureHtmlToPdf()
-- Créer route GET /api/forms/:id/preview
-- Modifier POST /api/generate-pdf
+- ✅ Implémenter generateHtmlFromTemplate()
+- ✅ Implémenter captureHtmlToPdf()
+- ✅ Créer route GET /api/forms/:id/preview
+- ✅ Modifier POST /api/generate-pdf
 
 ## Phase 3 : Frontend Aperçu (3-4h)
 - Créer preview.html
@@ -171,5 +171,6 @@ RUN apt-get update && apt-get install -y \
 - ✅ Plan validé
 - ✅ Decisions prises
 - ✅ Implémentation: Phase 1 (Préparation) - **TERMINEE**
+- ✅ Implémentation: Phase 2 (Backend Noyau) - **TERMINEE**
 
-**Prochaine etape** : Commencer Phase 2 (Backend Noyau)
+**Prochaine etape** : Commencer Phase 3 (Frontend Aperçu)
