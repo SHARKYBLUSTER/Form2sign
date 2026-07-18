@@ -1142,6 +1142,8 @@ function renderSeparator(doc, section, pageWidth) {
      .stroke();
   
   doc.restore();
+  // Réinitialiser lineWidth à 1 après le séparateur pour éviter d'affecter les autres éléments
+  doc.lineWidth(1);
   doc.moveDown();
 }
 
