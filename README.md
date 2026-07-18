@@ -179,7 +179,7 @@ curl -I http://localhost:3000/api/pdfs/download/[NOM_DU_PDF].pdf
 
 ## 📄 Documentation Additionnelle
 
-- [ROADMAP-PDF-ENRICHMENT.md](ROADMAP-PDF-ENRICHMENT.md) - Roadmap pour l'enrichissement des PDF
+- [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) - Roadmap pour la refactorisation capture web vers PDF
 - [DEV_LOG.md](DEV_LOG.md) - Journal de développement complet
 
 ---
@@ -572,7 +572,11 @@ docker compose up -d
 
 ## 🎨 Personnalisation des PDF
 
-Form2Sign permet de personnaliser l'apparence des PDF generes directement depuis le fichier YAML de chaque formulaire.
+> **⚠️ NOUVELLE VERSION 2.0+** : À partir de la version 2.0, Form2Sign utilise un système de **capture web vers PDF** (voir [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) pour la migration).
+>
+> Le système actuel (pdfkit) sera remplacé par un système où vous définissez une **page web HTML** dans votre YAML, puis le PDF est une capture exacte de cette page.
+
+Form2Sign permet actuellement de personnaliser l'apparence des PDF generes directement depuis le fichier YAML de chaque formulaire via pdfkit.
 
 ### Fonctionnalites disponibles (via la section `pdf` dans le YAML) :
 - **Logo** : Ajout d'un logo en en-tête (haut à gauche, centré ou à droite)
@@ -583,7 +587,7 @@ Form2Sign permet de personnaliser l'apparence des PDF generes directement depuis
 - **Marges** : Personnalisation des marges de la page
 - **Variables dynamiques** : Utilisation de `{date}`, `{champ_id}`, etc.
 
-### Exemple minimal :
+### Exemple minimal (système actuel) :
 ```yaml
 form:
   id: mon_contrat
@@ -605,7 +609,7 @@ form:
       required: true
 ```
 
-> ⚠️ **Pour plus de détails**, consultez [ROADMAP-PDF-ENRICHMENT.md](ROADMAP-PDF-ENRICHMENT.md)
+> 💡 **Pour le nouveau système (v2.0+)**, consultez [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md)
 
 ---
 
@@ -616,11 +620,19 @@ form:
 - Echange des couleurs des boutons **Effacer** (orange) et **Recommencer** (rouge) pour meilleure visibilité
 - Bouton **Recommencer** réinitialise maintenant tout le formulaire
 
+### v2.0.0 - Refactorisation Capture Web vers PDF (Planifié)
+- **Nouveau système de génération PDF** : Passage de pdfkit à Puppeteer pour une capture fidèle de la page web
+- **Nouvelle structure YAML** : Les templates définissent maintenant du HTML au lieu de la structure PDF
+- **Aperçu HTML obligatoire** : L'utilisateur voit un aperçu avant de générer le PDF
+- **Nouvelle dépendance** : Ajout de Puppeteer (^21.0.0)
+- **Configuration Docker** : Ajout des dépendances système pour Chrome
+- Voir [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) pour les détails complets
+
 ### v1.5.1 - Authentification simplifiée (18/07/2026)
 - Suppression du hashing des mots de passe (bcryptjs)
 - Comparaison directe des identifiants depuis le fichier .env
 - Identifiants par defaut: **admin / admin**
-- Mise a jour de la documentation (pas seulement la signature)
+- Mise a jour de la documentation
 
 ### v1.4.0 - Generation de PDF (16/07/2026)
 - Implementation de l'API POST /api/generate-pdf

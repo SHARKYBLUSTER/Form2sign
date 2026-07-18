@@ -607,3 +607,60 @@ docker volume prune
 
 *Derniere mise a jour : 18/07/2026 - Gestion des Logos*
 *Projet : Form2Sign*
+
+---
+
+### 18/07/2026 - Roadmap : Refactorisation Capture Web vers PDF (v2.0.0)
+- **Nouvelle architecture** : Passage du système de génération PDF directe (pdfkit) à un système de **capture web vers PDF**
+- **Objectif** : Permettre une capture EXACTE de la page web remplie, offrant plus de flexibilité et de fidélité
+- **Bibliothèque choisie** : Puppeteer (rendu fidèle avec Chrome/Chromium)
+- **Nouveau flux** :
+  - YAML définit une page web HTML avec placeholders
+  - Utilisateur remplit le formulaire
+  - **Aperçu HTML obligatoire** avant validation
+  - PDF = capture exacte de la page via Puppeteer
+- **Création du document** : [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md)
+- **Décisions validées** :
+  - ✅ Puppeteer pour la conversion HTML→PDF
+  - ✅ Aperçu HTML obligatoire avant génération
+  - ✅ Pas de rétrocompatibilité (migration complète)
+- **6 phases prévues** :
+  1. Préparation et Configuration (2-4h)
+  2. Backend - Noyau (4-6h)
+  3. Frontend - Aperçu (3-4h)
+  4. Migration et Exemples (2-3h)
+  5. Tests (2-3h)
+  6. Documentation (1-2h)
+- **Timeline estimée** : 1-2 semaines
+- **Fichiers créés** :
+  - `ROADMAP-WEB-CAPTURE.md` (roadmap détaillée)
+- **Fichiers à modifier** :
+  - `package.json` (ajout puppeteer)
+  - `Dockerfile` (dépendances Chrome)
+  - `docker-compose.yml` (mémoire: 2GB)
+  - `backend/app.js` (nouvelles fonctions + routes)
+  - `frontend/views/preview.html` (nouveau)
+  - `frontend/views/form.html` (modifié)
+- **Exemple nouvelle structure YAML** :
+  ```yaml
+  form:
+    id: mon_contrat
+    title: "Contrat"
+    template:
+      style: "body { font-family: Arial; }"
+      layout: "<h1>{title}</h1><p>Client: {client_name}</p>"
+      pdf:
+        format: A4
+        margin: 10mm
+    fields:
+      - id: client_name
+        type: text
+        label: "Nom client"
+    signature:
+      required: true
+  ```
+- **Prochaines étapes** : Commencer la Phase 1 (Préparation)
+- **Statut** : 📋 Planifié - Roadmap validée, prêt pour l'implémentation
+
+*Derniere mise a jour : 18/07/2026 - Roadmap Capture Web vers PDF*
+*Projet : Form2Sign*
