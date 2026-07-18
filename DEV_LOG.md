@@ -664,3 +664,15 @@ docker volume prune
 
 *Derniere mise a jour : 18/07/2026 - Roadmap Capture Web vers PDF*
 *Projet : Form2Sign*
+
+---
+
+### 18/07/2026 - Migration Complète vers Puppeteer (v2.0.0 TERMINÉE)
+- **Migration terminée** : Toutes les phases 1-5 de la ROADMAP-WEB-CAPTURE.md sont terminées
+- **Système PDF** : Passage complet de pdfkit à Puppeteer (capture web vers PDF)
+- **Formulaires migrés** : Tous les templates YAML mis à jour avec la nouvelle structure (template.style + template.layout)
+- **Tests** : Fonctionnement vérifié en production
+- **Documentation** : README.md mis à jour, anciennes références à pdfkit nettoyées
+- **Cleanup** : Suppression de README-PDF-CUSTOMIZATION.md (obsolète - système pdfkit)
+- **Note** : L'ancienne roadmap ROADMAP-PDF-ENRICHMENT.md mentionnée dans ce journal n'a pas été créée car remplacée par ROADMAP-WEB-CAPTURE.md
+- **Statut** : ✅ PRODUCTION READY

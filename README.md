@@ -415,11 +415,31 @@ Via l'interface web :
 
 **Attention** : Cette action est irreversible. Le fichier YAML est définitivement supprimé du serveur.
 
+### Format v2.0+ (recommandé) :
 ```yaml
 form:
   id: mon_formulaire
   title: "Mon Super Formulaire"
   description: "Description du formulaire"
+  
+  template:
+    style: |
+      body { font-family: Arial; max-width: 800px; margin: 0 auto; }
+      .signature-area { border: 2px dashed #ccc; width: 300px; height: 100px; }
+    
+    layout: |
+      <h1>Mon Formulaire</h1>
+      <p><strong>Nom:</strong> {nom}</p>
+      <p><strong>Email:</strong> {email}</p>
+      <div class="signature-area">
+        <img src="{signature}" alt="Signature" />
+      </div>
+    
+    pdf:
+      format: A4
+      orientation: portrait
+      margin: 15mm
+
   fields:
     - id: nom
       label: "Nom complet"
@@ -432,11 +452,6 @@ form:
       type: email
       required: true
       validation: "email"
-    
-    - id: date_naissance
-      label: "Date de naissance"
-      type: date
-      required: false
 
   signature:
     required: true
@@ -556,7 +571,7 @@ docker compose up -d
 | express | ^4.18.2 | Framework web |
 | express-session | ^1.17.3 | Gestion des sessions |
 | dotenv | ^16.3.1 | Chargement des variables d'environnement |
-| pdfkit | ^0.15.0 | Generation des PDFs |
+| puppeteer | ^21.0.0 | Capture web vers PDF |
 | js-yaml | ^4.1.0 | Parsing des fichiers YAML |
 | cors | ^2.8.5 | Gestion CORS |
 | multer | ^1.4.5-lts.1 | Upload de fichiers |
@@ -570,46 +585,65 @@ docker compose up -d
 
 ---
 
-## 🎨 Personnalisation des PDF
+## 🎨 Personnalisation des PDF (v2.0+)
 
-> **⚠️ NOUVELLE VERSION 2.0+** : À partir de la version 2.0, Form2Sign utilise un système de **capture web vers PDF** (voir [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) pour la migration).
->
-> Le système actuel (pdfkit) sera remplacé par un système où vous définissez une **page web HTML** dans votre YAML, puis le PDF est une capture exacte de cette page.
+Form2Sign utilise maintenant un système de **capture web vers PDF** via Puppeteer. Vous définissez une page web HTML/CSS dans votre YAML, et le PDF est une capture exacte de cette page.
 
-Form2Sign permet actuellement de personnaliser l'apparence des PDF generes directement depuis le fichier YAML de chaque formulaire via pdfkit.
+### Nouvelle structure YAML (v2.0+) :
 
-### Fonctionnalites disponibles (via la section `pdf` dans le YAML) :
-- **Logo** : Ajout d'un logo en en-tête (haut à gauche, centré ou à droite)
-- **Texte d'introduction** : Texte avec sauts de ligne avant les champs
-- **Sections personnalisées** : Ajout de texte, séparateurs, images, espacements
-- **Pied de page personnalisé** : Avec pagination automatique
-- **Styles** : Contrôle des polices, couleurs, tailles
-- **Marges** : Personnalisation des marges de la page
-- **Variables dynamiques** : Utilisation de `{date}`, `{champ_id}`, etc.
-
-### Exemple minimal (système actuel) :
 ```yaml
 form:
   id: mon_contrat
   title: "Contrat Client"
-  pdf:
-    header:
-      logo: "/static/images/logo.png"
-      logo_position: "top-left"
-      title: "CONTRAT OFFICIEL"
-    introduction: "Ce document officialise votre accord.\n\nDate: {date}"
-    footer:
-      left: "© 2024 Entreprise"
-      center: "Page {pageNumber} de {pageCount}"
-      right: "Généré le {date}"
+  
+  template:
+    # Styles CSS pour la page
+    style: |
+      body { font-family: Arial; }
+      .header { text-align: center; }
+      .signature-area { border: 2px dashed #ccc; }
+      
+    # Layout HTML avec placeholders
+    layout: |
+      <div class="header">
+        <h1>CONTRAT</h1>
+        <p>Entre {company_name} et {client_name}</p>
+      </div>
+      <p><strong>Date:</strong> {date}</p>
+      <div class="signature-area">
+        <img src="{signature}" alt="Signature" />
+      </div>
+    
+    # Options PDF
+    pdf:
+      format: A4
+      orientation: portrait
+      margin: 15mm
+
   fields:
-    - id: nom_client
+    - id: company_name
+      label: "Nom de l'entreprise"
+      type: text
+      required: true
+    - id: client_name
       label: "Nom du client"
       type: text
       required: true
+
+  signature:
+    required: true
+    label: "Signature"
 ```
 
-> 💡 **Pour le nouveau système (v2.0+)**, consultez [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md)
+### Fonctionnalités disponibles :
+- **Placeholders dynamiques** : `{field_id}`, `{date}`, `{time}`, `{form_id}`, `{form_title}`, `{signature}`
+- **CSS complet** : Tous les styles CSS standard sont supportés
+- **Images et logos** : Via `<img src="/static/logos/nom.png">`
+- **Format PDF** : A4, A5, Letter, Legal
+- **Orientation** : portrait ou landscape
+- **Marges** : Personnalisation complète
+
+Pour plus de détails, consultez [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md).
 
 ---
 
@@ -620,12 +654,13 @@ form:
 - Echange des couleurs des boutons **Effacer** (orange) et **Recommencer** (rouge) pour meilleure visibilité
 - Bouton **Recommencer** réinitialise maintenant tout le formulaire
 
-### v2.0.0 - Refactorisation Capture Web vers PDF (Planifié)
+### v2.0.0 - Refactorisation Capture Web vers PDF (18/07/2026)
 - **Nouveau système de génération PDF** : Passage de pdfkit à Puppeteer pour une capture fidèle de la page web
-- **Nouvelle structure YAML** : Les templates définissent maintenant du HTML au lieu de la structure PDF
+- **Nouvelle structure YAML** : Les templates définissent maintenant du HTML/CSS au lieu de la structure PDF
 - **Aperçu HTML obligatoire** : L'utilisateur voit un aperçu avant de générer le PDF
 - **Nouvelle dépendance** : Ajout de Puppeteer (^21.0.0)
 - **Configuration Docker** : Ajout des dépendances système pour Chrome
+- Migration complète des formulaires existants vers le nouveau format
 - Voir [ROADMAP-WEB-CAPTURE.md](ROADMAP-WEB-CAPTURE.md) pour les détails complets
 
 ### v1.5.1 - Authentification simplifiée (18/07/2026)
@@ -635,11 +670,9 @@ form:
 - Mise a jour de la documentation
 
 ### v1.4.0 - Generation de PDF (16/07/2026)
-- Implementation de l'API POST /api/generate-pdf
-- Generation de PDF avec PDFKit contenant les donnees du formulaire, la signature et la date
+- Implementation initiale de l'API POST /api/generate-pdf
 - Stockage automatique des PDFs generes dans uploads/pdfs/
 - Nom de fichier unique: [date]_[timestamp]_[formId].pdf
-- Retourne l'URL de telechargement du PDF au frontend
 
 ### v1.3.0 - Suppression de formulaires (16/07/2026)
 - Ajout d'une icône poubelle sur chaque carte de formulaire
