@@ -1007,12 +1007,8 @@ function renderHeader(doc, pdfOptions, formValues = {}, context = {}) {
         const logoFilename = path.basename(header.logo);
         const logoStoragePath = path.join(__dirname, LOGO_STORAGE_PATH, logoFilename);
         
-        console.log(`🔍 Cherche logo: ${header.logo} -> ${logoStoragePath}`);
         if (fs.existsSync(logoStoragePath)) {
-          console.log(`✅ Logo trouvé: ${logoStoragePath}`);
           logoBuffer = fs.readFileSync(logoStoragePath);
-        } else {
-          console.warn(`⚠️  Logo non trouvé à: ${logoStoragePath}`);
         }
       } else {
         // Ancienne méthode pour compatibilité
@@ -1671,6 +1667,10 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       doc.moveDown();
     }
     
+    // Separateur avant la signature
+    doc.moveTo(margins.left, doc.y).lineTo(doc.page.width - margins.right, doc.y).stroke();
+    doc.moveDown();
+    
     // Section Signature
     doc.fontSize(14).font('Helvetica-Bold').text('Signature:', { underline: true });
     doc.moveDown();
@@ -1685,21 +1685,13 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         const imageBuffer = Buffer.from(base64Data, 'base64');
         
         // Ajouter l'image de signature au PDF
-        // Redimensionner pour s'adapter a la page - taille réduite
-        const sigWidth = 180;
-        const sigHeight = 50;
+        // Redimensionner pour s'adapter a la page
+        const sigWidth = 300;
+        const sigHeight = 100;
         const pageWidth = doc.page.width - margins.left - margins.right;
         const x = (pageWidth - sigWidth) / 2;
         
-        // Dessiner un rectangle de fond gris clair
-        doc.save();
-        doc.fillColor('#e0e0e0');
-        doc.rect(x, doc.y, sigWidth, sigHeight).fill();
-        doc.restore();
-        
-        // Ajouter l'image de signature par-dessus
         doc.image(imageBuffer, x, doc.y, { width: sigWidth, height: sigHeight });
-        
         doc.moveDown(2);
       } catch (err) {
         console.warn('Impossible de decoder la signature:', err);
