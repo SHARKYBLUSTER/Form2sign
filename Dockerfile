@@ -17,7 +17,7 @@ COPY package*.json ./
 # Install Chrome dependencies for Puppeteer
 RUN apk add --no-cache \
     ca-certificates \
-    fonts-liberation \
+    ttf-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
@@ -54,7 +54,7 @@ WORKDIR /app
 # Install Chrome dependencies for Puppeteer (production)
 RUN apk add --no-cache \
     ca-certificates \
-    fonts-liberation \
+    ttf-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
@@ -76,9 +76,7 @@ RUN apk add --no-cache \
     chromium \
     nss \
     freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont-ttf
+    harfbuzz
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
