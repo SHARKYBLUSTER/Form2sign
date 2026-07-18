@@ -1090,6 +1090,10 @@ function renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues = {}, c
   const originalFontSize = doc._fontSize || 12;
   const originalFont = doc._font || 'Helvetica';
   const originalColor = doc._fillColor || '#000000';
+  
+  // Valider que originalFont est une police PDF valide
+  const validFonts = ['Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique', 'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic', 'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique', 'Symbol', 'ZapfDingbats'];
+  const safeOriginalFont = validFonts.includes(originalFont) ? originalFont : 'Helvetica';
 
   // Se positionner en bas de page
   const margins = doc._margins || { bottom: 50 };
@@ -1129,8 +1133,12 @@ function renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues = {}, c
   }
 
   if (footerText) {
+    // Valider la police du footer
+    const footerFont = footer.font || 'Helvetica';
+    const safeFooterFont = validFonts.includes(footerFont) ? footerFont : 'Helvetica';
+    
     doc.fontSize(footer.font_size || 8)
-       .font(footer.font || 'Helvetica')
+       .font(safeFooterFont)
        .fillColor(footer.color || '#999999');
 
     const align = footer.align || 'center';
@@ -1143,7 +1151,7 @@ function renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues = {}, c
   // Restaurer la position et le style
   doc.y = originalY;
   doc.fontSize(originalFontSize);
-  doc.font(originalFont);
+  doc.font(safeOriginalFont);
   doc.fillColor(originalColor);
 }
 
