@@ -19,13 +19,10 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-liberation \
     alsa-lib \
-    atk \
-    at-spi2-core \
     cups \
     dbus \
     libdrm \
     mesa-gbm \
-    gtk+3.0 \
     nspr \
     nss \
     libxcomposite \
@@ -55,13 +52,10 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-liberation \
     alsa-lib \
-    atk \
-    at-spi2-core \
     cups \
     dbus \
     libdrm \
     mesa-gbm \
-    gtk+3.0 \
     nspr \
     nss \
     libxcomposite \
