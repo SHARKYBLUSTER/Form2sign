@@ -104,6 +104,15 @@ git pull origin main
 docker compose up -d --build
 ```
 
+> ⚠️ **Si vous avez des erreurs de permissions lors du git pull** :
+> ```bash
+> sudo git pull origin main
+> sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
+> sudo chown 1001:1001 ./backend/config/.env
+> sudo chmod 666 ./backend/config/.env
+> ```
+> **Solution recommandée pour éviter ces problèmes** : Utilisez l'Option 1 ci-dessous.
+
 #### Sans Docker
 ```bash
 # Tirer les dernieres modifications
@@ -114,6 +123,56 @@ npm install
 
 # Redemarrer l'application
 npm restart  # ou Ctrl+C puis npm start
+```
+
+---
+
+## ✅ Test et Validation
+
+### Procedure complete pour tester après une mise à jour
+
+#### Methode recommandee (evite les problemes de permissions) :
+```bash
+# 1. Supprimer l'ancien dossier (si vous avez des erreurs de permissions)
+cd ~
+sudo rm -rf Form2sign
+
+# 2. Recloner le depot
+git clone https://github.com/SHARKYBLUSTER/Form2sign.git
+cd Form2sign
+
+# 3. Configurer les permissions AVANT de lancer Docker
+mkdir -p backend/uploads/pdfs backend/forms backend/config
+cp backend/config/.env.example backend/config/.env
+sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
+sudo chown 1001:1001 ./backend/config/.env
+sudo chmod 666 ./backend/config/.env
+
+# 4. Lancer Docker
+docker compose up -d --build
+
+# 5. Verifier que le conteneur est en cours d'execution
+docker compose ps
+```
+
+#### Test rapide :
+1. Ouvrez votre navigateur : `http://localhost:3000`
+2. Connectez-vous avec : **admin** / **admin**
+3. Selectionnez un formulaire
+4. Remplissez les champs et signez
+5. Generez un PDF
+6. Telechargez le PDF et verifiez qu'il s'ouvre sans erreur
+
+#### Verification serveur :
+```bash
+# Lister les PDFs generes
+ls -la backend/uploads/pdfs/
+
+# Voir les logs en temps reel
+docker compose logs -f
+
+# Verifier le Content-Type d'un PDF (doit etre application/pdf)
+curl -I http://localhost:3000/api/pdfs/download/[NOM_DU_PDF].pdf
 ```
 
 ---
