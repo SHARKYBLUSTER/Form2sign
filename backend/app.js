@@ -1636,31 +1636,33 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     // Rendre l'introduction
     renderIntroduction(doc, formPdfOptions, formValues, context);
     
-    // Afficher les champs dans l'ordre défini dans le formulaire
-    const displayKeys = fieldsOrder.length > 0 ? fieldsOrder : Object.keys(formValues);
-    const spacingBetweenFields = formPdfOptions.spacing?.between_fields || 0.5;
-    
-    doc.fontSize(formPdfOptions.styles?.font_size || 12)
-       .font(formPdfOptions.styles?.font_family || 'Helvetica')
-       .fillColor(formPdfOptions.styles?.text_color || '#000000');
-    
-    displayKeys.forEach(key => {
-      if (formValues[key] !== undefined) {
-        const value = formValues[key];
-        doc.text(`${key}: ${value || 'N/A'}`);
-        doc.moveDown(spacingBetweenFields);
-      }
-    });
-    
-    // Espacement avant les sections personnalisées
+    // Afficher les champs dans l'ordre défini dans le formulaire OU les sections personnalisées
+    // Si des custom_sections sont définies, on les utilise à la place de l'affichage basique des champs
     if (formPdfOptions.custom_sections && formPdfOptions.custom_sections.length > 0) {
+      // Espacement avant les sections personnalisées
       const spacingBefore = formPdfOptions.spacing?.before_signature || 1;
       for (let i = 0; i < spacingBefore; i++) {
         doc.moveDown();
       }
       
-      // Rendre les sections personnalisées (avant la signature)
+      // Rendre les sections personnalisées (qui remplacent l'affichage des champs)
       renderCustomSections(doc, formPdfOptions, formValues, context);
+    } else {
+      // Affichage basique des champs (sans custom_sections)
+      const displayKeys = fieldsOrder.length > 0 ? fieldsOrder : Object.keys(formValues);
+      const spacingBetweenFields = formPdfOptions.spacing?.between_fields || 0.5;
+      
+      doc.fontSize(formPdfOptions.styles?.font_size || 12)
+         .font(formPdfOptions.styles?.font_family || 'Helvetica')
+         .fillColor(formPdfOptions.styles?.text_color || '#000000');
+      
+      displayKeys.forEach(key => {
+        if (formValues[key] !== undefined) {
+          const value = formValues[key];
+          doc.text(`${key}: ${value || 'N/A'}`);
+          doc.moveDown(spacingBetweenFields);
+        }
+      });
     }
     
     // Espacement avant la signature
