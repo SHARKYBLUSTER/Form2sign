@@ -18,22 +18,21 @@ COPY package*.json ./
 RUN apk add --no-cache \
     ca-certificates \
     ttf-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libatspi2.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxkbcommon0 \
-    libxrandr2 \
+    alsa-lib \
+    atk \
+    at-spi2-core \
+    cups \
+    dbus \
+    libdrm \
+    mesa-gbm \
+    gtk+3.0 \
+    nspr \
+    nss \
+    libxcomposite \
+    libxdamage \
+    libxfixes \
+    libxkbcommon \
+    libxrandr \
     xdg-utils \
     ttf-freefont
 
@@ -55,26 +54,24 @@ WORKDIR /app
 RUN apk add --no-cache \
     ca-certificates \
     ttf-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libatspi2.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxkbcommon0 \
-    libxrandr2 \
+    alsa-lib \
+    atk \
+    at-spi2-core \
+    cups \
+    dbus \
+    libdrm \
+    mesa-gbm \
+    gtk+3.0 \
+    nspr \
+    nss \
+    libxcomposite \
+    libxdamage \
+    libxfixes \
+    libxkbcommon \
+    libxrandr \
     xdg-utils \
     ttf-freefont \
     chromium \
-    nss \
     freetype \
     harfbuzz
 
