@@ -384,7 +384,7 @@ form:
     layout: |
       <!-- EN-TETE -->
       <div class="document-header">
-        <img src="/static/logos/logo.jpg" alt="Logo Entreprise" />
+        <img src="/static/logos/form2sign-logo.jpg" alt="Logo Entreprise" />
         <h1>{form_title}</h1>
         <p class="subtitle">{document_type}</p>
         <p class="ref">Référence: {reference} | Date: {date}</p>

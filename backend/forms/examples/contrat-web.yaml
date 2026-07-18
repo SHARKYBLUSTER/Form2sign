@@ -234,7 +234,7 @@ form:
     
     layout: |
       <div class="header">
-        <img src="/static/logos/logo.jpg" alt="Logo Entreprise" />
+        <img src="/static/logos/form2sign-logo.jpg" alt="Logo Entreprise" />
         <h1>CONTRAT DE PRESTATION DE SERVICES</h1>
         <p class="subtitle">Document juridique electronique</p>
       </div>

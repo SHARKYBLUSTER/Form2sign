@@ -140,7 +140,7 @@ form:
     # Layout HTML de la page (contenu principal)
     layout: |
       <div class="header">
-        <img src="/static/logos/logo.jpg" alt="Logo" />
+        <img src="/static/logos/form2sign-logo.jpg" alt="Logo" />
         <h1>{form_title}</h1>
         <p class="subtitle">Document electronique a signer</p>
       </div>

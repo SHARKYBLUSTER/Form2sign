@@ -35,6 +35,12 @@ form:
         margin-bottom: 30px;
       }
       
+      .header img {
+        max-width: 120px;
+        height: auto;
+        margin-bottom: 10px;
+      }
+      
       .header h1 {
         color: #007bff;
         margin-bottom: 5px;
@@ -99,6 +105,7 @@ form:
     # Layout HTML simple
     layout: |
       <div class="header">
+        <img src="/static/logos/form2sign-logo.jpg" alt="Logo" />
         <h1>{form_title}</h1>
         <p>{form_id} - Document à signer</p>
       </div>
