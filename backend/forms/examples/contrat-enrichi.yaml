@@ -10,7 +10,7 @@
 # 3. Remplissez et signez le formulaire
 # 4. Téléchargez le PDF généré
 #
-# Logo par défaut: /static/logos/form2sign-logo.svg (déjà inclus)
+# Logo par défaut: /static/logos/form2sign-logo.jpg (déjà inclus)
 # =============================================================================
 
 form:
@@ -160,7 +160,7 @@ form:
     
     # Configuration de l'en-tête avec logo et titre dynamique
     header:
-      logo: /static/logos/form2sign-logo.svg  # Logo par défaut Form2Sign
+      logo: /static/logos/form2sign-logo.jpg  # Logo par défaut Form2Sign
       logo_position: top-left    # Logo en haut à gauche
       logo_width: 120            # Largeur du logo
       logo_height: 60            # Hauteur du logo
