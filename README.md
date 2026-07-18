@@ -201,8 +201,9 @@ cp backend/config/.env.example backend/config/.env
 | SESSION_SECRET | Cle secrete pour les cookies de session | `super_secret_key_form2sign_2026_change_me` | ✅ Oui |
 | PORT | Port sur lequel l'application ecoute | `3000` | ✅ Oui |
 | NODE_ENV | Environnement (development/production) | `development` | ❌ Non |
-| PDF_STORAGE_PATH | Chemin de stockage des PDFs | `./backend/uploads/pdfs` | ❌ Non |
-| FORMS_DIRECTORY | Repertoire des formulaires YAML | `./backend/forms` | ❌ Non |
+| PDF_STORAGE_PATH | Chemin de stockage des PDFs | `./uploads/pdfs` | ❌ Non |
+| FORMS_DIRECTORY | Repertoire des formulaires YAML | `./forms` | ❌ Non |
+| LOGO_STORAGE_PATH | Chemin de stockage des logos | `./uploads/logos` | ❌ Non |
 
 > ⚠️ **IMPORTANT** : Ne commitez JAMAIS le fichier `.env` dans Git. Il contient des informations sensibles.
 >
@@ -244,6 +245,23 @@ cp backend/config/.env.example backend/config/.env
 1. Une fois le PDF genere, vous pourrez le telecharger
 2. Les PDFs sont stockes dans `backend/uploads/pdfs/`
 
+### Gestion des Logos
+1. Accedez a la page **Configuration** via la navbar
+2. Dans la section **Gestion des Logos**, vous pouvez:
+   - Uploader des logos au format PNG, JPG, JPEG ou SVG (taille max: 5 Mo)
+   - Visualiser tous les logos uploadés
+   - Supprimer des logos
+3. Pour utiliser un logo dans un formulaire, referencez-le dans votre fichier YAML:
+   ```yaml
+   pdf:
+     header:
+       logo: /static/logos/votre-logo.png
+       logo_width: 100
+       logo_height: 50
+       logo_position: top-left
+   ```
+   > **Note**: Les logos sont accessibles via le chemin `/api/logos/[filename]` dans l'API ou `/static/logos/[filename]` dans les formulaires YAML
+
 ---
 
 ## 🔌 Routes API
@@ -273,6 +291,14 @@ cp backend/config/.env.example backend/config/.env
 | DELETE | `/api/pdfs/:id` | Supprime un PDF | ✅ Oui |
 | GET | `/api/pdfs/download/:filename` | Telecharge un PDF | ✅ Oui |
 | GET | `/api/pdfs/view/:filename` | Visualise un PDF dans le navigateur | ✅ Oui |
+
+### Logos
+| Methode | Endpoint | Description | Authentification requise |
+|---------|----------|-------------|--------------------------|
+| GET | `/api/logos` | Liste tous les logos disponibles | ✅ Oui |
+| POST | `/api/logos/upload` | Telecharge un nouveau logo (PNG, JPG, JPEG, SVG) | ✅ Oui |
+| DELETE | `/api/logos/:filename` | Supprime un logo | ✅ Oui |
+| GET | `/api/logos/:filename` | Charge un logo pour affichage | ✅ Oui |
 
 ---
 

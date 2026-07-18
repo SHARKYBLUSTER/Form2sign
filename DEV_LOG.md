@@ -575,3 +575,35 @@ docker volume prune
 
 *Derniere mise a jour : 18/07/2026 - v2.0.3 (Correction PDF corrompus)
 *Projet : Form2Sign*
+
+---
+
+### 18/07/2026 - Gestion des Logos (Nouvelle Fonctionnalite)
+- **Nouvelle fonctionnalite** : Systeme complet de gestion des logos pour l'enrichissement PDF
+- Implementation backend :
+  - Ajout de LOGO_STORAGE_PATH dans la configuration (./uploads/logos)
+  - Creation d'une configuration multer specifique pour les logos (uploadLogo)
+  - Support des formats: PNG, JPG, JPEG, SVG (taille max: 5 Mo)
+  - Implementation des routes API :
+    - GET /api/logos - Liste tous les logos disponibles
+    - POST /api/logos/upload - Upload d'un nouveau logo
+    - DELETE /api/logos/:filename - Suppression d'un logo
+    - GET /api/logos/:filename - Service d'un logo pour affichage
+  - Securisation contre le path traversal dans toutes les routes
+- Implementation frontend :
+  - Ajout d'une section Gestion des Logos dans config.html
+  - Interface d'upload avec previsualisation des formats acceptes
+  - Affichage des logos sous forme de grid responsive (1-3 colonnes)
+  - Boutons de suppression avec confirmation
+  - Affichage de la taille et du chemin d'acces pour chaque logo
+  - JavaScript pour gerer l'upload, la liste et la suppression
+- Documentation :
+  - Mise a jour de README.md avec:
+    - Nouvelle variable d'environnement LOGO_STORAGE_PATH
+    - Routes API pour les logos
+    - Guide d'utilisation des logos dans les formulaires YAML
+- **Utilisation** : Les utilisateurs peuvent maintenant uploader des logos via l'interface Configuration, puis les utiliser dans leurs formulaires YAML avec header.logo
+- **Statut** : Termine et teste
+
+*Derniere mise a jour : 18/07/2026 - Gestion des Logos*
+*Projet : Form2Sign*

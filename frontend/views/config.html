@@ -168,6 +168,81 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Logo Management Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">
+                            <i class="fas fa-image me-2"></i>
+                            Gestion des Logos
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Formats supportés:</strong> PNG, JPG, JPEG, SVG<br>
+                            <strong>Taille maximale:</strong> 5 Mo<br>
+                            <strong>Utilisation:</strong> Les logos uploadés peuvent être utilisés dans vos formulaires YAML via le champ <code>header.logo</code>
+                            (ex: <code>/static/logos/mon-logo.png</code>)
+                        </div>
+                        
+                        <!-- Logo Upload Form -->
+                        <form id="logo-upload-form" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="logo-file" class="form-label">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Sélectionner un logo à uploader
+                                </label>
+                                <input type="file" 
+                                       class="form-control form-control-lg" 
+                                       id="logo-file" 
+                                       name="logo"
+                                       accept=".png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/jpg,image/svg+xml"
+                                       required>
+                                <div class="form-text">
+                                    Formats acceptés: PNG, JPG, JPEG, SVG. Taille max: 5 Mo
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2">
+                                <button type="submit" 
+                                        class="btn btn-success"
+                                        id="upload-logo-btn">
+                                    <i class="fas fa-upload me-2"></i> Uploader le Logo
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Logos List -->
+                        <h5 class="mb-3">
+                            <i class="fas fa-list me-2"></i>
+                            Logos disponibles
+                        </h5>
+                        
+                        <div id="loading-logos" class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                            <p class="mt-2">Chargement des logos...</p>
+                        </div>
+                        
+                        <div id="logos-list" class="d-none">
+                            <div id="no-logos-message" class="alert alert-warning d-none">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Aucun logo disponible. Uploadez votre premier logo.
+                            </div>
+                            <div id="logos-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3"></div>
+                        </div>
+                        
+                        <div id="logos-error" class="alert alert-danger d-none" role="alert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Save Confirmation Modal -->
@@ -235,6 +310,7 @@
             
             await loadConfig();
             setupEventListeners();
+            await loadLogos();
         });
         
         // Charger la configuration depuis l'API
@@ -388,6 +464,204 @@
         document.getElementById('discardConfirmModal').addEventListener('hidden.bs.modal', () => {
             // Si l'utilisateur a cliqué sur Non, on ne fait rien
             // La modale se ferme simplement
+        });
+        
+        // ============================================================================
+        // GESTION DES LOGOS
+        // ============================================================================
+        
+        // Charger la liste des logos
+        async function loadLogos() {
+            const loadingElement = document.getElementById('loading-logos');
+            const logosListElement = document.getElementById('logos-list');
+            const logosGridElement = document.getElementById('logos-grid');
+            const noLogosElement = document.getElementById('no-logos-message');
+            const errorElement = document.getElementById('logos-error');
+            
+            try {
+                loadingElement.classList.remove('d-none');
+                logosListElement.classList.add('d-none');
+                errorElement.classList.add('d-none');
+                
+                const response = await fetch('/api/logos', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Impossible de charger les logos');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.logos) {
+                    logosGridElement.innerHTML = '';
+                    
+                    if (data.logos.length === 0) {
+                        noLogosElement.classList.remove('d-none');
+                    } else {
+                        noLogosElement.classList.add('d-none');
+                        
+                        // Afficher chaque logo
+                        data.logos.forEach(logo => {
+                            const logoCard = document.createElement('div');
+                            logoCard.className = 'col';
+                            
+                            const ext = logo.filename.split('.').pop().toLowerCase();
+                            const isSvg = ext === 'svg';
+                            const isImage = ['png', 'jpg', 'jpeg'].includes(ext);
+                            
+                            let logoPreview = '';
+                            if (isImage) {
+                                logoPreview = `<img src="/api/logos/${logo.filename}" alt="${logo.filename}" class="img-fluid mb-2" style="max-height: 100px;">`;
+                            } else if (isSvg) {
+                                logoPreview = `<img src="/api/logos/${logo.filename}" alt="${logo.filename}" class="img-fluid mb-2" style="max-height: 100px;">`;
+                            } else {
+                                logoPreview = `<i class="fas fa-file-image fa-3x text-secondary mb-2"></i>`;
+                            }
+                            
+                            logoCard.innerHTML = `
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        ${logoPreview}
+                                        <h6 class="card-title mb-2">${logo.filename}</h6>
+                                        <p class="card-text small text-muted">
+                                            ${(logo.size / 1024).toFixed(2)} Ko
+                                        </p>
+                                    </div>
+                                    <div class="card-footer bg-light text-center">
+                                        <button class="btn btn-danger btn-sm delete-logo-btn" 
+                                                data-filename="${logo.filename}"
+                                                title="Supprimer ce logo">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                        <small class="ms-2">
+                                            <code>/static/logos/${logo.filename}</code>
+                                        </small>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            logosGridElement.appendChild(logoCard);
+                        });
+                    }
+                    
+                    loadingElement.classList.add('d-none');
+                    logosListElement.classList.remove('d-none');
+                    
+                    // Attacher les event listeners aux boutons de suppression
+                    attachDeleteLogoListeners();
+                } else {
+                    throw new Error(data.error || 'Aucune donnée de logos');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                loadingElement.classList.add('d-none');
+                errorElement.textContent = 'Erreur lors du chargement des logos: ' + error.message;
+                errorElement.classList.remove('d-none');
+            }
+        }
+        
+        // Attacher les event listeners aux boutons de suppression
+        function attachDeleteLogoListeners() {
+            document.querySelectorAll('.delete-logo-btn').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.preventDefault();
+                    const filename = btn.getAttribute('data-filename');
+                    
+                    if (confirm(`Voulez-vous vraiment supprimer le logo "${filename}" ?`)) {
+                        try {
+                            const response = await fetch(`/api/logos/${filename}`, {
+                                method: 'DELETE',
+                                credentials: 'include'
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.success) {
+                                // Recharger la liste des logos
+                                loadLogos();
+                            } else {
+                                alert('Erreur: ' + (data.error || 'Impossible de supprimer le logo'));
+                            }
+                        } catch (error) {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors de la suppression du logo: ' + error.message);
+                        }
+                    }
+                };
+            });
+        }
+        
+        // Upload d'un logo
+        document.getElementById('logo-upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const uploadBtn = document.getElementById('upload-logo-btn');
+            const fileInput = document.getElementById('logo-file');
+            const errorElement = document.getElementById('logos-error');
+            
+            // Vérifier qu'un fichier est sélectionné
+            if (!fileInput.files || fileInput.files.length === 0) {
+                errorElement.textContent = 'Veuillez sélectionner un fichier.';
+                errorElement.classList.remove('d-none');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            // Vérifier la taille du fichier (5 Mo max)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                errorElement.textContent = 'Le fichier est trop grand. Taille maximale: 5 Mo.';
+                errorElement.classList.remove('d-none');
+                return;
+            }
+            
+            // Vérifier l'extension
+            const allowedExtensions = ['.png', '.jpg', '.jpeg', '.svg'];
+            const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+            if (!allowedExtensions.includes(ext)) {
+                errorElement.textContent = 'Format de fichier non autorisé. Formats acceptés: PNG, JPG, JPEG, SVG.';
+                errorElement.classList.remove('d-none');
+                return;
+            }
+            
+            // Désactiver le bouton
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Upload en cours...';
+            errorElement.classList.add('d-none');
+            
+            try {
+                const formData = new FormData();
+                formData.append('logo', file);
+                
+                const response = await fetch('/api/logos/upload', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Réinitialiser le formulaire
+                    fileInput.value = '';
+                    
+                    // Recharger la liste des logos
+                    loadLogos();
+                    
+                    alert('Logo téléchargé avec succès!');
+                } else {
+                    throw new Error(data.error || 'Erreur lors de l\'upload');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                errorElement.textContent = 'Erreur lors de l\'upload: ' + error.message;
+                errorElement.classList.remove('d-none');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-upload me-2"></i> Uploader le Logo';
+            }
         });
     </script>
 </body>

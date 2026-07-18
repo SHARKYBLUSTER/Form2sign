@@ -55,11 +55,13 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 // Creer le repertoire de stockage si il n'existe pas
 const PDF_STORAGE_PATH = process.env.PDF_STORAGE_PATH || './uploads/pdfs';
 const FORMS_DIRECTORY = process.env.FORMS_DIRECTORY || './forms';
+const LOGO_STORAGE_PATH = process.env.LOGO_STORAGE_PATH || './uploads/logos';
 
 // Creer les repertoires s'ils n'existent pas
 const directories = [
   PDF_STORAGE_PATH,
-  FORMS_DIRECTORY
+  FORMS_DIRECTORY,
+  LOGO_STORAGE_PATH
 ];
 
 directories.forEach(dir => {
@@ -106,7 +108,7 @@ app.use(session({
   saveUninitialized: false
 }));
 
-// Configuration de multer pour l'upload de fichiers
+// Configuration de multer pour l'upload de fichiers YAML
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 1024 * 1024 }, // 1MB
@@ -117,6 +119,27 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Seuls les fichiers YAML sont autorises'), false);
+    }
+  }
+});
+
+// Configuration de multer pour l'upload de logos
+const uploadLogo = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB pour les logos
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
+    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.svg'];
+    
+    const isValidType = allowedTypes.includes(file.mimetype);
+    const isValidExtension = allowedExtensions.some(ext => 
+      path.extname(file.originalname).toLowerCase() === ext
+    );
+    
+    if (isValidType || isValidExtension) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seuls les fichiers PNG, JPG, JPEG et SVG sont autorisés pour les logos'), false);
     }
   }
 });
@@ -485,6 +508,189 @@ app.post('/api/config', requireAuthRedirect, (req, res) => {
       success: false, 
       error: 'Impossible de sauvegarder la configuration',
       message: NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ============================================================================
+// ROUTES API POUR LA GESTION DES LOGOS
+// ============================================================================
+
+// GET /api/logos - Lister tous les logos disponibles
+app.get('/api/logos', requireAuthRedirect, (req, res) => {
+  try {
+    const logosDir = path.join(__dirname, LOGO_STORAGE_PATH);
+    
+    if (!fs.existsSync(logosDir)) {
+      return res.json({ success: true, logos: [] });
+    }
+    
+    const logoFiles = fs.readdirSync(logosDir).filter(file => 
+      ['.png', '.jpg', '.jpeg', '.svg'].includes(path.extname(file).toLowerCase())
+    );
+    
+    const logos = logoFiles.map(file => ({
+      id: path.parse(file).name,
+      filename: file,
+      url: `/api/logos/${file}`,
+      path: file,
+      size: fs.statSync(path.join(logosDir, file)).size
+    }));
+    
+    res.json({ success: true, logos });
+  } catch (error) {
+    console.error('Erreur lors de la liste des logos:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Impossible de lister les logos' 
+    });
+  }
+});
+
+// POST /api/logos/upload - Uploader un nouveau logo
+app.post('/api/logos/upload', requireAuthRedirect, uploadLogo.single('logo'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Aucun fichier logo téléchargé'
+      });
+    }
+    
+    const logosDir = path.join(__dirname, LOGO_STORAGE_PATH);
+    
+    // Créer le répertoire s'il n'existe pas
+    if (!fs.existsSync(logosDir)) {
+      fs.mkdirSync(logosDir, { recursive: true });
+    }
+    
+    // Générer un nom de fichier unique pour éviter les conflits
+    const timestamp = Date.now();
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const baseName = path.parse(req.file.originalname).name;
+    const safeBaseName = baseName.replace(/[^a-zA-Z0-9-_]/g, '_');
+    const filename = `${safeBaseName}_${timestamp}${ext}`;
+    const filePath = path.join(logosDir, filename);
+    
+    // Sauvegarder le fichier
+    fs.writeFileSync(filePath, req.file.buffer);
+    
+    console.log(`✅ Logo uploadé: ${filename}`);
+    
+    res.json({
+      success: true,
+      message: 'Logo téléchargé avec succès',
+      logo: {
+        id: path.parse(filename).name,
+        filename: filename,
+        url: `/api/logos/${filename}`,
+        path: filename
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'upload du logo:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Impossible de télécharger le logo',
+      message: NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// DELETE /api/logos/:filename - Supprimer un logo
+app.delete('/api/logos/:filename', requireAuthRedirect, (req, res) => {
+  try {
+    const { filename } = req.params;
+    const logosDir = path.join(__dirname, LOGO_STORAGE_PATH);
+    const filePath = path.join(logosDir, filename);
+    
+    // Vérifier que le chemin est valide et dans le répertoire des logos
+    const normalizedPath = path.normalize(filePath);
+    const normalizedLogsDir = path.normalize(logosDir);
+    
+    if (!normalizedPath.startsWith(normalizedLogsDir)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Accès interdit: chemin invalide'
+      });
+    }
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Logo non trouvé'
+      });
+    }
+    
+    // Supprimer le fichier
+    fs.unlinkSync(filePath);
+    
+    console.log(`🗑️  Logo supprimé: ${filename}`);
+    
+    res.json({
+      success: true,
+      message: 'Logo supprimé avec succès',
+      filename: filename
+    });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du logo:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Impossible de supprimer le logo',
+      message: NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET /api/logos/:filename - Servir un logo
+app.get('/api/logos/:filename', requireAuthRedirect, (req, res) => {
+  try {
+    const { filename } = req.params;
+    const logosDir = path.join(__dirname, LOGO_STORAGE_PATH);
+    const filePath = path.join(logosDir, filename);
+    
+    // Vérifier que le chemin est valide
+    const normalizedPath = path.normalize(filePath);
+    const normalizedLogsDir = path.normalize(logosDir);
+    
+    if (!normalizedPath.startsWith(normalizedLogsDir)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Accès interdit: chemin invalide'
+      });
+    }
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Logo non trouvé'
+      });
+    }
+    
+    // Envoyer le fichier
+    const ext = path.extname(filename).toLowerCase();
+    let contentType = 'application/octet-stream';
+    
+    switch (ext) {
+      case '.png':
+        contentType = 'image/png';
+        break;
+      case '.jpg':
+      case '.jpeg':
+        contentType = 'image/jpeg';
+        break;
+      case '.svg':
+        contentType = 'image/svg+xml';
+        break;
+    }
+    
+    res.contentType(contentType);
+    res.sendFile(filePath);
+  } catch (error) {
+    console.error('Erreur lors du chargement du logo:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Impossible de charger le logo'
     });
   }
 });
