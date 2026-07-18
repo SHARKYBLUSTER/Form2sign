@@ -79,6 +79,10 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/backend ./backend
 COPY --from=builder /app/frontend ./frontend
 
+# Create required directories
+RUN mkdir -p /app/backend/uploads/pdfs /app/backend/forms && \
+    chmod -R 777 /app/backend/uploads
+
 # Change ownership to non-root user
 RUN chown -R nodejs:nodejs /app
 

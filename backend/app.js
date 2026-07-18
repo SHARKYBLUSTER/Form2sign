@@ -1238,9 +1238,11 @@ async function captureHtmlToPdf(html, pdfOptions = {}, baseUrl = null) {
     html = html.replace(/src="\/static\//g, `src="${baseUrl}/static/`);
   }
   
-  // Lancer Puppeteer
+  // Lancer Puppeteer avec Chromium systeme dans Alpine
   const browser = await puppeteer.launch({
     headless: 'new',
+    executablePath: '/usr/bin/chromium-browser',
+    timeout: 30000,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -1249,7 +1251,8 @@ async function captureHtmlToPdf(html, pdfOptions = {}, baseUrl = null) {
       '--no-first-run',
       '--no-zygote',
       '--single-process',
-      '--disable-gpu'
+      '--disable-gpu',
+      '--disable-features=site-per-process'
     ]
   });
   
