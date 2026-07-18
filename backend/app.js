@@ -1007,8 +1007,12 @@ function renderHeader(doc, pdfOptions, formValues = {}, context = {}) {
         const logoFilename = path.basename(header.logo);
         const logoStoragePath = path.join(__dirname, LOGO_STORAGE_PATH, logoFilename);
         
+        console.log(`🔍 Cherche logo: ${header.logo} -> ${logoStoragePath}`);
         if (fs.existsSync(logoStoragePath)) {
+          console.log(`✅ Logo trouvé: ${logoStoragePath}`);
           logoBuffer = fs.readFileSync(logoStoragePath);
+        } else {
+          console.warn(`⚠️  Logo non trouvé à: ${logoStoragePath}`);
         }
       } else {
         // Ancienne méthode pour compatibilité
