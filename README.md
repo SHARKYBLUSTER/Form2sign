@@ -135,22 +135,19 @@ npm restart  # ou Ctrl+C puis npm start
 
 #### Methode recommandee (evite les problemes de permissions) :
 ```bash
-# 1. Supprimer l'ancien dossier (si vous avez des erreurs de permissions)
-cd ~
 sudo rm -rf Form2sign
-
-# 2. Recloner le depot
 git clone https://github.com/SHARKYBLUSTER/Form2sign.git
 cd Form2sign
 
-# 3. Configurer les permissions AVANT de lancer Docker
+# 3. Configurez les permissions AVANT de lancer Docker
 mkdir -p backend/uploads/pdfs backend/forms backend/config
 cp backend/config/.env.example backend/config/.env
 sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
 sudo chown 1001:1001 ./backend/config/.env
 sudo chmod 666 ./backend/config/.env
 
-# 4. Lancer Docker
+# 4. Lancez Docker
+docker compose down
 docker compose up -d --build
 
 # 5. Verifier que le conteneur est en cours d'execution
