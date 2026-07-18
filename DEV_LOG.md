@@ -551,5 +551,12 @@ docker volume prune
 - Mise a jour de la documentation (README.md, DEV_LOG.md)
 - Ajout d'une section de resolution de problemes pour les permissions PDF
 
-*Derniere mise a jour : 18/07/2026 - v2.0.2 (Correction permissions PDF)
+### v2.0.3 - Correction PDF corrompus (18/07/2026)
+- **FIX** : Suppression du double stream (finalStream + bufferStream) dans la generation PDF qui corrompait les fichiers
+- **FIX** : Changement de requireAuthRedirect en requireAuth pour toutes les routes /api/pdfs/* 
+  - Cela evite les redirections HTML (vers login.html) qui corrompaient la reponse binaire du PDF
+  - Les routes API returnent maintenant une erreur JSON propre (401) au lieu de rediriger
+- Les PDFs generes sont maintenant intacts et peuvent etre ouverts sans erreur
+
+*Derniere mise a jour : 18/07/2026 - v2.0.3 (Correction PDF corrompus)
 *Projet : Form2Sign*
