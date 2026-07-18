@@ -289,6 +289,21 @@
 
 ---
 
+### 18/07/2026 - Correction Footer PDF et Finalisation
+- **Corrections** : Amélioration de l'affichage du footer dans les PDF générés
+- Modification de la route POST /api/generate-pdf :
+  - Ajout du compteur de pages via l'événement `pageAdded`
+  - Ajout du rendu du footer à la fin du document avec le bon numéro total de pages
+  - Correction du format de pagination quand pageCount est inconnu
+- **Problèmes résolus** :
+  - Footer n'apparaissait que sur la première page → maintenant affiché à la fin du document
+  - Pagination avec {pageCount} maintenant correctement résolue
+- **Fichiers modifiés** :
+  - `backend/app.js` (gestion du footer et pagination)
+- **Statut** : ✅ Terminé
+
+---
+
 ### [Date a venir] - Conteneurisation Docker (Phase 7)
 - **Phase 7** : Finalisation de la configuration Docker
 - Test du conteneur en production
@@ -331,8 +346,8 @@
 | 10 | Personnalisation PDF (Phase 3 - Backend) | ✅ Termine | 17/07/2026 | 17/07/2026 | Lecture des options PDF depuis le YAML |
 | 11 | Personnalisation PDF (Phase 4 - Rendering) | ✅ Termine | 17/07/2026 | 17/07/2026 | Fonctions renderHeader, renderIntroduction, renderCustomSections, renderFooter |
 | 12 | Personnalisation PDF (Phase 5 - Intégration) | ✅ Termine | 17/07/2026 | 17/07/2026 | Intégration dans POST /api/generate-pdf |
-| 13 | Personnalisation PDF (MVP) | ⏳ Planifie | 22/07/2026 | 26/07/2026 | Logo + introduction + variables + espacement |
-| 14 | Personnalisation PDF (Complete) | ⏳ Planifie | 27/07/2026 | 04/08/2026 | Toutes les options de la Solution 1 |
+| 13 | Personnalisation PDF (MVP) | ✅ Termine | 18/07/2026 | 18/07/2026 | Logo + introduction + variables + espacement + footer avec pagination |
+| 14 | Personnalisation PDF (Complete) | ✅ Termine | 18/07/2026 | 18/07/2026 | Toutes les options de la Solution 1 implémentées et testées |
 
 ---
 

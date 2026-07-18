@@ -1110,7 +1110,13 @@ function renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues = {}, c
 
   // Ajouter la pagination si demandée
   if (footer.show_pagination !== false) {
-    const paginationText = footer.pagination_format || 'Page {pageNumber} / {pageCount}';
+    let paginationText = footer.pagination_format || 'Page {pageNumber} / {pageCount}';
+    
+    // Si pageCount est inconnu (0 ou non défini), utiliser un format simplifié
+    if (!pageCount || pageCount <= 1) {
+      paginationText = paginationText.replace('/ {pageCount}', '').replace(' sur {pageCount}', '');
+    }
+    
     const resolvedPagination = resolveVariables(paginationText, {}, footerContext);
     
     if (footerText) {
@@ -1383,7 +1389,7 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     // Suivi de la pagination
     let pageCount = 0;
     
-    // Compter les pages à la fin
+    // Compter les pages
     doc.on('pageAdded', () => {
       pageCount++;
     });
@@ -1463,10 +1469,10 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       doc.moveDown();
     }
     
-    // Rendre le footer sur la première page
-    // Note: PDFKit ne supporte pas nativement les footers dynamiques sur chaque page.
-    // Pour les footers sur toutes les pages, utiliser un package comme pdfkit-page-counter.
-    renderFooter(doc, formPdfOptions, 1, 1, formValues, context);
+    // Rendre le footer sur la dernière page (avec le bon nombre total de pages)
+    if (formPdfOptions.footer && formPdfOptions.footer.text && pageCount > 0) {
+      renderFooter(doc, formPdfOptions, pageCount, pageCount, formValues, context);
+    }
     
     // Finaliser le PDF
     doc.end();
