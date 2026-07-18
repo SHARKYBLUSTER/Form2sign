@@ -54,9 +54,9 @@ Transformer Form2Sign : passer de la génération PDF directe (pdfkit) à la cap
 - ✅ Créer template-avance.yaml
 
 ## Phase 5 : Tests (2-3h)
-- Tests backend (20 scenarios)
-- Tests frontend (10 scenarios)
-- Tests integration
+- ✅ Tests backend (20 scenarios)
+- ✅ Tests frontend (10 scenarios)
+- ✅ Tests integration
 
 ## Phase 6 : Documentation (1-2h)
 - Mettre à jour README.md
@@ -174,5 +174,6 @@ RUN apt-get update && apt-get install -y \
 - ✅ Implémentation: Phase 2 (Backend Noyau) - **TERMINEE**
 - ✅ Implémentation: Phase 3 (Frontend Aperçu) - **TERMINEE**
 - ✅ Implémentation: Phase 4 (Migration) - **TERMINEE**
+- ✅ Implémentation: Phase 5 (Tests) - **TERMINEE**
 
-**Prochaine etape** : Commencer Phase 5 (Tests)
+**Prochaine etape** : Commencer Phase 6 (Documentation)
