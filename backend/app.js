@@ -1688,20 +1688,14 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         // Decoder l'image de la signature
         const imageBuffer = Buffer.from(base64Data, 'base64');
         
-        // Ajouter l'image de signature au PDF avec fond gris
+        // Ajouter l'image de signature au PDF
         // Redimensionner pour s'adapter a la page - taille réduite pour éviter de couvrir toute la page
         const sigWidth = 200;
         const sigHeight = 60;
         const pageWidth = doc.page.width - margins.left - margins.right;
         const x = (pageWidth - sigWidth) / 2;
         
-        // Dessiner un rectangle de fond gris clair
-        doc.save();
-        doc.fillColor('#e0e0e0');
-        doc.rect(x, doc.y, sigWidth, sigHeight).fill();
-        doc.restore();
-        
-        // Ajouter l'image de signature par-dessus (elle a un fond transparent)
+        // Ajouter l'image de signature directement
         doc.image(imageBuffer, x, doc.y, { width: sigWidth, height: sigHeight });
         
         doc.moveDown(2);
