@@ -86,6 +86,10 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Les pages HTML sont gérées par des routes explicites ci-dessous
 app.use('/static', express.static(path.join(__dirname, '../frontend/public')));
 
+// Middleware pour servir les logos uploadés via /static/logos
+// Cela permet d'utiliser les logos dans les formulaires YAML avec header.logo: /static/logos/nom.svg
+app.use('/static/logos', express.static(path.join(__dirname, LOGO_STORAGE_PATH)));
+
 // Configuration CORS
 const corsOptions = {
   origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',

@@ -5,10 +5,12 @@
 # Solution 1: Section pdf dans le template YAML
 #
 # Pour tester:
-# 1. Placez votre logo dans /frontend/public/static/images/logo.png
-# 2. Upload ce fichier via l'interface d'administration
+# 1. Upload votre logo via Configuration > Gestion des Logos
+# 2. Utilisez le chemin /static/logos/[nom-du-fichier] dans header.logo
 # 3. Remplissez et signez le formulaire
 # 4. Téléchargez le PDF généré
+#
+# Logo par défaut: /static/logos/form2sign-logo.svg (déjà inclus)
 # =============================================================================
 
 form:
@@ -158,7 +160,7 @@ form:
     
     # Configuration de l'en-tête avec logo et titre dynamique
     header:
-      logo: /static/images/logo.png  # Chemin relatif à /frontend/public/
+      logo: /static/logos/form2sign-logo.svg  # Logo par défaut Form2Sign
       logo_position: top-left    # Logo en haut à gauche
       logo_width: 120            # Largeur du logo
       logo_height: 60            # Hauteur du logo
