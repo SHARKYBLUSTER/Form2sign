@@ -1739,6 +1739,35 @@ app.post('/api/forms/upload', requireAuthRedirect, upload.single('formFile'), as
   }
 });
 
+// GET /api/forms/:id/download - Telecharger un formulaire YAML
+app.get('/api/forms/:id/download', requireAuthRedirect, (req, res) => {
+  try {
+    const formId = req.params.id;
+    const formsDir = path.join(__dirname, FORMS_DIRECTORY);
+    
+    // Trouver le fichier YAML correspondant
+    const yamlFiles = fs.readdirSync(formsDir).filter(file => file.endsWith('.yaml') || file.endsWith('.yml'));
+    const formFile = yamlFiles.find(file => path.parse(file).name === formId);
+    
+    if (!formFile) {
+      return res.status(404).json({
+        success: false,
+        error: 'Formulaire non trouvé'
+      });
+    }
+    
+    const filePath = path.join(formsDir, formFile);
+    res.download(filePath, formFile);
+  } catch (error) {
+    console.error('Erreur lors du téléchargement du formulaire:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Impossible de télécharger le formulaire',
+      message: NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // DELETE /api/forms/:id - Supprimer un formulaire
 app.delete('/api/forms/:id', requireAuthRedirect, (req, res) => {
   try {
