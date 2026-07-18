@@ -1671,10 +1671,6 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       doc.moveDown();
     }
     
-    // Separateur avant la signature
-    doc.moveTo(margins.left, doc.y).lineTo(doc.page.width - margins.right, doc.y).stroke();
-    doc.moveDown();
-    
     // Section Signature
     doc.fontSize(14).font('Helvetica-Bold').text('Signature:', { underline: true });
     doc.moveDown();
