@@ -179,15 +179,9 @@
                             <div>
                                 <button type="button" 
                                         id="generate-pdf-btn" 
-                                        class="btn btn-success btn-lg me-2">
-                                    <i class="fas fa-file-pdf me-2"></i>
-                                    Générer PDF
-                                </button>
-                                <button type="button" 
-                                        id="download-preview-btn" 
-                                        class="btn btn-outline-primary btn-lg">
-                                    <i class="fas fa-download me-2"></i>
-                                    Télécharger HTML
+                                        class="btn btn-success btn-lg">
+                                    <i class="fas fa-check me-2"></i>
+                                    Approuver
                                 </button>
                             </div>
                         </div>
@@ -386,15 +380,9 @@
                 window.location.href = `/form.html?id=${formId}`;
             });
             
-            // Bouton Générer PDF
+            // Bouton Approuver
             document.getElementById('generate-pdf-btn').addEventListener('click', async () => {
                 await generatePdf();
-            });
-            
-            // Bouton Télécharger HTML
-            document.getElementById('download-preview-btn').addEventListener('click', () => {
-                const html = document.getElementById('preview-html').innerHTML;
-                downloadHtml(html);
             });
         }
         
@@ -428,8 +416,8 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Rediriger vers la page de téléchargement ou afficher le succès
-                    window.location.href = data.pdfUrl || '/pdf-list.html';
+                    // Rediriger vers la liste des formulaires
+                    window.location.href = '/form-list.html';
                 } else {
                     throw new Error(data.error || 'Erreur lors de la génération du PDF');
                 }
@@ -442,37 +430,7 @@
             }
         }
         
-        // Télécharger le HTML
-        function downloadHtml(html) {
-            const completeHtml = `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aperçu - ${formData.title || formId}</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .signature-container { border: 2px dashed #ccc; padding: 10px; margin: 10px 0; }
-        .signature-container img { max-width: 100%; }
-    </style>
-</head>
-<body>
-    ${html}
-</body>
-</html>
-            `;
-            
-            const blob = new Blob([completeHtml], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `apercu_${formId}_${new Date().toISOString().split('T')[0]}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
+
         
         // Afficher une erreur
         function showError(message) {
