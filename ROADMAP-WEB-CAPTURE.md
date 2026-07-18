@@ -49,9 +49,9 @@ Transformer Form2Sign : passer de la génération PDF directe (pdfkit) à la cap
 - ✅ Adapter JavaScript
 
 ## Phase 4 : Migration (2-3h)
-- Convertir contrat-enrichi.yaml
-- Créer template-simple.yaml
-- Créer template-avance.yaml
+- ✅ Convertir contrat-enrichi.yaml (vers contrat-enrichi-web.yaml)
+- ✅ Créer template-simple.yaml
+- ✅ Créer template-avance.yaml
 
 ## Phase 5 : Tests (2-3h)
 - Tests backend (20 scenarios)
@@ -173,5 +173,6 @@ RUN apt-get update && apt-get install -y \
 - ✅ Implémentation: Phase 1 (Préparation) - **TERMINEE**
 - ✅ Implémentation: Phase 2 (Backend Noyau) - **TERMINEE**
 - ✅ Implémentation: Phase 3 (Frontend Aperçu) - **TERMINEE**
+- ✅ Implémentation: Phase 4 (Migration) - **TERMINEE**
 
-**Prochaine etape** : Commencer Phase 4 (Migration)
+**Prochaine etape** : Commencer Phase 5 (Tests)

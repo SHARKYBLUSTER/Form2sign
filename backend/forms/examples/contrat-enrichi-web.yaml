@@ -1,0 +1,467 @@
+# =============================================================================
+# Form2Sign - Contrat de Service Enrichi (Migre vers v2.0+)
+# =============================================================================
+# Migration du formulaire contrat-enrichi.yaml vers la nouvelle structure Web-to-PDF
+# Ce fichier utilise Puppeteer pour la capture web au lieu de pdfkit
+#
+# Pour tester:
+# 1. Selectionnez ce formulaire dans l'interface
+# 2. Remplissez tous les champs
+# 3. Signez
+# 4. Validez pour voir l'aperçu HTML
+# 5. Generez le PDF (capture exacte de l'aperçu)
+# =============================================================================
+
+form:
+  # Metadata du formulaire
+  id: contrat_enrichi
+  title: "Contrat de Service Enrichi"
+  description: |
+    Exemple complet démontrant toutes les options de personnalisation.
+    Ce formulaire génère un PDF professionnel avec logo, en-tête personnalisé,
+    introduction, sections structurées et pied de page avec pagination.
+    Migration vers la nouvelle structure Web-to-PDF (v2.0+).
+  version: "2.0.0"
+
+  # Definition de la page web (NOUVEAU v2.0+)
+  template:
+    # Styles CSS pour la page
+    style: |
+      /* Reset et styles de base */
+      * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: Helvetica, Arial, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 50px;
+        color: #34495e;
+        background-color: #ffffff;
+        line-height: 1.5;
+      }
+      
+      /* En-tete du document */
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 3px double #2c3e50;
+      }
+      
+      .header img {
+        max-width: 120px;
+        height: 60px;
+        object-fit: contain;
+        margin-bottom: 15px;
+      }
+      
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      
+      .header .subtitle {
+        font-size: 14px;
+        color: #7f8c8d;
+        font-style: italic;
+        margin-top: 5px;
+      }
+      
+      /* Introduction */
+      .introduction {
+        background-color: #f8f9fa;
+        padding: 20px 25px;
+        border-radius: 5px;
+        margin-bottom: 30px;
+        border-left: 4px solid #3498db;
+      }
+      
+      .introduction p {
+        margin: 10px 0;
+        color: #34495e;
+      }
+      
+      .introduction strong {
+        color: #2c3e50;
+      }
+      
+      /* Sections principales */
+      .section {
+        margin-bottom: 25px;
+      }
+      
+      .section-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #3498db;
+      }
+      
+      .section-content {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: 0;
+      }
+      
+      .section-content p {
+        margin: 12px 0;
+        text-align: justify;
+        color: #34495e;
+      }
+      
+      /* Separateurs */
+      .separator {
+        height: 2px;
+        background-color: #3498db;
+        width: 500px;
+        margin: 10px 0 15px 0;
+      }
+      
+      .separator-special {
+        height: 1px;
+        background-color: #e74c3c;
+        width: 500px;
+        margin: 10px 0 15px 0;
+      }
+      
+      /* Article */
+      .article {
+        margin-bottom: 20px;
+      }
+      
+      .article-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 8px;
+      }
+      
+      /* Section conditions spéciales */
+      .special-conditions {
+        background-color: #fff5f5;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #ffcccc;
+        margin: 20px 0;
+      }
+      
+      .special-conditions p {
+        margin: 10px 0;
+        color: #c0392b;
+        text-align: justify;
+      }
+      
+      /* Zone de signature */
+      .signature-section {
+        text-align: center;
+        padding: 30px;
+        margin: 40px 0 20px 0;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+      }
+      
+      .signature-container {
+        width: 300px;
+        height: 100px;
+        border: 2px dashed #ccc;
+        margin: 20px auto;
+        background: white;
+        position: relative;
+      }
+      
+      .signature-container::before {
+        content: "Signez ici";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #aaa;
+        font-size: 14px;
+      }
+      
+      .signature-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      
+      .signature-info {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 20px;
+        font-size: 12px;
+        color: #7f8c8d;
+      }
+      
+      .signature-info-item {
+        text-align: center;
+      }
+      
+      .signature-info-label {
+        font-size: 11px;
+        color: #95a5a6;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+      
+      .signature-info-value {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      /* Pied de page */
+      .footer {
+        text-align: center;
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        font-size: 8px;
+        color: #95a5a6;
+      }
+      
+      /* Responsive */
+      @media (max-width: 768px) {
+        body {
+          padding: 20px 25px;
+        }
+        
+        .header h1 {
+          font-size: 20px;
+        }
+        
+        .signature-container {
+          width: 100%;
+          height: 80px;
+        }
+        
+        .separator, .separator-special {
+          width: 100%;
+        }
+      }
+
+    # Layout HTML de la page
+    layout: |
+      <div class="header">
+        <img src="/static/logos/form2sign-logo.jpg" alt="Logo" />
+        <h1>CONTRAT DE SERVICE</h1>
+        <p class="subtitle">Entre {company_name} et {client_full_name}</p>
+      </div>
+      
+      <div class="introduction">
+        <p><strong>Le présent contrat est établi entre :</strong></p>
+        <p><strong>{company_name}</strong> (ci-après "le Prestataire")<br/>
+        dont le siège social est situé à : {company_address}</p>
+        <p><strong>et</strong></p>
+        <p><strong>{client_full_name}</strong> (ci-après "le Client")<br/>
+        Email : {client_email}<br/>
+        Téléphone : {client_phone}</p>
+        <p>Ce contrat porte sur : {contract_description}</p>
+        <p><em>Signé le {date} à {time}.</em></p>
+      </div>
+      
+      <!-- ARTICLE 1: OBJET -->
+      <div class="section">
+        <div class="section-title">ARTICLE 1 - OBJET</div>
+        <div class="separator"></div>
+        <div class="section-content">
+          <p>Le présent contrat a pour objet la fourniture des services suivants :</p>
+          <p><em>{contract_description}</em></p>
+          <p>Type de contrat : <strong>{contract_type}</strong><br/>
+          Date de début : <strong>{contract_start_date}</strong><br/>
+          Date de fin : <strong>{contract_end_date}</strong><br/>
+          Montant : <strong>{contract_amount} €</strong></p>
+        </div>
+      </div>
+      
+      <!-- ARTICLE 2: DUREE -->
+      <div class="section">
+        <div class="section-title">ARTICLE 2 - DURÉE</div>
+        <div class="separator"></div>
+        <div class="section-content">
+          <p>Le présent contrat prendra effet à compter du <strong>{contract_start_date}</strong> et prendra fin le <strong>{contract_end_date}</strong>, sauf résiliation anticipée conformément aux dispositions prévues à l'article 5.</p>
+        </div>
+      </div>
+      
+      <!-- ARTICLE 3: OBLIGATIONS DU PRESTATAIRE -->
+      <div class="section">
+        <div class="section-title">ARTICLE 3 - OBLIGATIONS DU PRESTATAIRE</div>
+        <div class="separator"></div>
+        <div class="section-content">
+          <p>Le Prestataire s'engage à exécuter les services conformément aux stipulations du présent contrat, dans les délais convenus et avec la diligence requise.</p>
+        </div>
+      </div>
+      
+      <!-- ARTICLE 4: OBLIGATIONS DU CLIENT -->
+      <div class="section">
+        <div class="section-title">ARTICLE 4 - OBLIGATIONS DU CLIENT</div>
+        <div class="separator"></div>
+        <div class="section-content">
+          <p>Le Client s'engage à fournir au Prestataire toutes les informations et documents nécessaires à la bonne exécution des services.</p>
+        </div>
+      </div>
+      
+      <!-- CONDITIONS SPECIALES -->
+      <div class="section">
+        <div class="section-title">CONDITIONS SPÉCIALES</div>
+        <div class="separator-special"></div>
+        <div class="special-conditions">
+          <p>{special_conditions}</p>
+        </div>
+      </div>
+      
+      <!-- Signature -->
+      <div class="signature-section">
+        <p><strong>En signant ci-dessous, les parties reconnaissent avoir pris connaissance</strong><br/>
+        <strong>de l'intégralité des clauses du présent contrat et s'engagent à les respecter.</strong></p>
+        
+        <div class="signature-container">
+          <img src="{signature}" alt="Signature" />
+        </div>
+        
+        <div class="signature-info">
+          <div class="signature-info-item">
+            <div class="signature-info-label">Signataire</div>
+            <div class="signature-info-value">{client_full_name}</div>
+          </div>
+          <div class="signature-info-item">
+            <div class="signature-info-label">Fait à</div>
+            <div class="signature-info-value">{company_address}</div>
+          </div>
+          <div class="signature-info-item">
+            <div class="signature-info-label">Date</div>
+            <div class="signature-info-value">{date}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <p>Page 1/1 - Contrat {contract_type} - {form_title} - Généré le {date}</p>
+      </div>
+
+    # Options de generation PDF
+    pdf:
+      format: A4
+      orientation: portrait
+      margin: 50pt
+
+  # Liste des champs du formulaire
+  fields:
+    # Informations sur l'entreprise
+    - id: company_name
+      label: "Nom de l'entreprise"
+      type: text
+      required: true
+      placeholder: "Entrez le nom de votre entreprise"
+      validation: null
+    
+    - id: company_address
+      label: "Adresse de l'entreprise"
+      type: textarea
+      required: true
+      placeholder: "Adresse complète de l'entreprise"
+      rows: 3
+      validation: null
+    
+    - id: company_siret
+      label: "Numéro SIRET"
+      type: text
+      required: false
+      placeholder: "123 456 789 00010"
+      validation: null
+    
+    # Informations sur le client
+    - id: client_full_name
+      label: "Nom complet du client"
+      type: text
+      required: true
+      placeholder: "Nom et prénom du client"
+      validation: null
+    
+    - id: client_email
+      label: "Email du client"
+      type: email
+      required: true
+      placeholder: "client@example.com"
+      validation: "email"
+    
+    - id: client_phone
+      label: "Téléphone du client"
+      type: tel
+      required: false
+      placeholder: "+33 1 23 45 67 89"
+      validation: "phone"
+    
+    # Informations sur le contrat
+    - id: contract_type
+      label: "Type de contrat"
+      type: select
+      required: true
+      placeholder: "Sélectionnez le type de contrat"
+      validation: null
+      options:
+        - label: "Service de maintenance"
+          value: "maintenance"
+        - label: "Développement logiciel"
+          value: "developpement"
+        - label: "Consulting"
+          value: "consulting"
+        - label: "Formation"
+          value: "formation"
+    
+    - id: contract_start_date
+      label: "Date de début"
+      type: date
+      required: true
+      placeholder: null
+      validation: null
+    
+    - id: contract_end_date
+      label: "Date de fin"
+      type: date
+      required: false
+      placeholder: null
+      validation: null
+    
+    - id: contract_amount
+      label: "Montant du contrat (€)"
+      type: number
+      required: true
+      placeholder: "1000"
+      validation: "min:0"
+    
+    - id: contract_description
+      label: "Description des services"
+      type: textarea
+      required: true
+      placeholder: "Décrivez les services inclus dans ce contrat..."
+      rows: 5
+      validation: null
+    
+    # Conditions générales
+    - id: accept_terms
+      label: "J'accepte les conditions générales"
+      type: checkbox
+      required: true
+      placeholder: null
+      validation: null
+    
+    - id: special_conditions
+      label: "Conditions spéciales"
+      type: textarea
+      required: false
+      placeholder: "Ajoutez ici toute condition spéciale..."
+      rows: 3
+      validation: null
+
+  # Configuration de la signature
+  signature:
+    required: true
+    label: "Signature"
+    instructions: "Signez électroniquement avec votre doigt, stylet ou souris."

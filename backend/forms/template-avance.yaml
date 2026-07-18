@@ -1,0 +1,868 @@
+# =============================================================================
+# Form2Sign - Template Avancé (v2.0+)
+# =============================================================================
+# Template complet avec toutes les fonctionnalités avancées :
+# - Logo personnalisable
+# - Tableaux
+# - Styles conditionnels
+# - Sections multiples
+# - En-tête et pied de page professionnels
+# - Responsive design
+#
+# Parfait pour les contrats, devis, factures et documents professionnels.
+# =============================================================================
+
+form:
+  # Metadata du formulaire
+  id: template_avance
+  title: "Template Avancé"
+  description: |
+    Template complet avec toutes les fonctionnalités avancées de Form2Sign.
+    Inclut logo, tableaux, sections professionnelles, et mise en page complète.
+  version: "2.0.0"
+
+  # Definition de la page web
+  template:
+    # Styles CSS avancés
+    style: |
+      /* ===== RESET ET VARIABLES ===== */
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --accent-color: #e74c3c;
+        --light-bg: #f8f9fa;
+        --dark-text: #2c3e50;
+        --light-text: #7f8c8d;
+        --border-color: #ddd;
+      }
+      
+      * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0;
+        color: var(--dark-text);
+        background-color: #ffffff;
+        line-height: 1.6;
+      }
+      
+      /* ===== EN-TETE ===== */
+      .document-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 30px 40px;
+        text-align: center;
+      }
+      
+      .document-header img {
+        max-width: 200px;
+        height: 80px;
+        object-fit: contain;
+        margin-bottom: 15px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 5px;
+      }
+      
+      .document-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        letter-spacing: 1px;
+      }
+      
+      .document-header .subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-top: 8px;
+        font-style: italic;
+      }
+      
+      .document-header .ref {
+        margin-top: 15px;
+        font-size: 14px;
+        opacity: 0.8;
+      }
+      
+      /* ===== INFO BLOC ===== */
+      .info-bloc {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 25px 40px;
+        background: var(--light-bg);
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .info-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border-left: 4px solid var(--secondary-color);
+      }
+      
+      .info-card h3 {
+        color: var(--secondary-color);
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+      
+      .info-card p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: var(--dark-text);
+      }
+      
+      .info-card .label {
+        font-weight: 600;
+        color: var(--light-text);
+        font-size: 12px;
+      }
+      
+      /* ===== SECTIONS ===== */
+      .section {
+        padding: 30px 40px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .section:last-child {
+        border-bottom: none;
+      }
+      
+      .section h2 {
+        color: var(--primary-color);
+        margin-top: 0;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--secondary-color);
+        font-size: 22px;
+      }
+      
+      .section p {
+        margin: 12px 0;
+        text-align: justify;
+        color: var(--dark-text);
+      }
+      
+      /* ===== ARTICLES ===== */
+      .article {
+        margin-bottom: 25px;
+        padding: 15px;
+        background: white;
+        border-radius: 5px;
+        border-left: 4px solid var(--secondary-color);
+      }
+      
+      .article h3 {
+        color: var(--secondary-color);
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+      
+      .article p:first-child {
+        margin-top: 0;
+      }
+      
+      .article p:last-child {
+        margin-bottom: 0;
+      }
+      
+      /* ===== TABLEAUX ===== */
+      .table-container {
+        overflow-x: auto;
+        margin: 20px 0;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      
+      table th {
+        background: var(--primary-color);
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+      }
+      
+      table td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      table tr:nth-child(even) {
+        background: var(--light-bg);
+      }
+      
+      table tr:hover {
+        background: #eef2f7;
+      }
+      
+      .table-total {
+        font-weight: bold;
+        background: var(--light-bg) !important;
+      }
+      
+      /* ===== SIGNATURE ===== */
+      .signature-section {
+        padding: 40px;
+        text-align: center;
+        background: var(--light-bg);
+        border-top: 2px solid var(--border-color);
+      }
+      
+      .signature-section h2 {
+        color: var(--primary-color);
+        margin-bottom: 20px;
+      }
+      
+      .signature-section > p {
+        max-width: 600px;
+        margin: 0 auto 25px auto;
+        font-size: 14px;
+        color: var(--light-text);
+      }
+      
+      .signature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 25px;
+      }
+      
+      .signature-box {
+        text-align: center;
+      }
+      
+      .signature-container {
+        width: 100%;
+        height: 120px;
+        border: 2px dashed var(--secondary-color);
+        margin: 0 auto 15px auto;
+        background: white;
+        position: relative;
+      }
+      
+      .signature-container::before {
+        content: "Signez ici";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #aaa;
+        font-size: 14px;
+      }
+      
+      .signature-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      
+      .signatory-info {
+        padding: 10px;
+        background: white;
+        border-radius: 5px;
+        border: 1px solid var(--border-color);
+      }
+      
+      .signatory-info .name {
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 3px;
+      }
+      
+      .signatory-info .role {
+        font-size: 12px;
+        color: var(--light-text);
+        font-style: italic;
+      }
+      
+      .signatory-info .date {
+        font-size: 11px;
+        color: var(--light-text);
+        margin-top: 5px;
+      }
+      
+      /* ===== PIED DE PAGE ===== */
+      .document-footer {
+        background: var(--primary-color);
+        color: white;
+        text-align: center;
+        padding: 15px;
+        font-size: 12px;
+      }
+      
+      .document-footer p {
+        margin: 0;
+      }
+      
+      /* ===== BADGES ===== */
+      .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        margin: 2px;
+      }
+      
+      .badge-primary {
+        background: var(--primary-color);
+        color: white;
+      }
+      
+      .badge-secondary {
+        background: var(--secondary-color);
+        color: white;
+      }
+      
+      .badge-accent {
+        background: var(--accent-color);
+        color: white;
+      }
+      
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        
+        .document-header {
+          padding: 20px;
+        }
+        
+        .document-header h1 {
+          font-size: 24px;
+        }
+        
+        .info-bloc {
+          grid-template-columns: 1fr;
+          padding: 20px;
+        }
+        
+        .section {
+          padding: 20px;
+        }
+        
+        .signature-grid {
+          grid-template-columns: 1fr;
+        }
+        
+        .signature-container {
+          height: 100px;
+        }
+        
+        .signature-section {
+          padding: 25px;
+        }
+      }
+      
+      /* ===== IMPRESSION ===== */
+      @media print {
+        body {
+          max-width: none;
+          padding: 0;
+        }
+        
+        .no-print {
+          display: none !important;
+        }
+      }
+
+    # Layout HTML complet
+    layout: |
+      <!-- EN-TETE -->
+      <div class="document-header">
+        <img src="/static/logos/logo.jpg" alt="Logo Entreprise" />
+        <h1>{form_title}</h1>
+        <p class="subtitle">{document_type}</p>
+        <p class="ref">Référence: {reference} | Date: {date}</p>
+      </div>
+      
+      <!-- BLOC D'INFORMATIONS -->
+      <div class="info-bloc">
+        <div class="info-card">
+          <h3>Entreprise</h3>
+          <p><span class="label">Nom:</span> {company_name}</p>
+          <p><span class="label">SIRET:</span> {company_siret}</p>
+          <p><span class="label">Adresse:</span> {company_address}</p>
+          <p><span class="label">Email:</span> {company_email}</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>Client</h3>
+          <p><span class="label">Nom:</span> {client_name}</p>
+          <p><span class="label">Contact:</span> {client_contact}</p>
+          <p><span class="label">Email:</span> {client_email}</p>
+          <p><span class="label">Téléphone:</span> {client_phone}</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>Contrat</h3>
+          <p><span class="label">Type:</span> {contract_type}</p>
+          <p><span class="label">Début:</span> {start_date}</p>
+          <p><span class="label">Fin:</span> {end_date}</p>
+          <p><span class="label">Montant:</span> <strong>{total_amount} €</strong></p>
+        </div>
+      </div>
+      
+      <!-- SECTION: OBJET -->
+      <div class="section">
+        <h2>1. Objet du document</h2>
+        <div class="article">
+          <h3>Description</h3>
+          <p>{description}</p>
+        </div>
+      </div>
+      
+      <!-- SECTION: DETAILS -->
+      <div class="section">
+        <h2>2. Détails et conditions</h2>
+        
+        <div class="article">
+          <h3>Prestations</h3>
+          <p>{services}</p>
+        </div>
+        
+        <div class="article">
+          <h3>Modalités de paiement</h3>
+          <p><strong>Montant total:</strong> {total_amount} €</p>
+          <p><strong>Échéance:</strong> {payment_due_date}</p>
+          <p><strong>Mode de paiement:</strong> {payment_method}</p>
+          <p>{payment_terms}</p>
+        </div>
+      </div>
+      
+      <!-- SECTION: TABLEAU (si applicable) -->
+      <div class="section">
+        <h2>3. Récapitulatif</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Quantité</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{item1_description}</td>
+                <td>{item1_quantity}</td>
+                <td>{item1_unit_price} €</td>
+                <td>{item1_total} €</td>
+              </tr>
+              <tr>
+                <td>{item2_description}</td>
+                <td>{item2_quantity}</td>
+                <td>{item2_unit_price} €</td>
+                <td>{item2_total} €</td>
+              </tr>
+              <tr>
+                <td>{item3_description}</td>
+                <td>{item3_quantity}</td>
+                <td>{item3_unit_price} €</td>
+                <td>{item3_total} €</td>
+              </tr>
+              <tr class="table-total">
+                <td colspan="3" style="text-align: right;">TOTAL HT:</td>
+                <td>{subtotal} €</td>
+              </tr>
+              <tr class="table-total">
+                <td colspan="3" style="text-align: right;">TVA ({tva_rate}%):</td>
+                <td>{tva_amount} €</td>
+              </tr>
+              <tr class="table-total">
+                <td colspan="3" style="text-align: right;">TOTAL TTC:</td>
+                <td>{total_amount} €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- SECTION: CONDITIONS SPECIALES -->
+      <div class="section">
+        <h2>4. Conditions spéciales</h2>
+        <div class="article">
+          <p>{special_conditions}</p>
+        </div>
+      </div>
+      
+      <!-- SECTION: SIGNATURE -->
+      <div class="signature-section">
+        <h2>Signature Électronique</h2>
+        <p>
+          En signant ci-dessous, je certifie avoir pris connaissance de l'intégralité du document
+          et m'engage à respecter les conditions définies.
+        </p>
+        
+        <div class="signature-grid">
+          <div class="signature-box">
+            <h4>Prestataire</h4>
+            <div class="signature-container">
+              <img src="{provider_signature}" alt="Signature Prestataire" />
+            </div>
+            <div class="signatory-info">
+              <div class="name">{provider_name}</div>
+              <div class="role">{provider_role}</div>
+              <div class="date">Le {date}</div>
+            </div>
+          </div>
+          
+          <div class="signature-box">
+            <h4>Client</h4>
+            <div class="signature-container">
+              <img src="{client_signature}" alt="Signature Client" />
+            </div>
+            <div class="signatory-info">
+              <div class="name">{client_name}</div>
+              <div class="role">{client_role}</div>
+              <div class="date">Le {date}</div>
+            </div>
+          </div>
+        </div>
+        
+        <p style="margin-top: 25px; font-size: 11px; color: var(--light-text);">
+          Document généré via Form2Sign - {form_id} | {time}
+        </p>
+      </div>
+      
+      <!-- PIED DE PAGE -->
+      <div class="document-footer">
+        <p>© {company_name} - {date} | <span style="opacity: 0.7;">{form_title}</span></p>
+      </div>
+
+    # Options PDF
+    pdf:
+      format: A4
+      orientation: portrait
+      margin: 15mm
+
+  # Champs du formulaire
+  fields:
+    # Information document
+    - id: document_type
+      label: "Type de document"
+      type: select
+      required: true
+      placeholder: "Sélectionnez le type"
+      validation: null
+      options:
+        - label: "Contrat"
+          value: "Contrat"
+        - label: "Devis"
+          value: "Devis"
+        - label: "Facture"
+          value: "Facture"
+        - label: "Bon de commande"
+          value: "Bon de commande"
+    
+    - id: reference
+      label: "Référence"
+      type: text
+      required: true
+      placeholder: "Ex: DOC-2026-001"
+      validation: null
+    
+    # Entreprise
+    - id: company_name
+      label: "Nom de l'entreprise"
+      type: text
+      required: true
+      placeholder: "Nom de votre entreprise"
+      validation: null
+    
+    - id: company_siret
+      label: "SIRET"
+      type: text
+      required: false
+      placeholder: "123 456 789 00010"
+      validation: null
+    
+    - id: company_address
+      label: "Adresse"
+      type: textarea
+      required: false
+      placeholder: "Adresse complète"
+      rows: 3
+      validation: null
+    
+    - id: company_email
+      label: "Email"
+      type: email
+      required: false
+      placeholder: "contact@entreprise.com"
+      validation: "email"
+    
+    # Client
+    - id: client_name
+      label: "Nom du client"
+      type: text
+      required: true
+      placeholder: "Nom du client"
+      validation: null
+    
+    - id: client_contact
+      label: "Contact"
+      type: text
+      required: false
+      placeholder: "Personne à contacter"
+      validation: null
+    
+    - id: client_email
+      label: "Email client"
+      type: email
+      required: false
+      placeholder: "client@entreprise.com"
+      validation: "email"
+    
+    - id: client_phone
+      label: "Téléphone client"
+      type: tel
+      required: false
+      placeholder: "+33 1 23 45 67 89"
+      validation: null
+    
+    # Contrat
+    - id: contract_type
+      label: "Type de contrat"
+      type: select
+      required: false
+      placeholder: "Type de contrat"
+      validation: null
+      options:
+        - label: "Prestation de services"
+          value: "Prestation de services"
+        - label: "Vente"
+          value: "Vente"
+        - label: "Location"
+          value: "Location"
+        - label: "Autre"
+          value: "Autre"
+    
+    - id: start_date
+      label: "Date de début"
+      type: date
+      required: false
+      placeholder: null
+      validation: null
+    
+    - id: end_date
+      label: "Date de fin"
+      type: date
+      required: false
+      placeholder: null
+      validation: null
+    
+    # Description
+    - id: description
+      label: "Description"
+      type: textarea
+      required: true
+      placeholder: "Description du document"
+      rows: 4
+      validation: null
+    
+    - id: services
+      label: "Prestations"
+      type: textarea
+      required: false
+      placeholder: "Détaillez les prestations"
+      rows: 4
+      validation: null
+    
+    # Paiement
+    - id: total_amount
+      label: "Montant total (€)"
+      type: number
+      required: true
+      placeholder: "1000"
+      validation: "min:0,step:0.01"
+    
+    - id: payment_due_date
+      label: "Date d'échéance"
+      type: date
+      required: false
+      placeholder: null
+      validation: null
+    
+    - id: payment_method
+      label: "Mode de paiement"
+      type: select
+      required: false
+      placeholder: "Mode de paiement"
+      validation: null
+      options:
+        - label: "Virement"
+          value: "Virement"
+        - label: "Chèque"
+          value: "Chèque"
+        - label: "Espèces"
+          value: "Espèces"
+        - label: "Carte bancaire"
+          value: "Carte bancaire"
+    
+    - id: payment_terms
+      label: "Conditions de paiement"
+      type: textarea
+      required: false
+      placeholder: "Ex: Paiement à 30 jours"
+      rows: 2
+      validation: null
+    
+    # Tableau items
+    - id: item1_description
+      label: "Ligne 1 - Description"
+      type: text
+      required: false
+      placeholder: "Description"
+      validation: null
+    
+    - id: item1_quantity
+      label: "Ligne 1 - Quantité"
+      type: number
+      required: false
+      placeholder: "1"
+      validation: "min:0"
+    
+    - id: item1_unit_price
+      label: "Ligne 1 - Prix unitaire"
+      type: number
+      required: false
+      placeholder: "100"
+      validation: "min:0,step:0.01"
+    
+    - id: item1_total
+      label: "Ligne 1 - Total"
+      type: number
+      required: false
+      placeholder: "100"
+      validation: "min:0,step:0.01"
+    
+    - id: item2_description
+      label: "Ligne 2 - Description"
+      type: text
+      required: false
+      placeholder: "Description"
+      validation: null
+    
+    - id: item2_quantity
+      label: "Ligne 2 - Quantité"
+      type: number
+      required: false
+      placeholder: "1"
+      validation: "min:0"
+    
+    - id: item2_unit_price
+      label: "Ligne 2 - Prix unitaire"
+      type: number
+      required: false
+      placeholder: "100"
+      validation: "min:0,step:0.01"
+    
+    - id: item2_total
+      label: "Ligne 2 - Total"
+      type: number
+      required: false
+      placeholder: "100"
+      validation: "min:0,step:0.01"
+    
+    - id: item3_description
+      label: "Ligne 3 - Description"
+      type: text
+      required: false
+      placeholder: "Description"
+      validation: null
+    
+    - id: item3_quantity
+      label: "Ligne 3 - Quantité"
+      type: number
+      required: false
+      placeholder: "1"
+      validation: "min:0"
+    
+    - id: item3_unit_price
+      label: "Ligne 3 - Prix unitaire"
+      type: number
+      required: false
+      placeholder: "100"
+      validation: "min:0,step:0.01"
+    
+    - id: item3_total
+      label: "Ligne 3 - Total"
+      type: number
+      required: false
+      placeholder: "100"
+      validation: "min:0,step:0.01"
+    
+    # TVA
+    - id: tva_rate
+      label: "Taux de TVA (%)"
+      type: number
+      required: false
+      placeholder: "20"
+      validation: "min:0,max:100,step:0.01"
+    
+    - id: subtotal
+      label: "Total HT"
+      type: number
+      required: false
+      placeholder: "800"
+      validation: "min:0,step:0.01"
+    
+    - id: tva_amount
+      label: "Montant TVA"
+      type: number
+      required: false
+      placeholder: "160"
+      validation: "min:0,step:0.01"
+    
+    # Conditions spéciales
+    - id: special_conditions
+      label: "Conditions spéciales"
+      type: textarea
+      required: false
+      placeholder: "Ajoutez les conditions spéciales..."
+      rows: 3
+      validation: null
+    
+    # Signataires
+    - id: provider_name
+      label: "Nom du prestataire (signataire)"
+      type: text
+      required: false
+      placeholder: "Nom du signataire"
+      validation: null
+    
+    - id: provider_role
+      label: "Fonction du prestataire"
+      type: text
+      required: false
+      placeholder: "Ex: Directeur"
+      validation: null
+    
+    - id: client_role
+      label: "Fonction du client"
+      type: text
+      required: false
+      placeholder: "Ex: Responsable achats"
+      validation: null
+
+  # Configuration de la signature
+  signature:
+    required: true
+    label: "Signature"
+    instructions: "Signez ici pour valider le document (client)."

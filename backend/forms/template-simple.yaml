@@ -1,0 +1,197 @@
+# =============================================================================
+# Form2Sign - Template Simple (v2.0+)
+# =============================================================================
+# Template minimal pour créer rapidement des formulaires avec capture web.
+# Parfait pour les documents simples sans mise en page complexe.
+#
+# Utilisation:
+# 1. Copiez ce fichier
+# 2. Modifiez l'id, title et les champs
+# 3. Personnalisez le CSS et le layout si besoin
+# =============================================================================
+
+form:
+  # Metadata du formulaire
+  id: template_simple
+  title: "Template Simple"
+  description: "Template minimal pour formulaires basiques avec capture web-to-PDF."
+  version: "2.0.0"
+
+  # Definition de la page web
+  template:
+    # Styles CSS simples
+    style: |
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #333;
+        line-height: 1.6;
+      }
+      
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      
+      .header h1 {
+        color: #007bff;
+        margin-bottom: 5px;
+      }
+      
+      .header p {
+        color: #666;
+        font-style: italic;
+      }
+      
+      .content {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      
+      .field-row {
+        margin-bottom: 12px;
+      }
+      
+      .field-label {
+        font-weight: bold;
+        display: inline-block;
+        width: 150px;
+        color: #555;
+      }
+      
+      .field-value {
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      
+      .signature-area {
+        width: 300px;
+        height: 100px;
+        border: 2px dashed #ccc;
+        margin: 20px auto;
+        background: white;
+        text-align: center;
+        line-height: 100px;
+        color: #aaa;
+      }
+      
+      .signature-area img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        font-size: 12px;
+        color: #666;
+      }
+
+    # Layout HTML simple
+    layout: |
+      <div class="header">
+        <h1>{form_title}</h1>
+        <p>{form_id} - Document à signer</p>
+      </div>
+      
+      <div class="content">
+        <h2>Informations</h2>
+        
+        <div class="field-row">
+          <span class="field-label">Nom:</span>
+          <span class="field-value">{full_name}</span>
+        </div>
+        
+        <div class="field-row">
+          <span class="field-label">Email:</span>
+          <span class="field-value">{email}</span>
+        </div>
+        
+        <div class="field-row">
+          <span class="field-label">Téléphone:</span>
+          <span class="field-value">{phone}</span>
+        </div>
+        
+        <div class="field-row">
+          <span class="field-label">Adresse:</span>
+          <span class="field-value">{address}</span>
+        </div>
+        
+        <div class="field-row">
+          <span class="field-label">Date:</span>
+          <span class="field-value">{date}</span>
+        </div>
+        
+        <div class="field-row">
+          <span class="field-label">Description:</span>
+          <span class="field-value">{description}</span>
+        </div>
+      </div>
+      
+      <div class="signature-area">
+        <img src="{signature}" alt="Signature" />
+      </div>
+      
+      <div class="footer">
+        <p>Document généré via Form2Sign le {date} à {time}</p>
+      </div>
+
+    # Options PDF
+    pdf:
+      format: A4
+      orientation: portrait
+      margin: 15mm
+
+  # Champs du formulaire
+  fields:
+    - id: full_name
+      label: "Nom complet"
+      type: text
+      required: true
+      placeholder: "Votre nom et prénom"
+      validation: null
+
+    - id: email
+      label: "Email"
+      type: email
+      required: true
+      placeholder: "votre@email.com"
+      validation: "email"
+
+    - id: phone
+      label: "Téléphone"
+      type: tel
+      required: false
+      placeholder: "+33 1 23 45 67 89"
+      validation: null
+
+    - id: address
+      label: "Adresse"
+      type: textarea
+      required: false
+      placeholder: "Votre adresse"
+      rows: 3
+      validation: null
+
+    - id: description
+      label: "Description"
+      type: textarea
+      required: false
+      placeholder: "Description du document"
+      rows: 3
+      validation: null
+
+  # Configuration de la signature
+  signature:
+    required: true
+    label: "Signature"
+    instructions: "Signez ici pour valider le document."
