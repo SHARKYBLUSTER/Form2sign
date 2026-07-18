@@ -25,8 +25,7 @@
 ### 16/07/2026 - Authentification (Phase 1)
 - **Phase 1** : Implementation du systeme d'authentification
 - Configuration de express-session avec cookies securises
-- Hash des mots de passe avec bcrypt (10 rounds)
-- Auto-hashage du mot de passe au premier demarrage
+- Verification directe des identifiants depuis le fichier `.env`
 - Creation des routes :
   - POST /api/login
   - GET /api/logout
@@ -318,7 +317,7 @@
 | Phase | Objectif | Statut | Date Debut | Date Fin | Notes |
 |-------|----------|--------|------------|----------|-------|
 | 0 | Initialisation projet | ✅ Termine | 16/07/2026 | 16/07/2026 | Structure complete creee |
-| 1 | Authentification | ✅ Termine | 16/07/2026 | 16/07/2026 | Systeme d'auth complet avec bcrypt et express-session |
+| 1 | Authentification | ✅ Termine | 16/07/2026 | 18/07/2026 | Systeme d'auth complet avec express-session, verification directe des identifiants depuis .env (credentials: admin/admin) |
 | 2 | Formulaires dynamiques | ✅ Termine | 16/07/2026 | 16/07/2026 | Chargement, upload et suppression des formulaires fonctionnels |
 | 2.5 | Upload de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour uploader de nouveaux formulaires YAML |
 | 2.6 | Suppression de formulaires | ✅ Termine | 16/07/2026 | 16/07/2026 | Interface web pour supprimer des formulaires avec confirmation |
@@ -365,10 +364,10 @@
   - **Alternatives considerees** : jsPDF (frontend), reportlab (Python), pdf-lib
   - **Choix** : pdfkit pour la generation serveur et la qualite du rendu
 
-- **Authentification** : express-session + bcrypt
-  - **Justification** : Solution simple et securisee pour une application interne
-  - **Alternatives considerees** : JWT, Passport.js
-  - **Choix** : express-session pour la simplicite avec les cookies
+- **Authentification** : express-session
+  - **Justification** : Solution simple pour une application interne, verification directe des identifiants
+  - **Alternatives considerees** : JWT, Passport.js, bcrypt
+  - **Choix** : express-session avec verification directe des identifiants depuis .env
 
 ### Docker
 - **Image** : node:20-alpine
@@ -433,7 +432,6 @@ docker volume prune
 |------------|---------|-------------|------------|
 | express | ^4.18.2 | Framework web | 16/07/2026 |
 | express-session | ^1.17.3 | Gestion des sessions | 16/07/2026 |
-| bcryptjs | ^2.4.3 | Hashage des mots de passe | 16/07/2026 |
 | dotenv | ^16.3.1 | Chargement des variables d'environnement | 16/07/2026 |
 | pdfkit | ^0.15.0 | Generation des PDFs | 16/07/2026 |
 | js-yaml | ^4.1.0 | Parsing des fichiers YAML | 16/07/2026 |
@@ -500,6 +498,13 @@ docker volume prune
 - Creation de ROADMAP-PDF-ENRICHMENT.md
 - Mise à jour README.md avec section personnalisation PDF
 
+### v1.5.1 - Authentification simplifiée (18/07/2026)
+- Suppression de bcryptjs des dépendances
+- Modification de authController.js pour utiliser une comparaison directe des identifiants
+- Suppression de l'auto-hashage des mots de passe
+- Identifiants par defaut: admin / admin
+- Mise à jour de README.md, DEV_LOG.md et des fichiers .env
+
 ### v1.5.1 - Phase 2 PDF: Structure YAML (17/07/2026)
 - Mise à jour de template.yaml avec section pdf complète
 - Création de README-PDF-CUSTOMIZATION.md (documentation complète)
@@ -528,5 +533,11 @@ docker volume prune
 
 ---
 
-*Derniere mise a jour : 17/07/2026 - v2.0.0 (Phase 4 & 5 PDF: Fonctions de Rendering et Intégration)*
+### v2.0.1 - Mise a jour systeme d'authentification (18/07/2026)
+- Suppression du hashing des mots de passe (bcryptjs)
+- Comparaison directe des identifiants depuis le fichier .env
+- Identifiants par defaut: admin / admin
+- Mise a jour de la documentation (README.md, DEV_LOG.md)
+
+*Derniere mise a jour : 18/07/2026 - v2.0.1 (Authentification sans hashing, credentials admin/admin)*
 *Projet : Form2Sign*

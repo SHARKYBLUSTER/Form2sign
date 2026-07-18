@@ -4,7 +4,6 @@
  * Gestion de l'authentification (connexion, deconnexion, statut)
  */
 
-const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 
@@ -13,7 +12,7 @@ const envPath = path.join(__dirname, '../config', '.env');
 
 /**
  * Charge les identifiants depuis le fichier .env
- * Si le mot de passe n'est pas hashe, le hashe et sauvegarde
+ * Utilise directement les crédentials SANS hashing
  */
 function loadCredentials() {
     try {
@@ -24,31 +23,27 @@ function loadCredentials() {
         const APP_USER = envContent.match(/^APP_USER=(.*)$/m)?.[1]?.trim() || 'admin';
         let APP_PASSWORD = envContent.match(/^APP_PASSWORD=(.*)$/m)?.[1]?.trim() || 'password123';
         
-        // Vérifier si le mot de passe est déjà hashé (commence par $2a$, $2b$, ou $2y$)
-        const isHashed = APP_PASSWORD.startsWith('$2a$') || APP_PASSWORD.startsWith('$2b$') || APP_PASSWORD.startsWith('$2y$');
+        // Vérifier si le mot de passe semble être un hash bcrypt (ancienne version)
+        // Si c'est le cas, afficher une ERREUR claire et utiliser la valeur par défaut
+        const isHashedPassword = APP_PASSWORD.startsWith('$2a$') || 
+                                  APP_PASSWORD.startsWith('$2b$') || 
+                                  APP_PASSWORD.startsWith('$2y$');
         
-        if (!isHashed) {
-            // Hasher le mot de passe
-            const salt = bcrypt.genSaltSync(10);
-            const hashedPassword = bcrypt.hashSync(APP_PASSWORD, salt);
-            
-            // Mettre à jour le fichier .env (remplacer seulement la ligne APP_PASSWORD)
-            const newEnvContent = envContent.replace(
-                /^(APP_PASSWORD=).*/m,
-                `$1${hashedPassword}`
-            );
-            
-            fs.writeFileSync(envPath, newEnvContent);
-            console.log('🔐 Mot de passe hashé et sauvegardé dans .env');
-            
-            return { username: APP_USER, password: hashedPassword };
+        if (isHashedPassword) {
+            console.error('❌ ⚠️  ERREUR: Le mot de passe dans .env est HASHE (ancien format) !');
+            console.error('   Le nouveau système utilise les mots de passe EN CLAIR.');
+            console.error('   Veuillez modifier APP_PASSWORD dans backend/config/.env');
+            console.error('   Exemple: APP_PASSWORD=password123');
+            console.error('   Actuellement: APP_PASSWORD=' + APP_PASSWORD);
+            // Utiliser le mot de passe par défaut pour permettre la connexion
+            APP_PASSWORD = 'password123';
         }
         
         return { username: APP_USER, password: APP_PASSWORD };
     } catch (error) {
         console.error('❌ Erreur lors du chargement des identifiants:', error);
         // Retourner des valeurs par défaut en cas d'erreur
-        return { username: 'admin', password: bcrypt.hashSync('password123', bcrypt.genSaltSync(10)) };
+        return { username: 'admin', password: 'password123' };
     }
 }
 
@@ -73,7 +68,7 @@ const login = async (req, res) => {
         
         // Vérifier les identifiants
         const isUsernameValid = username === credentials.username;
-        const isPasswordValid = await bcrypt.compare(password, credentials.password);
+        const isPasswordValid = password === credentials.password;
         
         if (!isUsernameValid || !isPasswordValid) {
             return res.status(401).json({

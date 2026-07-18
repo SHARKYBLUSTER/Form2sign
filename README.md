@@ -7,7 +7,7 @@ Form2Sign est une application web **mobile-first** qui permet de :
 - Capturer une signature via l'ecran tactile d'un telephone mobile
 - Generer un PDF contenant le formulaire rempli, la signature et la date
 - Stocker les PDFs generes dans un repertoire dedie
-- Proteger l'acces par authentification (login/mot de passe via .env)
+- Proteger l'acces par authentification (login/mot de passe via .env - **admin/admin** par defaut)
 
 L'application est entierement conteneurisee avec **Docker** pour un deploiement facile.
 
@@ -131,17 +131,23 @@ Copiez le fichier `.env.example` vers `.env` et adaptez les valeurs :
 cp backend/config/.env.example backend/config/.env
 ```
 
-| Variable | Description | Exemple | Requise |
-|----------|-------------|---------|---------|
+| Variable | Description | Valeur par defaut | Requise |
+|----------|-------------|------------------|---------|
 | APP_USER | Nom d'utilisateur pour la connexion | `admin` | ✅ Oui |
-| APP_PASSWORD | Mot de passe (sera hashe automatiquement) | `monmotdepasse` | ✅ Oui |
-| SESSION_SECRET | Cle secrete pour les cookies de session | `ma_cle_secrete_aleatoire_12345` | ✅ Oui |
+| APP_PASSWORD | Mot de passe | `admin` | ✅ Oui |
+| SESSION_SECRET | Cle secrete pour les cookies de session | `super_secret_key_form2sign_2026_change_me` | ✅ Oui |
 | PORT | Port sur lequel l'application ecoute | `3000` | ✅ Oui |
 | NODE_ENV | Environnement (development/production) | `development` | ❌ Non |
 | PDF_STORAGE_PATH | Chemin de stockage des PDFs | `./backend/uploads/pdfs` | ❌ Non |
 | FORMS_DIRECTORY | Repertoire des formulaires YAML | `./backend/forms` | ❌ Non |
 
 > ⚠️ **IMPORTANT** : Ne commitez JAMAIS le fichier `.env` dans Git. Il contient des informations sensibles.
+>
+> **Identifiants par defaut :**
+> - Nom d'utilisateur : `admin`
+> - Mot de passe : `admin`
+>
+> Pour modifier les identifiants, editez le fichier `.env` et changez les valeurs des variables `APP_USER` et `APP_PASSWORD`, puis redemarrez l'application.
 
 ---
 
@@ -149,7 +155,7 @@ cp backend/config/.env.example backend/config/.env
 
 ### Etape 1: Connexion
 1. Accedez a l'application via votre navigateur : `http://localhost:3000`
-2. Utilisez les identifiants configures dans le fichier `.env` (APP_USER / APP_PASSWORD)
+2. Utilisez les identifiants configures dans le fichier `.env` (par defaut: **admin** / **admin**)
 
 ### Etape 2: Selectionner un formulaire
 1. Une fois connecte, vous verrez la liste des formulaires disponibles
@@ -402,13 +408,13 @@ docker-compose up -d
 
 **Solutions :**
 - Verifiez que `APP_USER` et `APP_PASSWORD` sont correctement definis dans `.env`
-- Verifiez que le mot de passe n'est pas deja hashe (le systeme le hashe automatiquement)
 - Verifiez les majuscules/minuscules (la connexion est sensible a la casse)
+- Les identifiants par defaut sont: **admin** / **admin**
 - Si vous avez perdu le mot de passe, réinitialisez-le avec :
   ```bash
-  sudo sed -i 's/^APP_PASSWORD=.*/APP_PASSWORD=password123/' backend/config/.env
+  sudo sed -i 's/^APP_PASSWORD=.*/APP_PASSWORD=admin/' backend/config/.env
   ```
-  Puis redémarrez Docker pour que le backend re-hashe automatiquement le mot de passe.
+  Puis redémarrez l'application.
 
 ### Le formulaire ne s'affiche pas
 
@@ -447,7 +453,6 @@ docker-compose up -d
 |-------------|---------|-------------|
 | express | ^4.18.2 | Framework web |
 | express-session | ^1.17.3 | Gestion des sessions |
-| bcryptjs | ^2.4.3 | Hashage des mots de passe |
 | dotenv | ^16.3.1 | Chargement des variables d'environnement |
 | pdfkit | ^0.15.0 | Generation des PDFs |
 | js-yaml | ^4.1.0 | Parsing des fichiers YAML |
@@ -507,7 +512,13 @@ form:
 ### v1.5.0 - Améliorations Interface Formulaire (17/07/2026)
 - Ajout d'un bouton **Annuler** dans la zone de signature pour retourner à la liste des formulaires
 - Echange des couleurs des boutons **Effacer** (orange) et **Recommencer** (rouge) pour meilleure visibilité
-- Bouton **Recommencer** réinitialise maintenant tout le formulaire (pas seulement la signature)
+- Bouton **Recommencer** réinitialise maintenant tout le formulaire
+
+### v1.5.1 - Authentification simplifiée (18/07/2026)
+- Suppression du hashing des mots de passe (bcryptjs)
+- Comparaison directe des identifiants depuis le fichier .env
+- Identifiants par defaut: **admin / admin**
+- Mise a jour de la documentation (pas seulement la signature)
 
 ### v1.4.0 - Generation de PDF (16/07/2026)
 - Implementation de l'API POST /api/generate-pdf
@@ -536,11 +547,11 @@ form:
 
 ### v1.1.0 - Authentification (16/07/2026)
 - Implementation complete du systeme d'authentification
-- Creation de `authController.js` avec bcrypt pour le hashage des mots de passe
+- Creation de `authController.js` pour la verification des identifiants
 - Creation de `authRoutes.js` (POST /api/login, GET /api/logout, GET /api/auth/status)
 - Creation de `authMiddleware.js` pour la protection des routes
 - Integration dans `app.js` avec protection des routes frontales et API
-- Auto-hashage du mot de passe au premier demarrage
+- Identifiants configures directement dans le fichier `.env` (admin/password123 par defaut)
 - Gestion des sessions avec express-session
 
 ### v1.0.0 - Initialisation (16/07/2026)
