@@ -342,7 +342,7 @@ form:
       
       # Espacement final avant la signature
       - type: spacing
-        lines: 1
+        lines: 2
     
     # Configuration du pied de page (apparaît sur chaque page)
     footer:

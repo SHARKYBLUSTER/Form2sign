@@ -997,27 +997,40 @@ function renderHeader(doc, pdfOptions, formValues = {}, context = {}) {
   // Logo
   if (header.logo) {
     try {
-      // Protéger contre le path traversal
-      const logoPath = path.join(__dirname, '../frontend/public', header.logo);
-      const normalizedPath = path.normalize(logoPath);
+      let logoBuffer = null;
+      let width = header.logo_width || 100;
+      let height = header.logo_height || 50;
+      let position = header.logo_position || 'top-left';
       
-      // Vérifier que le chemin commence bien par notre base path
-      const basePath = path.normalize(path.join(__dirname, '../frontend/public'));
-      if (!normalizedPath.startsWith(basePath)) {
-        console.warn('⚠️  Chemin du logo potentiellement dangereux, utilisation des valeurs par défaut');
-      } else if (fs.existsSync(normalizedPath)) {
-        const logoBuffer = fs.readFileSync(normalizedPath);
-        const width = header.logo_width || 100;
-        const height = header.logo_height || 50;
-        const position = header.logo_position || 'top-left';
-        const x = getLogoXPosition(doc, width, position);
+      // Gérer les chemins /static/logos/ qui pointent vers LOGO_STORAGE_PATH
+      if (header.logo.startsWith('/static/logos/')) {
+        const logoFilename = path.basename(header.logo);
+        const logoStoragePath = path.join(__dirname, LOGO_STORAGE_PATH, logoFilename);
         
+        if (fs.existsSync(logoStoragePath)) {
+          logoBuffer = fs.readFileSync(logoStoragePath);
+        }
+      } else {
+        // Ancienne méthode pour compatibilité
+        const logoPath = path.join(__dirname, '../frontend/public', header.logo);
+        const normalizedPath = path.normalize(logoPath);
+        const basePath = path.normalize(path.join(__dirname, '../frontend/public'));
+        
+        if (normalizedPath.startsWith(basePath) && fs.existsSync(normalizedPath)) {
+          logoBuffer = fs.readFileSync(normalizedPath);
+        }
+      }
+      
+      if (logoBuffer) {
+        const x = getLogoXPosition(doc, width, position);
         doc.image(logoBuffer, x, doc.y, { width, height });
         
         // Déplacer le curseur en dessous du logo
         const logoBottom = doc.y + height;
         doc.y = logoBottom;
         doc.moveDown();
+      } else {
+        console.warn('⚠️  Logo non trouvé:', header.logo);
       }
     } catch (err) {
       console.warn('⚠️  Impossible de charger le logo:', err.message);
@@ -1671,14 +1684,29 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
         // Decoder l'image de la signature
         const imageBuffer = Buffer.from(base64Data, 'base64');
         
-        // Ajouter l'image de signature au PDF
+        // Ajouter l'image de signature au PDF avec fond gris
         // Redimensionner pour s'adapter a la page
         const sigWidth = 300;
         const sigHeight = 100;
         const pageWidth = doc.page.width - margins.left - margins.right;
         const x = (pageWidth - sigWidth) / 2;
         
+        // Dessiner un rectangle de fond gris clair
+        doc.save();
+        doc.fillColor('#e0e0e0');
+        doc.rect(x, doc.y, sigWidth, sigHeight).fill();
+        doc.restore();
+        
+        // Ajouter l'image de signature par-dessus (elle a un fond transparent)
         doc.image(imageBuffer, x, doc.y, { width: sigWidth, height: sigHeight });
+        
+        // Ajouter un cadre noir autour de la signature
+        doc.save();
+        doc.strokeColor('#000000');
+        doc.lineWidth(1);
+        doc.rect(x, doc.y, sigWidth, sigHeight).stroke();
+        doc.restore();
+        
         doc.moveDown(2);
       } catch (err) {
         console.warn('Impossible de decoder la signature:', err);
