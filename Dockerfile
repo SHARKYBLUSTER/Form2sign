@@ -72,7 +72,13 @@ RUN apk add --no-cache \
     libxkbcommon0 \
     libxrandr2 \
     xdg-utils \
-    ttf-freefont
+    ttf-freefont \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont-ttf
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
