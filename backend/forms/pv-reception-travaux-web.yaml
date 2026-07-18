@@ -339,7 +339,7 @@ form:
       </div>
       
       <div class="chantier-info">
-        <h2>📍 Identification du Chantier</h2>
+        <h2>Identification du Chantier</h2>
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">Référence du PV :</span>
@@ -377,7 +377,7 @@ form:
       </div>
       
       <div class="section">
-        <div class="section-title">📋 Objet du Procès-Verbal</div>
+        <div class="section-title">Objet du Procès-Verbal</div>
         <div class="section-content">
           <p>Le présent procès-verbal a pour objet de constater la réception des travaux exécutés par <strong>{entreprise_nom}</strong> pour le compte de <strong>{maitre_ouvrage}</strong>.</p>
           <p>Les travaux concernent : <strong>{objet_travaux}</strong></p>
@@ -385,7 +385,7 @@ form:
       </div>
       
       <div class="section">
-        <div class="section-title">📝 Description des Travaux Réalisés</div>
+        <div class="section-title">Description des Travaux Réalisés</div>
         <div class="section-content">
           <p><strong>Nature des travaux :</strong> {nature_travaux}</p>
           <p><strong>Description détaillée :</strong></p>
@@ -395,14 +395,14 @@ form:
       </div>
       
       <div class="section">
-        <div class="section-title">✅ État de Réception</div>
-        <div class="etat-reception {etat_class}">
+        <div class="section-title">Etat de Réception</div>
+        <div class="etat-reception" style="text-align: center; padding: 15px; margin: 20px 0; font-size: 16px; font-weight: bold; background-color: #f8f9fa; border-radius: 5px; border: 1px solid #ddd;">
           {etat_reception}
         </div>
       </div>
       
       <div class="section">
-        <div class="section-title">📝 Réserves et Observations</div>
+        <div class="section-title">Reserves et Observations</div>
         <div class="section-content">
           <p>{reserves_observations}</p>
           
@@ -438,7 +438,7 @@ form:
       <div class="separator"></div>
       
       <div class="signature-section">
-        <div class="signature-title">✍️ Signatures des Parties</div>
+        <div class="signature-title">Signatures des Parties</div>
         
         <p style="margin-bottom: 20px; color: #566573;">
           Les signataires déclarent avoir pris connaissance du présent procès-verbal
