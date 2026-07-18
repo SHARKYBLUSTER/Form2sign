@@ -47,14 +47,18 @@ nano backend/config/.env  # ou utilisez votre editeur prefere
 # sinon elle utilise directement UID 1001. Cela permet au conteneur d'ecrire dans les volumes montes.
 awk -F: '{ if ($3 == 1001) print $1 }' /etc/passwd | xargs -I {} sudo chown -R {}:{} ./backend/uploads ./backend/forms ./backend/config 2>/dev/null || sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
 
-# Demarrer l'application avec Docker Compose
-docker-compose up -d
+# Permissions pour le fichier .env (necessaire pour l'interface de configuration)
+sudo chown 1001:1001 ./backend/config/.env
+sudo chmod 666 ./backend/config/.env
+
+# Demarrer l'application avec Docker Compose (rebuild automatique)
+docker compose up -d --build
 
 # Verifier que le conteneur est en cours d'execution
-docker-compose ps
+docker compose ps
 
 # Voir les logs
-docker-compose logs -f
+docker compose logs -f
 
 # Acceder a l'application
 # Ouvrez votre navigateur : http://localhost:3000
@@ -91,13 +95,13 @@ npm start
 #### Avec Docker
 ```bash
 # Arreter les conteneurs
-docker-compose down
+docker compose down
 
 # Tirer les dernieres modifications
 git pull origin main
 
 # Reconstruire et redemarrer (les modifications du code seront prises en compte)
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 #### Sans Docker
@@ -266,25 +270,25 @@ Form2sign/
 #### Avec Docker
 ```bash
 # Builder l'image
-docker-compose build
+docker compose build
 
 # Demarrer les services
-docker-compose up -d
+docker compose up -d
 
 # Arreter les services
-docker-compose down
+docker compose down
 
 # Redemarrer les services
-docker-compose restart
+docker compose restart
 
 # Voir les logs
-docker-compose logs -f
+docker compose logs -f
 
 # Acceder au conteneur (pour deboguer)
 docker exec -it form2sign-app sh
 
 # Mettre a jour apres modification
-docker-compose down && docker-compose up -d --build
+docker compose down && docker compose up -d --build
 ```
 
 #### Sans Docker
@@ -368,13 +372,13 @@ form:
 docker --version
 
 # Vérifier les logs
-docker-compose logs
+docker compose logs
 
 # Vérifier les volumes
 docker volume ls
 
 # Verifier les conteneurs en cours
-docker ps -a
+docker compose ps -a
 ```
 
 **Solutions courantes :**
@@ -396,8 +400,8 @@ sudo chown 1001:1001 ./backend/config/.env
 sudo chmod 666 ./backend/config/.env
 
 # Puis redemarrer les conteneurs
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 ```
 
 **Explication :** Le Dockerfile cree un utilisateur `nodejs` avec UID 1001 pour des raisons de securite. Les volumes montes depuis l'hote doivent etre accessibles par cet utilisateur. Pour l'interface de configuration (page Configuration), le fichier `.env` doit etre accessible en ecriture par le conteneur.
@@ -441,7 +445,7 @@ docker-compose up -d
 **Solutions :**
 - Verifiez que tous les champs requis sont remplis
 - Verifiez que la signature a ete capturee
-- Verifiez les logs du backend : `docker-compose logs app`
+- Verifiez les logs du backend : `docker compose logs app`
 
 ---
 
