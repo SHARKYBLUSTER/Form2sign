@@ -1639,12 +1639,6 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
     // Afficher les champs dans l'ordre défini dans le formulaire OU les sections personnalisées
     // Si des custom_sections sont définies, on les utilise à la place de l'affichage basique des champs
     if (formPdfOptions.custom_sections && formPdfOptions.custom_sections.length > 0) {
-      // Espacement avant les sections personnalisées
-      const spacingBefore = formPdfOptions.spacing?.before_signature || 1;
-      for (let i = 0; i < spacingBefore; i++) {
-        doc.moveDown();
-      }
-      
       // Rendre les sections personnalisées (qui remplacent l'affichage des champs)
       renderCustomSections(doc, formPdfOptions, formValues, context);
     } else {
