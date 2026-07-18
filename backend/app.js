@@ -987,7 +987,8 @@ function renderImageSection(doc, section) {
     const height = section.height || 100;
     const align = section.align || 'center';
 
-    const pageWidth = doc.page.width - doc._margins.left - doc._margins.right;
+    const margins = doc._margins || { left: 50, right: 50 };
+  const pageWidth = doc.page.width - margins.left - margins.right;
     let x = 0;
     
     if (align === 'center') {
@@ -1038,7 +1039,8 @@ function renderCustomSections(doc, pdfOptions, formValues = {}, context = {}) {
     return;
   }
 
-  const pageWidth = doc.page.width - doc._margins.left - doc._margins.right;
+  const margins = doc._margins || { left: 50, right: 50 };
+  const pageWidth = doc.page.width - margins.left - margins.right;
 
   sections.forEach(section => {
     // Espacement avant la section
@@ -1132,7 +1134,8 @@ function renderFooter(doc, pdfOptions, pageNumber, pageCount, formValues = {}, c
        .fillColor(footer.color || '#999999');
 
     const align = footer.align || 'center';
-    const width = doc.page.width - doc._margins.left - doc._margins.right;
+    const margins = doc._margins || { left: 50, right: 50 };
+    const width = doc.page.width - margins.left - margins.right;
     
     doc.text(footerText, { align, width });
   }
