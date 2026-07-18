@@ -38,21 +38,20 @@ L'application est entierement conteneurisee avec **Docker** pour un deploiement 
 git clone https://github.com/SHARKYBLUSTER/Form2sign.git
 cd Form2sign
 
+# Creer les repertoires de stockage
+mkdir -p backend/uploads/pdfs backend/forms backend/config
+
 # Copier et configurer le fichier d'environnement
 cp backend/config/.env.example backend/config/.env
 
-# Editer .env avec vos identifiants (voir section Configuration)
-nano backend/config/.env  # ou utilisez votre editeur prefere
-
-# Creer les repertoires de stockage et configurer les permissions pour Docker
+# Configurer les permissions pour Docker
 # Le conteneur Docker s'execute sous l'utilisateur UID 1001
-# Cette commande detecte si un utilisateur avec UID 1001 existe sur votre systeme,
-# sinon elle utilise directement UID 1001. Cela permet au conteneur d'ecrire dans les volumes montes.
-awk -F: '{ if ($3 == 1001) print $1 }' /etc/passwd | xargs -I {} sudo chown -R {}:{} ./backend/uploads ./backend/forms ./backend/config 2>/dev/null || sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
-
-# Permissions pour le fichier .env
+sudo chown -R 1001:1001 ./backend/uploads ./backend/forms ./backend/config
 sudo chown 1001:1001 ./backend/config/.env
 sudo chmod 666 ./backend/config/.env
+
+# Editer .env avec vos identifiants (voir section Configuration)
+nano backend/config/.env  # ou utilisez votre editeur prefere
 
 # Demarrer l'application avec Docker Compose (rebuild automatique)
 docker compose up -d --build
