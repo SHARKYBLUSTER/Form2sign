@@ -396,6 +396,10 @@ app.get('/logout.html', requireAuthRedirect, (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/views/logout.html'));
 });
 
+app.get('/preview.html', requireAuthRedirect, (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/views/preview.html'));
+});
+
 // Route de health check (pour Docker)
 app.get('/health', (req, res) => {
   res.status(200).json({ 

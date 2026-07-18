@@ -132,9 +132,9 @@
                                 <div class="d-grid gap-2">
                                     <button type="submit" 
                                             id="submit-btn" 
-                                            class="btn btn-success btn-lg">
-                                        <i class="fas fa-check me-2"></i>
-                                        Valider et Generer PDF
+                                            class="btn btn-primary btn-lg">
+                                        <i class="fas fa-eye me-2"></i>
+                                        Aperçu et Valider
                                     </button>
                                 </div>
                             </form>
@@ -570,7 +570,7 @@
             loadingSpinner.classList.add('d-none');
         }
         
-        // Soumission du formulaire
+        // Soumission du formulaire - NOUVEAU FLUX: form → preview → PDF
         document.getElementById('dynamic-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -578,70 +578,95 @@
             const submitBtn = document.getElementById('submit-btn');
             const signatureData = document.getElementById('signature-data').value;
             
-            // Verifier qu'il y a une signature
+            // Verifier qu'il y a une signature si requise
             if (formData.signature && formData.signature.required && !signatureData) {
-                alert('Veuillez signer le document avant de valider.');
+                alert('Veuillez signer le document avant de continuer.');
                 return;
             }
             
             // Desactiver le bouton
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generation...';
-            
-            // Preparer les donnees
-            const formValues = {};
-            const formDataObj = new FormData(form);
-            
-            for (let [key, value] of formDataObj.entries()) {
-                if (key !== 'signature') {
-                    formValues[key] = value;
-                }
-            }
-            
-            formValues.signature = signatureData;
-            formValues.formId = formData.id;
-            formValues.formTitle = formData.title;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Préparation...';
             
             try {
-                const response = await fetch('/api/generate-pdf', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formValues),
-                    credentials: 'include'
-                });
+                // Preparer les donnees
+                const formValues = {};
+                const formDataObj = new FormData(form);
                 
-                const data = await response.json();
+                for (let [key, value] of formDataObj.entries()) {
+                    if (key !== 'signature' && key !== 'formId' && key !== 'formTitle') {
+                        formValues[key] = value;
+                    }
+                }
                 
-                if (data.success) {
-                    // Succes - afficher le modal
-                    successModal = new bootstrap.Modal(document.getElementById('successModal'));
-                    document.getElementById('success-message').textContent = 
-                        data.message || 'Le PDF a ete genere avec succes.';
+                // Vérifier si le formulaire utilise le nouveau système (template)
+                if (formData.usesTemplate) {
+                    // NOUVEAU SYSTEME: Rediriger vers la page d'aperçu
+                    const params = new URLSearchParams();
+                    params.append('id', formData.id);
                     
-                    if (data.pdfUrl) {
-                        document.getElementById('download-pdf-btn').href = data.pdfUrl;
+                    // Encoder les valeurs en JSON
+                    params.append('values', encodeURIComponent(JSON.stringify(formValues)));
+                    
+                    // Ajouter la signature
+                    if (signatureData) {
+                        params.append('signature', encodeURIComponent(signatureData));
                     }
                     
-                    successModal.show();
-                    
-                    // Reinitialiser le formulaire
-                    form.reset();
-                    signaturePad.clear();
-                    currentSignature = '';
-                    document.getElementById('signature-data').value = '';
-                    form.classList.remove('was-validated');
+                    // Rediriger vers preview.html
+                    window.location.href = `/preview.html?${params.toString()}`;
                     
                 } else {
-                    throw new Error(data.error || 'Erreur lors de la generation du PDF');
+                    // ANCIEN SYSTEME: Générer directement le PDF (compatibilité)
+                    const requestData = {
+                        formId: formData.id,
+                        formTitle: formData.title,
+                        ...formValues,
+                        signature: signatureData
+                    };
+                    
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Generation...';
+                    
+                    const response = await fetch('/api/generate-pdf', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData),
+                        credentials: 'include'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Succes - afficher le modal
+                        successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                        document.getElementById('success-message').textContent = 
+                            data.message || 'Le PDF a ete genere avec succes.';
+                        
+                        if (data.pdfUrl) {
+                            document.getElementById('download-pdf-btn').href = data.pdfUrl;
+                        }
+                        
+                        successModal.show();
+                        
+                        // Reinitialiser le formulaire
+                        form.reset();
+                        signaturePad.clear();
+                        currentSignature = '';
+                        document.getElementById('signature-data').value = '';
+                        form.classList.remove('was-validated');
+                        
+                    } else {
+                        throw new Error(data.error || 'Erreur lors de la generation du PDF');
+                    }
                 }
             } catch (error) {
                 console.error('Erreur:', error);
                 alert(`Erreur: ${error.message}`);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Valider et Generer PDF';
+                submitBtn.innerHTML = '<i class="fas fa-eye me-2"></i> Aperçu et Valider';
             }
         });
         
