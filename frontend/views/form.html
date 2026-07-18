@@ -296,9 +296,153 @@
                 return;
             }
             
-            fields.forEach((field, index) => {
-                const fieldElement = createFormField(field, index);
-                formFields.appendChild(fieldElement);
+            // Vérifier si c'est le PV de réception de travaux pour ajouter des sections
+            const isPVReception = formData && formData.id === 'pv-reception-travaux-web';
+            
+            if (isPVReception) {
+                renderPVReceptionFields(fields, formFields);
+            } else {
+                // Rendering standard pour les autres formulaires
+                fields.forEach((field, index) => {
+                    const fieldElement = createFormField(field, index);
+                    formFields.appendChild(fieldElement);
+                });
+            }
+        }
+        
+        // Rendering spécifique pour le PV de réception de travaux
+        function renderPVReceptionFields(fields, container) {
+            // Définir les sections avec leurs titres et descriptions
+            const sections = [
+                {
+                    id: 'parties',
+                    title: '1. IDENTIFICATION DES PARTIES',
+                    description: 'Veuillez renseigner les informations des parties impliquées dans les travaux.',
+                    fieldPrefixes: ['client_', 'entreprise_'],
+                    subsections: [
+                        {
+                            title: 'Maître d\'Ouvrage (Client)',
+                            description: 'Informations du client ou maître d\'ouvrage.',
+                            fieldPrefixes: ['client_']
+                        },
+                        {
+                            title: 'Entreprise (Maître d\'Œuvre / Exécutant)',
+                            description: 'Informations de l\'entreprise réalisant les travaux.',
+                            fieldPrefixes: ['entreprise_']
+                        }
+                    ]
+                },
+                {
+                    id: 'objet',
+                    title: '2. OBJET DES TRAVAUX',
+                    description: 'Décrivez la nature et les caractéristiques des travaux réalisés.',
+                    fields: ['nature_travaux', 'chantier_adresse', 'date_debut', 'date_fin_prevue', 'montant_ht']
+                },
+                {
+                    id: 'constatations',
+                    title: '3. CONSTATATIONS',
+                    description: 'Indiquez le type de réception, la conformité des travaux et éventuellement des réserves.',
+                    fields: ['type_reception', 'conformite_travaux', 'reserves', 'observations']
+                },
+                {
+                    id: 'reception',
+                    title: '4. RÉCEPTION ET SIGNATURE',
+                    description: 'Date effective de réception et informations du signataire.',
+                    fields: ['date_reception', 'signataire_nom', 'signataire_qualite', 'etat_travaux']
+                }
+            ];
+            
+            // Créer les sections
+            sections.forEach(section => {
+                // Vérifier si cette section a des champs
+                const sectionFields = [];
+                
+                if (section.subsections) {
+                    // Section avec sous-sections (comme "Identification des Parties")
+                    section.subsections.forEach(subsection => {
+                        const subFields = fields.filter(f => 
+                            subsection.fieldPrefixes.some(prefix => f.id.startsWith(prefix))
+                        );
+                        if (subFields.length > 0) {
+                            sectionFields.push(...subFields);
+                        }
+                    });
+                } else {
+                    // Section simple
+                    const secFields = fields.filter(f => 
+                        section.fields.some(fieldId => f.id === fieldId)
+                    );
+                    sectionFields.push(...secFields);
+                }
+                
+                if (sectionFields.length === 0) return;
+                
+                // Créer la carte de section
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'card mb-4';
+                
+                // Header de la section
+                const headerHtml = `
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-folder-open me-2"></i>
+                            ${section.title}
+                        </h5>
+                    </div>
+                `;
+                sectionDiv.innerHTML = headerHtml;
+                
+                // Body de la section
+                const bodyDiv = document.createElement('div');
+                bodyDiv.className = 'card-body';
+                
+                // Ajouter la description si elle existe
+                if (section.description) {
+                    const descDiv = document.createElement('div');
+                    descDiv.className = 'alert alert-info mb-3';
+                    descDiv.innerHTML = `<i class="fas fa-info-circle me-2"></i>${section.description}`;
+                    bodyDiv.appendChild(descDiv);
+                }
+                
+                // Si la section a des sous-sections
+                if (section.subsections) {
+                    section.subsections.forEach(subsection => {
+                        const subFields = sectionFields.filter(f => 
+                            subsection.fieldPrefixes.some(prefix => f.id.startsWith(prefix))
+                        );
+                        
+                        if (subFields.length > 0) {
+                            // Créer un sous-titre
+                            const subTitle = document.createElement('h6');
+                            subTitle.className = 'text-primary mb-3 mt-3';
+                            subTitle.innerHTML = `<i class="fas fa-chevron-right me-2"></i>${subsection.title}`;
+                            bodyDiv.appendChild(subTitle);
+                            
+                            // Ajouter la description de la sous-section
+                            if (subsection.description) {
+                                const subDesc = document.createElement('p');
+                                subDesc.className = 'text-muted small mb-3';
+                                subDesc.textContent = subsection.description;
+                                bodyDiv.appendChild(subDesc);
+                            }
+                            
+                            // Ajouter les champs
+                            subFields.forEach(field => {
+                                const fieldElement = createFormField(field, fields.indexOf(field));
+                                bodyDiv.appendChild(fieldElement);
+                            });
+                        }
+                    });
+                } else {
+                    // Ajouter directement les champs
+                    sectionFields.forEach(field => {
+                        const fieldElement = createFormField(field, fields.indexOf(field));
+                        bodyDiv.appendChild(fieldElement);
+                    });
+                }
+                
+                sectionDiv.appendChild(bodyDiv);
+                container.appendChild(sectionDiv);
             });
         }
         
