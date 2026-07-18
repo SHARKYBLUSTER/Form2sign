@@ -1665,6 +1665,48 @@ app.post('/api/generate-pdf', requireAuth, async (req, res) => {
       });
     }
     
+    // Espacement avant la signature
+    const spacingBeforeSignature = formPdfOptions.spacing?.before_signature || 2;
+    for (let i = 0; i < spacingBeforeSignature; i++) {
+      doc.moveDown();
+    }
+    
+    // Separateur avant la signature
+    doc.moveTo(margins.left, doc.y).lineTo(doc.page.width - margins.right, doc.y).stroke();
+    doc.moveDown();
+    
+    // Section Signature
+    doc.fontSize(14).font('Helvetica-Bold').text('Signature:', { underline: true });
+    doc.moveDown();
+    
+    if (signature) {
+      // La signature est en base64 (data URL)
+      // Extraire la partie base64 de la data URL
+      let base64Data = signature.replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+      
+      try {
+        // Decoder l'image de la signature
+        const imageBuffer = Buffer.from(base64Data, 'base64');
+        
+        // Ajouter l'image de signature au PDF
+        // Redimensionner pour s'adapter a la page
+        const sigWidth = 300;
+        const sigHeight = 100;
+        const pageWidth = doc.page.width - margins.left - margins.right;
+        const x = (pageWidth - sigWidth) / 2;
+        
+        doc.image(imageBuffer, x, doc.y, { width: sigWidth, height: sigHeight });
+        doc.moveDown(2);
+      } catch (err) {
+        console.warn('Impossible de decoder la signature:', err);
+        doc.fontSize(12).text('Signature: Impossible d\'afficher la signature');
+        doc.moveDown();
+      }
+    } else {
+      doc.fontSize(12).text('Aucune signature fournie');
+      doc.moveDown();
+    }
+    
     // Rendre le footer sur la dernière page (avec le bon nombre total de pages)
     if (formPdfOptions.footer && formPdfOptions.footer.text && pageCount > 0) {
       renderFooter(doc, formPdfOptions, pageCount, pageCount, formValues, context);
