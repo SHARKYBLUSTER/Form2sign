@@ -1,0 +1,561 @@
+# =============================================================================
+# Form2Sign - PV de Réception de Travaux
+# =============================================================================
+# Template pour la generation de Procès-Verbal de Réception de Travaux
+# Systeme v2.0+ : YAML definit une page web avec capture Puppeteer pour PDF
+#
+# Structure :
+# - form: metadata + template (style, layout, pdf) + fields + signature
+# Placeholders: {field_id}, {date}, {time}, {form_id}, {form_title}, {signature}
+# =============================================================================
+
+form:
+  # Metadata du formulaire
+  id: pv-reception-travaux-web
+  title: "Procès-Verbal de Réception de Travaux"
+  description: "Document officiel pour la reception definitive ou partielle de travaux de construction ou renovation."
+  version: "2.0.0"
+
+  # Definition de la page web
+  template:
+    # Styles CSS pour la page
+    style: |
+      body {
+        font-family: Arial, 'DejaVu Sans', sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+        line-height: 1.6;
+      }
+      
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 3px solid #2c3e50;
+        padding-bottom: 20px;
+      }
+      
+      .header img {
+        max-width: 120px;
+        height: auto;
+        margin-bottom: 10px;
+      }
+      
+      .header h1 {
+        color: #2c3e50;
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      
+      .header .subtitle {
+        color: #7f8c8d;
+        font-style: italic;
+        margin-top: 5px;
+      }
+      
+      .document-title {
+        text-align: center;
+        margin: 30px 0 20px 0;
+        font-size: 18px;
+        font-weight: bold;
+        color: #2c3e50;
+        text-decoration: underline;
+      }
+      
+      .form-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+      }
+      
+      .form-section h2 {
+        color: #2c3e50;
+        margin-top: 0;
+        font-size: 16px;
+        border-bottom: 1px solid #bdc3c7;
+        padding-bottom: 10px;
+      }
+      
+      .form-section h3 {
+        color: #34495e;
+        font-size: 14px;
+        margin-top: 15px;
+        margin-bottom: 10px;
+      }
+      
+      .field-group {
+        margin-bottom: 15px;
+      }
+      
+      .field-label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        color: #2c3e50;
+      }
+      
+      .field-value {
+        padding: 10px 12px;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-height: 20px;
+        font-size: 14px;
+      }
+      
+      .important-note {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        padding: 12px;
+        margin: 15px 0;
+        font-size: 14px;
+      }
+      
+      .important-note strong {
+        color: #856404;
+      }
+      
+      .signature-container {
+        width: 300px;
+        height: 100px;
+        border: 2px solid #2c3e50;
+        margin: 20px auto;
+        background-color: white;
+      }
+      
+      .signature-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 11px;
+        color: #7f8c8d;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+      }
+      
+      .date-info {
+        font-size: 14px;
+        color: #2c3e50;
+        margin: 20px 0;
+        text-align: right;
+      }
+      
+      .text-center {
+        text-align: center;
+      }
+      
+      .text-justify {
+        text-align: justify;
+      }
+      
+      .participant-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      
+      @media print {
+        body { max-width: 100%; }
+        .no-print { display: none; }
+      }
+    
+    # Layout HTML de la page
+    layout: |
+      <div class="header">
+        <img src="/static/logos/form2sign-logo.jpg" alt="Logo Form2Sign" />
+        <h1>{form_title}</h1>
+        <p class="subtitle">Document electronique juridiquement valable</p>
+      </div>
+      
+      <div class="document-title">
+        PROCES-VERBAL DE RECEPTION DE TRAVAUX
+      </div>
+      
+      <div class="date-info">
+        <strong>Date du PV:</strong> {date}
+      </div>
+      
+      <div class="form-section">
+        <h2>1. IDENTIFICATION DES PARTIES</h2>
+        
+        <h3>Maître d'Ouvrage (Client)</h3>
+        <div class="field-group">
+          <span class="field-label">Nom et Prénom / Raison Sociale</span>
+          <div class="field-value">{client_nom}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Adresse</span>
+          <div class="field-value">{client_adresse}</div>
+        </div>
+        
+        <div class="participant-grid">
+          <div class="field-group">
+            <span class="field-label">Code Postal</span>
+            <div class="field-value">{client_cp}</div>
+          </div>
+          <div class="field-group">
+            <span class="field-label">Ville</span>
+            <div class="field-value">{client_ville}</div>
+          </div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Téléphone</span>
+          <div class="field-value">{client_telephone}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Email</span>
+          <div class="field-value">{client_email}</div>
+        </div>
+        
+        <h3>Entreprise (Maître d'Œuvre / Exécutant)</h3>
+        <div class="field-group">
+          <span class="field-label">Nom de l'Entreprise</span>
+          <div class="field-value">{entreprise_nom}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Représenté par</span>
+          <div class="field-value">{entreprise_representant}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Adresse</span>
+          <div class="field-value">{entreprise_adresse}</div>
+        </div>
+        
+        <div class="participant-grid">
+          <div class="field-group">
+            <span class="field-label">SIRET</span>
+            <div class="field-value">{entreprise_siret}</div>
+          </div>
+          <div class="field-group">
+            <span class="field-label">Téléphone</span>
+            <div class="field-value">{entreprise_telephone}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h2>2. OBJET DES TRAVAUX</h2>
+        
+        <div class="field-group">
+          <span class="field-label">Nature des Travaux</span>
+          <div class="field-value">{nature_travaux}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Adresse du Chantier</span>
+          <div class="field-value">{chantier_adresse}</div>
+        </div>
+        
+        <div class="participant-grid">
+          <div class="field-group">
+            <span class="field-label">Date de début</span>
+            <div class="field-value">{date_debut}</div>
+          </div>
+          <div class="field-group">
+            <span class="field-label">Date de fin prévue</span>
+            <div class="field-value">{date_fin_prevue}</div>
+          </div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Montant HT des Travaux</span>
+          <div class="field-value">{montant_ht} €</div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h2>3. CONSTATATIONS</h2>
+        
+        <div class="important-note">
+          <strong>Note :</strong> La réception est l'acte par lequel le maître d'ouvrage déclare accepter l'ouvrage avec ou sans réserves. 
+          Elle peut être totale ou partielle, avec ou sans réserves.
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Type de Réception</span>
+          <div class="field-value">{type_reception}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Conformité des Travaux</span>
+          <div class="field-value">{conformite_travaux}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Réserves éventuelles</span>
+          <div class="field-value">{reserves}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Observations complémentaires</span>
+          <div class="field-value">{observations}</div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h2>4. RECEPTION ET SIGNATURE</h2>
+        
+        <div class="field-group text-center">
+          <span class="field-label">Date de Réception Effective</span>
+          <div class="field-value">{date_reception}</div>
+        </div>
+        
+        <p class="text-justify" style="margin: 20px 0; padding: 0 10px;">
+          Je soussigné(e), <strong>{signataire_nom}</strong>, agissant en qualité de <strong>{signataire_qualite}</strong>,
+          déclare avoir visité les lieux et être satisfait(e) des travaux exécutés conformément au contrat.
+          Les travaux sont déclarés <strong>{etat_travaux}</strong>.
+        </p>
+        
+        <div class="field-group text-center">
+          <span class="field-label">Fait à {client_ville}, le {date}</span>
+        </div>
+        
+        <div class="field-group text-center">
+          <span class="field-label">Signature du Responsable</span>
+          <div class="signature-container">
+            <img src="{signature}" alt="Signature" />
+          </div>
+          <p style="margin-top: 10px; font-size: 12px;">
+            <strong>Nom:</strong> {signataire_nom} | <strong>Qualité:</strong> {signataire_qualite}<br>
+            <strong>Date:</strong> {date}
+          </p>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <p>Document généré via Form2Sign - {form_id} | Procès-Verbal de Réception de Travaux | Page 1/1</p>
+      </div>
+    
+    # Options de generation PDF
+    pdf:
+      format: A4
+      orientation: portrait
+      margin: 15mm
+
+  # Liste des champs du formulaire
+  fields:
+    # Section 1 - Maître d'Ouvrage
+    - id: client_nom
+      label: "Nom et Prénom / Raison Sociale (Client)"
+      type: text
+      required: true
+      placeholder: "Nom et prénom ou raison sociale du client"
+      validation: null
+
+    - id: client_adresse
+      label: "Adresse (Client)"
+      type: textarea
+      required: true
+      placeholder: "Adresse complète du client"
+      rows: 2
+      validation: null
+
+    - id: client_cp
+      label: "Code Postal (Client)"
+      type: text
+      required: true
+      placeholder: "Code postal"
+      validation: null
+
+    - id: client_ville
+      label: "Ville (Client)"
+      type: text
+      required: true
+      placeholder: "Ville"
+      validation: null
+
+    - id: client_telephone
+      label: "Téléphone (Client)"
+      type: tel
+      required: false
+      placeholder: "Numéro de téléphone"
+      validation: null
+
+    - id: client_email
+      label: "Email (Client)"
+      type: email
+      required: false
+      placeholder: "Adresse email"
+      validation: "email"
+
+    # Section 2 - Entreprise
+    - id: entreprise_nom
+      label: "Nom de l'Entreprise"
+      type: text
+      required: true
+      placeholder: "Nom de l'entreprise exécutante"
+      validation: null
+
+    - id: entreprise_representant
+      label: "Représenté par"
+      type: text
+      required: true
+      placeholder: "Nom du représentant de l'entreprise"
+      validation: null
+
+    - id: entreprise_adresse
+      label: "Adresse de l'Entreprise"
+      type: textarea
+      required: true
+      placeholder: "Adresse complète de l'entreprise"
+      rows: 2
+      validation: null
+
+    - id: entreprise_siret
+      label: "SIRET de l'Entreprise"
+      type: text
+      required: false
+      placeholder: "Numéro SIRET"
+      validation: null
+
+    - id: entreprise_telephone
+      label: "Téléphone de l'Entreprise"
+      type: tel
+      required: false
+      placeholder: "Numéro de téléphone"
+      validation: null
+
+    # Section 3 - Objet des Travaux
+    - id: nature_travaux
+      label: "Nature des Travaux"
+      type: textarea
+      required: true
+      placeholder: "Décrivez la nature des travaux (ex: Construction maison individuelle, Rénovation cuisine, etc.)"
+      rows: 3
+      validation: null
+
+    - id: chantier_adresse
+      label: "Adresse du Chantier"
+      type: textarea
+      required: true
+      placeholder: "Adresse complète du chantier"
+      rows: 2
+      validation: null
+
+    - id: date_debut
+      label: "Date de début des Travaux"
+      type: date
+      required: true
+      placeholder: null
+      validation: null
+
+    - id: date_fin_prevue
+      label: "Date de fin prévue"
+      type: date
+      required: true
+      placeholder: null
+      validation: null
+
+    - id: montant_ht
+      label: "Montant HT des Travaux (€)"
+      type: number
+      required: false
+      placeholder: "Montant hors taxes"
+      validation: null
+
+    # Section 4 - Constatations
+    - id: type_reception
+      label: "Type de Réception"
+      type: select
+      required: true
+      placeholder: "Sélectionnez le type de réception"
+      options:
+        - label: "Réception définitive"
+          value: "Réception définitive"
+        - label: "Réception partielle"
+          value: "Réception partielle"
+        - label: "Réception avec réserves"
+          value: "Réception avec réserves"
+
+    - id: conformite_travaux
+      label: "Conformité des Travaux"
+      type: select
+      required: true
+      placeholder: "Les travaux sont-ils conformes ?"
+      options:
+        - label: "Conformes au contrat"
+          value: "Conformes au contrat"
+        - label: "Conformes avec écarts mineurs"
+          value: "Conformes avec écarts mineurs"
+        - label: "Non conformes"
+          value: "Non conformes"
+
+    - id: reserves
+      label: "Réserves éventuelles"
+      type: textarea
+      required: false
+      placeholder: "Listez les réserves si applicable"
+      rows: 4
+      validation: null
+
+    - id: observations
+      label: "Observations complémentaires"
+      type: textarea
+      required: false
+      placeholder: "Toute observation supplémentaire"
+      rows: 4
+      validation: null
+
+    # Section 5 - Signature
+    - id: date_reception
+      label: "Date de Réception Effective"
+      type: date
+      required: true
+      placeholder: null
+      validation: null
+
+    - id: signataire_nom
+      label: "Nom du Signataire"
+      type: text
+      required: true
+      placeholder: "Nom et prénom du signataire"
+      validation: null
+
+    - id: signataire_qualite
+      label: "Qualité du Signataire"
+      type: select
+      required: true
+      placeholder: "Qualité du signataire"
+      options:
+        - label: "Maître d'Ouvrage"
+          value: "Maître d'Ouvrage"
+        - label: "Maître d'Œuvre"
+          value: "Maître d'Œuvre"
+        - label: "Représentant de l'Entreprise"
+          value: "Représentant de l'Entreprise"
+        - label: "Autre"
+          value: "Autre"
+
+    - id: etat_travaux
+      label: "État des Travaux"
+      type: select
+      required: true
+      placeholder: "État des travaux"
+      options:
+        - label: "terminés et conformes"
+          value: "terminés et conformes"
+        - label: "terminés avec réserves"
+          value: "terminés avec réserves"
+
+  # Configuration de la signature (une seule signature)
+  signature:
+    required: true
+    label: "Signature"
+    instructions: "Signez avec votre doigt ou un stylet sur l'écran tactile pour valider le PV de réception."
