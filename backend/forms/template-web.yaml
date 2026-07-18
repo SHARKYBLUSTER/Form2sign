@@ -37,7 +37,7 @@
 
 form:
   # Metadata du formulaire
-  id: template_web_form
+  id: template-web
   title: "Template Web-to-PDF"
   description: "Template pour la nouvelle generation de formulaires avec capture web."
   version: "2.0.0"

@@ -75,7 +75,7 @@
 
 form:
   # Metadata du formulaire
-  id: template_form
+  id: template
   title: "Template de Formulaire"
   description: "Ceci est un template pour créer de nouveaux formulaires. Modifiez ce fichier selon vos besoins."
   version: "1.0.0"

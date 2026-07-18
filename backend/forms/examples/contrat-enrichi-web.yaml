@@ -14,7 +14,7 @@
 
 form:
   # Metadata du formulaire
-  id: contrat_enrichi
+  id: contrat-enrichi-web
   title: "Contrat de Service Enrichi"
   description: |
     Exemple complet démontrant toutes les options de personnalisation.

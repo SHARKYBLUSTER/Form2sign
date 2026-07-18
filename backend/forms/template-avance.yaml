@@ -14,7 +14,7 @@
 
 form:
   # Metadata du formulaire
-  id: template_avance
+  id: template-avance
   title: "Template Avancé"
   description: |
     Template complet avec toutes les fonctionnalités avancées de Form2Sign.
