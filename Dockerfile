@@ -14,6 +14,29 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
+# Install Chrome dependencies for Puppeteer
+RUN apk add --no-cache \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxkbcommon0 \
+    libxrandr2 \
+    xdg-utils \
+    ttf-freefont
+
 # Install dependencies (production only)
 RUN npm install --omit=dev
 
@@ -27,6 +50,29 @@ FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
+
+# Install Chrome dependencies for Puppeteer (production)
+RUN apk add --no-cache \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxkbcommon0 \
+    libxrandr2 \
+    xdg-utils \
+    ttf-freefont
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \

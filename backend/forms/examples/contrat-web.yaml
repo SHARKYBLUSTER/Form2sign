@@ -1,0 +1,502 @@
+# =============================================================================
+# Form2Sign - Exemple : Contrat Web-to-PDF
+# =============================================================================
+# Exemple concret de formulaire utilisant la NOUVELLE structure v2.0+
+# Demonstration des fonctionnalites :
+# - Template HTML complet avec sections
+# - Styles CSS avancés
+# - Variables dynamiques
+# - Placeholders de signature
+#
+# Pour tester :
+# 1. Selectionnez ce formulaire dans l'interface
+# 2. Remplissez tous les champs
+# 3. Signez
+# 4. Validez pour voir l'aperçu HTML
+# 5. Generez le PDF (capture exacte de l'aperçu)
+# =============================================================================
+
+form:
+  id: contrat_web
+  title: "Contrat de Service"
+  description: "Contrat type pour prestation de services avec capture web."
+  version: "2.0.0"
+
+  template:
+    style: |
+      /* Reset et styles de base */
+      * {
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #2c3e50;
+        background-color: #f8f9fa;
+        line-height: 1.6;
+      }
+      
+      /* En-tete du document */
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+      }
+      
+      .header img {
+        max-width: 150px;
+        height: auto;
+        margin-bottom: 15px;
+      }
+      
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      }
+      
+      .header .subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-top: 5px;
+      }
+      
+      /* Bloc de métadonnées */
+      .meta-block {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+      }
+      
+      .meta-block h2 {
+        color: #667eea;
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 20px;
+      }
+      
+      .meta-row {
+        display: flex;
+        margin-bottom: 10px;
+      }
+      
+      .meta-label {
+        font-weight: 600;
+        min-width: 150px;
+        color: #555;
+      }
+      
+      .meta-value {
+        flex: 1;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 4px;
+      }
+      
+      /* Sections principales */
+      .section {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+      }
+      
+      .section h2 {
+        color: #667eea;
+        margin-top: 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+        font-size: 20px;
+      }
+      
+      .section p {
+        color: #555;
+        margin: 15px 0;
+      }
+      
+      /* Articles du contrat */
+      .article {
+        margin-bottom: 20px;
+        padding-left: 15px;
+        border-left: 4px solid #667eea;
+      }
+      
+      .article h3 {
+        color: #667eea;
+        margin-top: 0;
+        font-size: 18px;
+      }
+      
+      /* Zone de signature */
+      .signature-section {
+        text-align: center;
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        margin: 30px 0;
+      }
+      
+      .signature-container {
+        width: 350px;
+        height: 120px;
+        border: 2px dashed #667eea;
+        margin: 20px auto;
+        background: white;
+        position: relative;
+      }
+      
+      .signature-container::before {
+        content: "Signez ici";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #aaa;
+        font-size: 14px;
+      }
+      
+      .signature-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      
+      .signatory-info {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        font-size: 14px;
+      }
+      
+      .signatory-item {
+        padding: 10px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        background: #f8f9fa;
+      }
+      
+      .signatory-label {
+        font-size: 11px;
+        color: #777;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+      
+      .signatory-value {
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      /* Pied de page */
+      .footer {
+        text-align: center;
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+        font-size: 12px;
+        color: #777;
+      }
+      
+      /* Responsive */
+      @media (max-width: 768px) {
+        body {
+          padding: 15px;
+        }
+        
+        .header h1 {
+          font-size: 22px;
+        }
+        
+        .meta-row {
+          flex-direction: column;
+        }
+        
+        .meta-label {
+          min-width: auto;
+        }
+        
+        .signature-container {
+          width: 100%;
+          height: 100px;
+        }
+      }
+    
+    layout: |
+      <div class="header">
+        <img src="/static/logos/logo.jpg" alt="Logo Entreprise" />
+        <h1>CONTRAT DE PRESTATION DE SERVICES</h1>
+        <p class="subtitle">Document juridique electronique</p>
+      </div>
+      
+      <div class="meta-block">
+        <h2>Informations du Contrat</h2>
+        <div class="meta-row">
+          <span class="meta-label">Reference:</span>
+          <span class="meta-value">{contract_reference}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Date:</span>
+          <span class="meta-value">{date}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Client:</span>
+          <span class="meta-value">{client_name}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Prestataire:</span>
+          <span class="meta-value">{provider_name}</span>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>📋 Objet du Contrat</h2>
+        <p>
+          Le present contrat a pour objet de definir les conditions dans lesquelles 
+          <strong>{provider_name}</strong>, ci-apres denomme(e) "le Prestataire", 
+          s'engage a fournir les services decrits ci-dessous a 
+          <strong>{client_name}</strong>, ci-apres denomme(e) "le Client".
+        </p>
+      </div>
+      
+      <div class="section">
+        <h2>📝 Description des Services</h2>
+        
+        <div class="article">
+          <h3>Article 1 - Nature des prestations</h3>
+          <p>{service_description}</p>
+        </div>
+        
+        <div class="article">
+          <h3>Article 2 - Délai d'exécution</h3>
+          <p>Les services seront réalises dans un delai de <strong>{delivery_time}</strong> jours ouvres a compter de la signature du present contrat.</p>
+        </div>
+        
+        <div class="article">
+          <h3>Article 3 - Tarification</h3>
+          <p>Le montant total des prestations est fixe a <strong>{total_amount} €</strong> (TTC).</p>
+          <p>Modalites de paiement: {payment_terms}</p>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>📞 Coordonnées des Parties</h2>
+        
+        <div class="meta-block">
+          <h2 style="color: #28a745; margin-bottom: 15px;">Prestataire</h2>
+          <div class="meta-row">
+            <span class="meta-label">Nom:</span>
+            <span class="meta-value">{provider_name}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Email:</span>
+            <span class="meta-value">{provider_email}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Telephone:</span>
+            <span class="meta-value">{provider_phone}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Adresse:</span>
+            <span class="meta-value">{provider_address}</span>
+          </div>
+        </div>
+        
+        <div class="meta-block">
+          <h2 style="color: #dc3545; margin-bottom: 15px;">Client</h2>
+          <div class="meta-row">
+            <span class="meta-label">Nom:</span>
+            <span class="meta-value">{client_name}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Email:</span>
+            <span class="meta-value">{client_email}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Telephone:</span>
+            <span class="meta-value">{client_phone}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Adresse:</span>
+            <span class="meta-value">{client_address}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="signature-section">
+        <h2>✍️ Signature Electronique</h2>
+        <p>
+          En signant ci-dessous, les parties reconnaissent avoir pris connaissance 
+          de l'integralite des clauses du present contrat et s'engagent a les respecter.
+        </p>
+        
+        <div class="signature-container">
+          <img src="{signature}" alt="Signature" />
+        </div>
+        
+        <div class="signatory-info">
+          <div class="signatory-item">
+            <div class="signatory-label">Signataire</div>
+            <div class="signatory-value">{signatory_name}</div>
+          </div>
+          <div class="signatory-item">
+            <div class="signatory-label">Fonction</div>
+            <div class="signatory-value">{signatory_role}</div>
+          </div>
+          <div class="signatory-item">
+            <div class="signatory-label">Date</div>
+            <div class="signatory-value">{date}</div>
+          </div>
+        </div>
+        
+        <p style="margin-top: 25px; font-size: 12px; color: #666;">
+          Signature electronique realisee via Form2Sign - {form_id}
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p>
+          Document genere le {date} a {time} | 
+          Contrat reference: {contract_reference} | 
+          Page 1/1
+        </p>
+      </div>
+    
+    pdf:
+      format: A4
+      orientation: portrait
+      margin: 15mm
+
+  fields:
+    # Informations contractuelles
+    - id: contract_reference
+      label: "Reference du contrat"
+      type: text
+      required: true
+      placeholder: "Ex: CONTRAT-2026-001"
+      validation: null
+
+    # Informations prestataire
+    - id: provider_name
+      label: "Nom du prestataire"
+      type: text
+      required: true
+      placeholder: "Nom de votre entreprise"
+      validation: null
+
+    - id: provider_email
+      label: "Email du prestataire"
+      type: email
+      required: true
+      placeholder: "contact@votre-entreprise.com"
+      validation: "email"
+
+    - id: provider_phone
+      label: "Telephone du prestataire"
+      type: tel
+      required: false
+      placeholder: "+33 1 23 45 67 89"
+      validation: null
+
+    - id: provider_address
+      label: "Adresse du prestataire"
+      type: textarea
+      required: false
+      placeholder: "Adresse complete"
+      rows: 3
+
+    # Informations client
+    - id: client_name
+      label: "Nom du client"
+      type: text
+      required: true
+      placeholder: "Nom du client ou de l'entreprise"
+      validation: null
+
+    - id: client_email
+      label: "Email du client"
+      type: email
+      required: true
+      placeholder: "contact@client.com"
+      validation: "email"
+
+    - id: client_phone
+      label: "Telephone du client"
+      type: tel
+      required: false
+      placeholder: "+33 1 23 45 67 89"
+      validation: null
+
+    - id: client_address
+      label: "Adresse du client"
+      type: textarea
+      required: false
+      placeholder: "Adresse complete"
+      rows: 3
+
+    # Description des services
+    - id: service_description
+      label: "Description des services"
+      type: textarea
+      required: true
+      placeholder: "Decrivez les services a fournir..."
+      rows: 5
+
+    - id: delivery_time
+      label: "Delai d'execution (jours)"
+      type: number
+      required: true
+      placeholder: "30"
+      validation: "min:1"
+
+    - id: total_amount
+      label: "Montant total (€)"
+      type: number
+      required: true
+      placeholder: "1500"
+      validation: "min:0,step:0.01"
+
+    - id: payment_terms
+      label: "Modalites de paiement"
+      type: select
+      required: true
+      placeholder: "Selectionnez les modalites"
+      options:
+        - label: "Paiement comptant"
+          value: "comptant"
+        - label: "30 jours net"
+          value: "30_jours"
+        - label: "50% a la commande, 50% a livraison"
+          value: "50_50"
+        - label: "Autre"
+          value: "autre"
+
+    # Signataire
+    - id: signatory_name
+      label: "Nom du signataire"
+      type: text
+      required: true
+      placeholder: "Nom et prenom"
+      validation: null
+
+    - id: signatory_role
+      label: "Fonction du signataire"
+      type: text
+      required: false
+      placeholder: "Ex: Directeur General"
+      validation: null
+
+  signature:
+    required: true
+    label: "Signature"
+    instructions: "Signez avec votre doigt ou un stylet pour valider le contrat."

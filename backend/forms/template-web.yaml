@@ -1,0 +1,270 @@
+# =============================================================================
+# Form2Sign - Template Web-to-PDF (Nouveau Systeme v2.0+)
+# =============================================================================
+# Ce fichier est un template pour la NOUVELLE structure de formulaires.
+# 
+# NOUVEAUTE v2.0+ : 
+# - Le YAML definit maintenant une PAGE WEB (HTML) avec placeholders
+# - Un apercu HTML est affiche a l'utilisateur avant generation
+# - Le PDF est une CAPTURE EXACTE de cette page via Puppeteer
+# - Plus de pdfkit : le rendu est delegue au navigateur (Chrome/Chromium)
+#
+# Structure :
+# - form: metadata du formulaire
+#   - id: identifiant unique (utilise dans les URLs)
+#   - title: titre affiche
+#   - description: description du formulaire
+#   - template: definition de la page web
+#     - style: CSS pour la page (optionnel)
+#     - layout: HTML de la page avec placeholders {field_id}
+#     - pdf: options de generation PDF (format, marges)
+#   - fields: liste des champs (comme avant)
+#   - signature: configuration de la signature
+#
+# Placeholders disponibles dans le HTML :
+#   - {field_id} : valeur du champ (ex: {full_name}, {email})
+#   - {date} : date du jour (format: JJ/MM/AAAA)
+#   - {time} : heure actuelle (format: HH:MM:SS)
+#   - {form_id} : identifiant du formulaire
+#   - {form_title} : titre du formulaire
+#   - {signature} : image de la signature (base64 PNG)
+#
+# Classes CSS speciales :
+#   - .signature-container : conteneur pour la signature (dimensions recommandees: 300x100px)
+#   - .no-print : elements a exclure du PDF
+#
+# =============================================================================
+
+form:
+  # Metadata du formulaire
+  id: template_web_form
+  title: "Template Web-to-PDF"
+  description: "Template pour la nouvelle generation de formulaires avec capture web."
+  version: "2.0.0"
+
+  # Definition de la page web (NOUVEAU)
+  template:
+    # Styles CSS pour la page (appliques dans <style>)
+    style: |
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+        line-height: 1.6;
+      }
+      
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 20px;
+      }
+      
+      .header img {
+        max-width: 120px;
+        height: auto;
+      }
+      
+      .header h1 {
+        color: #007bff;
+        margin-top: 10px;
+        margin-bottom: 5px;
+      }
+      
+      .header .subtitle {
+        color: #666;
+        font-style: italic;
+      }
+      
+      .form-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .form-section h2 {
+        color: #007bff;
+        margin-top: 0;
+      }
+      
+      .field-group {
+        margin-bottom: 15px;
+      }
+      
+      .field-label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+      }
+      
+      .field-value {
+        padding: 8px 12px;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-height: 20px;
+      }
+      
+      .signature-container {
+        width: 300px;
+        height: 100px;
+        border: 2px dashed #ccc;
+        margin: 20px auto;
+        background-color: white;
+      }
+      
+      .signature-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+      }
+      
+      .date-info {
+        font-size: 14px;
+        color: #666;
+        margin: 20px 0;
+      }
+    
+    # Layout HTML de la page (contenu principal)
+    layout: |
+      <div class="header">
+        <img src="/static/logos/logo.jpg" alt="Logo" />
+        <h1>{form_title}</h1>
+        <p class="subtitle">Document electronique a signer</p>
+      </div>
+      
+      <div class="date-info">
+        <strong>Date:</strong> {date} | <strong>Heure:</strong> {time}
+      </div>
+      
+      <div class="form-section">
+        <h2>Informations Personnelles</h2>
+        
+        <div class="field-group">
+          <span class="field-label">Nom Complet</span>
+          <div class="field-value">{full_name}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Email</span>
+          <div class="field-value">{email}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Telephone</span>
+          <div class="field-value">{phone}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Date de Naissance</span>
+          <div class="field-value">{birth_date}</div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h2>Adresse</h2>
+        
+        <div class="field-group">
+          <span class="field-label">Pays</span>
+          <div class="field-value">{country}</div>
+        </div>
+        
+        <div class="field-group">
+          <span class="field-label">Adresse</span>
+          <div class="field-value">{address}</div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h2>Signature</h2>
+        <p>En signant ci-dessous, je certifie que toutes les informations fournies sont exactes.</p>
+        <div class="signature-container">
+          <img src="{signature}" alt="Signature" />
+        </div>
+        <p style="text-align: center; font-size: 12px; color: #666;">
+          Signataire: {full_name} | Date: {date}
+        </p>
+      </div>
+      
+      <div class="footer">
+        <p>Document genere via Form2Sign - {form_id} | Page 1/1</p>
+      </div>
+    
+    # Options de generation PDF
+    pdf:
+      format: A4              # Format: A4, A5, Letter, Legal
+      orientation: portrait   # Orientation: portrait, landscape
+      margin: 10mm           # Marges: peut etre une valeur unique ou un objet {top, bottom, left, right}
+      # margin:               # Alternative: marges individuellement
+      #   top: 15mm
+      #   bottom: 15mm
+      #   left: 10mm
+      #   right: 10mm
+
+  # Liste des champs du formulaire (utilises pour le formulaire web)
+  fields:
+    - id: full_name
+      label: "Nom complet"
+      type: text
+      required: true
+      placeholder: "Entrez votre nom et prenom"
+      validation: null
+
+    - id: email
+      label: "Adresse email"
+      type: email
+      required: true
+      placeholder: "exemple@domaine.com"
+      validation: "email"
+
+    - id: phone
+      label: "Numero de telephone"
+      type: tel
+      required: false
+      placeholder: "+33 1 23 45 67 89"
+      validation: null
+
+    - id: birth_date
+      label: "Date de naissance"
+      type: date
+      required: false
+      placeholder: null
+      validation: null
+
+    - id: country
+      label: "Pays"
+      type: select
+      required: true
+      placeholder: "Selectionnez un pays"
+      options:
+        - label: "France"
+          value: "FR"
+        - label: "Belgique"
+          value: "BE"
+        - label: "Suisse"
+          value: "CH"
+
+    - id: address
+      label: "Adresse"
+      type: textarea
+      required: false
+      placeholder: "Votre adresse complete"
+      rows: 3
+
+  # Configuration de la signature
+  signature:
+    required: true
+    label: "Signature"
+    instructions: "Signez avec votre doigt ou un stylet sur l'ecran tactile."

@@ -20,8 +20,15 @@ services:
       - ./backend/config:/app/backend/config
     environment:
       - PORT=3000
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
     env_file:
       - ./backend/config/.env
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    shm_size: 2g
     restart: unless-stopped
     networks: [proxy]
     
